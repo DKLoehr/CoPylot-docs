@@ -1,0 +1,154 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{xifthen}
+\usepackage{relsize}
+\usepackage{mathtools}
+\usepackage[usenames,dvipsnames]{xcolor}
+
+% Better TT font
+\let\oldrmdefault\rmdefault
+\let\oldsfdefault\sfdefault
+\usepackage{lmodern}
+\let\rmdefault\oldrmdefault
+\let\sfdefault\oldsfdefault
+
+%%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Produces the contents of the second argument only if the first argument is
+% empty.
+\newcommand{\ifnotempty}[2]{\ifthenelse{\isempty{#1}}{}{#2}}
+
+\newcommand{\znote}[1]{\textit{\color{ForestGreen}(#1 -- ZP)}}
+
+%%% General algebraic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\listConcat}{\ensuremath{\mathop{||}}}
+
+%%% General logic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Create a relational rule
+% [#1] - Additional mathpartir arguments
+% {#2} - Name of the rule
+% {#3} - Premises for the rule
+% {#4} - Conclusions for the rule
+\newcommand{\relationRule}[4][]{\inferrule*[lab={\sc #2},#1]{#3}{#4}}
+
+\declaretheorem[within=section]{lemma}
+\declaretheorem[name=Definition,numberlike=lemma]{definition}
+\declaretheorem[name=Notation,numberlike=lemma]{notation}
+\declaretheorem[name=Theorem,numberlike=lemma]{theorem}
+
+%%% Grammar definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Defines a grammar terminal.
+% [#1] - The name of the command to define.  Defaults to "\gt#2".
+% {#2} - The text of the grammar terminal.
+\newcommand{\defgt}[2][]{%
+    \ifthenelse{\isempty{#1}}{\defgt[\defgtname{#2}]{#2}}{%
+        \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgtstyle{#2}}
+    }%
+}
+\newcommand{\defgtstyle}[1]{\mathinner{\texttt{#1}}}
+\newcommand{\defgtname}[1]{gt#1}
+
+% Defines a grammar non-terminal.
+% {#1} - The name of the command to define.
+% {#2} - The math-mode text of the command.
+\newcommand{\defgn}[2]{%
+    \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgnstyle{#2}}%
+}
+\newcommand{\defgnstyle}[1]{\ensuremath{#1}}
+
+% Defines an environment, {grammar}, for displaying language grammars.
+% Within this environment, some commands are defined:
+%   \grule[description]{non-terminal}{productions}
+%   \gor (a symbol for separating productions)
+%   \gline (a symbol for breaking a line of productions if more space is needed)
+%   \setGrammarVertAdjustment{length} (which sets the vertical adjustment for
+%                                      the next grammar newline)
+\newcommand{\grammarNoteSpace}{\hspace{4mm}}
+\newcounter{grammarnote}
+\setcounter{grammarnote}{0}
+\newcommand{\grammarDefs}{%
+    \global\def\grammarVertAdjustment{0mm}%
+    \newcommand{\gcomment}[1]{\hfill%
+        \ifnum\value{grammarnote}=0
+            \stepcounter{grammarnote}
+            \grammarNoteSpace \textrm{\textsmaller{\itshape ##1}}
+        \fi
+    }%
+    \newcommand{\grule}[3][]{%
+        \setcounter{grammarnote}{0}
+        ##2 & \ifnotempty{##3}{::=} & \newcommand{\gcommenttext}{##1} ##3 \hfill \gcomment{##1} \endgrule
+    }%
+    \newcommand{\gskip}{&&\endgrule}%
+    \def\endgrule{\\[\grammarVertAdjustment]}%
+    \newcommand{\gor}{\mathrel{\vert}}%
+    \newcommand{\gline}{%
+        \hfill \gcomment{\gcommenttext} \\[\grammarVertAdjustment] &&
+    }%
+}
+\def\grammarColPad{\quad}%
+\newenvironment{grammar}{%
+    \begingroup%
+    \grammarDefs%
+    \begin{math}\begin{array}{@{}r@{\grammarColPad}c@{\grammarColPad}l@{}}%
+}{%
+    \end{array}\end{math}%
+    \endgroup%
+}
+
+%%% CoPylot grammars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Abstract language grammar
+
+\defgt[gtcolon]{:}
+\defgt[gteq]{=}
+
+\defgt[gtintplus]{int\ensuremath{{}^{\texttt{+}}}}
+\defgt[gtintminus]{int\ensuremath{{}^{\texttt{-}}}}
+\defgt[gtintzero]{int\ensuremath{{}^{\texttt{0}}}}
+
+\newcommand{\xstmt}[3]{#1\gtcolon#2\gtcolon#3}
+
+%%% Analysis grammar
+
+\defgn{albl}{\hat{\ell}}
+\defgn{avalue}{\hat{v}}
+\defgn{avariable}{\hat{x}}
+\defgn{adirective}{\hat{d}}
+\defgn{astmt}{\hat{s}}
+\defgn{aprogram}{\hat{S}}
+
+% this will likely be replaced later when we move to a different kind of answer
+\defgn{avalues}{\hat{V}}
+
+\defgn{cfgnode}{\hat{o}}
+\defgn{cfgedge}{\hat{g}}
+\defgn{cfg}{\hat{G}}
+
+\newcommand{\gstart}{\text{\textsmaller{\sc Start}}}
+\newcommand{\gend}{\text{\textsmaller{\sc End}}}
+
+\newcommand{\before}{\mathrel{\mathrlap{<}{\ <}}}
+\newcommand{\lexicallyBefore}{\blacktriangleleft}
+
+\defgn{astackelement}{\hat{k}}
+\defgn{astack}{\hat{K}}
+
+\newcommand{\kcapture}[1]{\text{\textsmaller{\textsc{Capture}}}(#1)}
+\newcommand{\kjump}[1]{\text{\textsmaller{\textsc{Jump}}}(#1)}
+
+%%% CoPylot functions and relations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\isbefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{?}}}{\before}}}
+\newcommand{\islexicallyBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{?}}}{\lexicallyBefore}}}
+
+\newcommand{\valueLookup}[3][\cfg]{#1(#2,#3)}
+
+\newcommand{\cfgClosureStep}{\mathrel{\longrightarrow^1}}
+\newcommand{\cfgClosureSteps}{\mathrel{\longrightarrow^*}}

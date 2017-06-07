@@ -1,0 +1,155 @@
+\documentclass{article}
+
+\input{macros}
+\usepackage{enumitem}
+
+\begin{document}
+    \section{CoPylot}
+    
+    \subsection{Grammar}
+
+    \begin{figure}\center
+        \begin{grammar}
+            \grule[abstract programs]{\aprogram}{
+                        [\astmt,\ldots]
+            }
+            \grule[abstract statements]{\astmt}{
+                        \xstmt{\albl}{\albl}{\adirective}
+            }
+            \grule[abstract directives]{\adirective}{
+                        \avariable \gteq \avalue
+                \gor    \avariable \gteq \avariable
+            }
+            \grule[abstract values]{\avalue}{
+                        \gtintplus
+                \gor    \gtintminus
+                \gor    \gtintzero
+            }
+            \grule[abstract variables]{\avariable}{}
+            \grule[labels]{\albl}{}
+        \end{grammar}
+        \caption{Normalized Python Language Grammar}
+        \label{fig_languageGrammar}
+    \end{figure}
+
+    The grammar of the language to be analyzed appears in Figure~\ref{fig_languageGrammar}.
+    
+    We assume throughout the rest of this document that a fixed program $\aprogram$ is under analysis.  \znote{TODO: describe here the idea of a bijection between labels and statements in this fixed program.}
+    
+    \subsection{Control Flow}
+    
+    The grammar of control flow graphs appears in Figure~\ref{fig_cfgGrammar}.  \znote{Discuss construction of initial graph.}
+    
+    \begin{figure}\center
+        \begin{grammar}
+            \grule[control flow graphs]{\cfg}{
+                        \{\cfgedge, \ldots\}
+            }
+            \grule[control flow graph edge]{\cfgedge}{
+                        \cfgnode \lexicallyBefore \cfgnode
+                \gor    \cfgnode \before \cfgnode
+            }
+            \grule[control flow graph nodes]{\cfgnode}{
+                        \gstart
+                \gor    \gend
+                \gor    \astmt
+            }
+        \end{grammar}
+        \caption{Control Flow Graph Grammar}
+        \label{fig_cfgGrammar}
+    \end{figure}
+    
+    We write $\cfgnode \islexicallyBefore \cfgnode'$ to denote $(\cfgnode \lexicallyBefore \cfgnode' \in \cfg$ when $\cfg$ is understood from context.  Likewise, we write $\cfgnode \isbefore \cfgnode'$ to denote $(\cfgnode \before \cfgnode' \in \cfg$ when $\cfg$ is understood from context.
+    
+    We define a relation $\cfgClosureStep$ to perform control flow graph closure.
+    
+    \begin{definition}
+        Let $\cfg \cfgClosureStep \cfg'$ be the least relation satisfying the rules appearing in Figure~\ref{fig_cfgClosure}.  Throughout these rules, the predicates $\isbefore$ and $\islexicallyBefore$ refer to graph $\cfg$.
+    \end{definition}
+    
+    \begin{figure}
+        \begin{mathpar}
+            \relationRule{Lexical Start}{
+                \gstart \islexicallyBefore \cfgnode
+            }{
+                \cfg \cfgClosureStep \cfg \cup \{\gstart \before \cfgnode\}
+            }
+            
+            \relationRule{Literal Assignment}{
+                \cfgnode_1 = (\avariable \gteq \avalue) \\
+                \cfgnode_1 \islexicallyBefore \cfgnode_2
+            }{
+                \cfg \cfgClosureStep \cfg \cup \{\cfgnode_1 \before \cfgnode_2\}
+            }
+        \end{mathpar}
+        \caption{Control Flow Graph Closure}
+        \label{fig_cfgClosure}
+    \end{figure}
+
+    \subsection{Value Lookup}
+    
+    The value lookup function uses the additional grammar in Figure~\ref{fig_valueLookupGrammar}.
+    
+    \begin{figure}
+        \begin{grammar}
+            \grule[lookup stacks]{\astack}{
+                        [\astackelement, \ldots]
+            }
+            \grule[lookup stack elements]{\astackelement}{
+                        \avariable
+                \gor    \avalue % subject to change to e.g. heap fragments
+                \gor    \kcapture{\mathbb{N}}
+                \gor    \kjump{\cfgnode}
+            }
+        \end{grammar}
+        \caption{Value Lookup Grammar}
+        \label{fig_valueLookupGrammar}
+    \end{figure}
+
+    \begingroup
+        \newenvironment{enumerateClauses}%
+            {\begin{enumerate}[label=(\alph*),ref=\arabic{enumi}\alph*]}%
+            {\end{enumerate}}
+        \newenvironment{enumerateSubclauses}%
+            {\begin{enumerate}[label=\roman*.,ref=\arabic{enumi}\alph{enumii}(\roman*)]}%
+            {\end{enumerate}}
+        \newcommand{\clauseSectionTitle}[1]{\textbf{#1}}
+        \newcommand{\clauseSubsectionTitle}[1]{\underline{\smash{#1}}}
+        \newcommand{\rulename}[1]{%
+            \begingroup%
+                \setlength{\fboxsep}{1.5pt}%
+                \fcolorbox{black}{gray!15!white}{%
+                    \textsc{\textsmaller{#1}}%
+                }%
+                \vspace*{1pt}%
+            \endgroup%
+            \\%
+        }
+        \begin{definition}
+            Given a control-flow graph $\cfg$, let $\valueLookup[\cfg]{\cfgnode_0}{\astack}$ be the function returning the least set $\avalues$ which satisfies the following conditions:
+            
+            \begin{enumerate}
+                \item \clauseSectionTitle{Value Manipulation}
+                \begin{enumerateClauses}
+                    \item \rulename{Result}
+                        If
+                            $\astack = [\avalue]$,
+                        then
+                            $\avalue \in \avalues$.
+                \end{enumerateClauses}
+                
+                \item \clauseSectionTitle{Variable Lookup}
+                \begin{enumerateClauses}
+                    \item \rulename{Value Discovery}
+                        If
+                            $\cfgnode_1 \isbefore \cfgnode_0$,
+                            $\cfgnode_1 =
+                                \xstmt{\albl_1}{\albl_2}{\avariable \gteq \avalue}$, and
+                            $\astack = [\avariable] \listConcat \astack'$,
+                        then
+                            $\valueLookup{\cfgnode_1}{[\avalue] \listConcat \astack'} \subseteq \avalues$.
+                \end{enumerateClauses}
+            \end{enumerate}
+        \end{definition}
+        \endgroup
+\end{document}
