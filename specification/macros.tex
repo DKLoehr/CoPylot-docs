@@ -104,6 +104,28 @@
 
 %%% CoPylot grammars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%% Operational semantics
+
+\defgn{olbl}{\ell}
+\defgn{oglbl}{\overset{*}{\ell}}
+\defgn{ovalue}{v}
+\defgn{ovariable}{x}
+\defgn{odirective}{d}
+\defgn{ostmt}{s}
+\defgn{oprogram}{S}
+\defgn{ostack}{T}
+\defgn{ostackframe}{t}
+\defgn{obinding}{B}
+\defgn{oheap}{H}
+\defgn{opscope}{\eta}
+\defgn{oenv}{E}
+\defgn{oparent}{P}
+\defgn{omem}{m}
+\defgn{ofunc}{fun}
+\newcommand{\osBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{S}}}{\lexicallyBefore}}}
+\newcommand{\osLookup}{\text{\textsmaller{\sc Lookup}}}
+\newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+
 %%% Abstract language grammar
 
 \defgt[gtcolon]{:}

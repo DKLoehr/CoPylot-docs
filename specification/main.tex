@@ -8,6 +8,83 @@
 
     \subsection{Grammar}
 
+
+
+        \begin{figure}\center
+              \begin{grammar}
+                \grule[labels]{\oglbl}{\olbl \gor \gend}
+                \grule[stack]{\ostack}{
+                            [\ostackframe,\ldots]
+                }
+                \grule[stack frame]{\ostackframe}{\oglbl \times \oprogram}
+                \grule[programs]{\oprogram}{
+                            [\ostmt,\ldots]
+                }
+                \grule[directives]{\odirective}{
+                            \ovariable \gteq \ovariable
+                    \gor    \ovariable \gteq \ovalue
+                    \gor    \ovariable \gteq \ovariable(\ovariable)
+
+                }
+                \grule[bindings]{\obinding}{\ovariable \mapsto \omem, \ldots}
+                \grule[heap]{\oheap}{\omem \mapsto \ovalue, \ldots}
+                \grule[values]{\ovalue}{
+                            \gtintplus
+                    \gor    \gtintminus
+                    \gor    \gtintzero
+                    \gor    \langle \opscope,\ofunc(x) \mapsto \oprogram \rangle
+                }
+                \grule[pointers to scopes]{\opscope}{}
+                \grule[environments]{\oenv}{\opscope \mapsto \obinding}
+                \grule[parental maps]{\oparent}{\opscope \mapsto \opscope}
+
+              \end{grammar}
+
+              \begin{mathpar}
+              \relationRule{Literal Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable=\ovalue \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue] \\
+                  \omem \notin \oheap \\
+                  \obinding \gteq \oenv(\opscope) \\
+                  \obinding' \gteq \obinding[\ovariable \mapsto \omem] \\
+                  \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
+                  \olbl \osBefore \olbl''
+              }{
+                  [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap',\oenv',\oparent,\opscope
+              }
+
+              \relationRule{Variable Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1=\ovalue_2 \\
+                  \omem \gteq \osLookup (\opscope,\oparent,\oenv,\ovariable_1)\\
+                  \obinding \gteq \oenv(\opscope) \\
+                  \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
+                  \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
+                  \olbl \osBefore \olbl''
+              }{
+                  [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap,\oenv',\oparent,\opscope
+              }
+
+              \relationRule{Function Call}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1=\ovariable_2(\ovariable_3) \\
+                  \omem \gteq \ocLookup (\opscope,\oparent,\oenv,\ovariable_2)\\
+                  \oheap[\omem] \gteq \langle \opscope',\ofunc(\ovariable_4) \mapsto \oprogram' \rangle \\
+                  \opscope'' \notin \oenv \\
+                  \omem' \gteq \ocLookup (\opscope,\oparent,\oenv,\ovariable_3) \\
+                  \obinding \gteq \{\ovariable_4 \mapsto \omem'\} \\
+                  \oenv' \gteq \oenv[\opscope'' \mapsto \obinding] \\
+                  \oparent' \gteq \oparent \cup \{\opscope'' \mapsto \opscope'\} \\
+                  \oprogram' \gteq [\olbl'':\olbl''':\odirective]
+              }{
+                  [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram' \rangle,\langle l,S \rangle] \listConcat \ostack,\oheap',\oenv',\oparent',\opscope''
+              }
+            \end{mathpar}
+            \caption{Operation Semantics}
+            \label{fig_languageOS}
+        \end{figure}
+
     \begin{figure}\center
         \begin{grammar}
             \grule[abstract programs]{\aprogram}{
@@ -60,86 +137,7 @@
         \label{fig_cfgGrammar}
     \end{figure}
 
-    \begin{figure}\center
-        \begin{grammar}
-          \grule[labels]{\overset{*}{l}}{l \gor \gend}
-          \grule[stack]{T}{
-                      [t,\ldots]
-          }
-          \grule[stack frame]{t}{\overset{*}{l} \times S}
-          \grule[programs]{S}{
-                      [s,\ldots]
-          }
-          \grule[directives]{d}{
-                      x \gteq x
-              \gor    x \gteq v
-              \gor    x \gteq x(x)
 
-          }
-          \grule[bindings]{B}{x \mapsto m, \ldots}
-          \grule[heap]{H}{m \mapsto v, \ldots}
-          \grule[values]{v}{
-                      \gtintplus
-              \gor    \gtintminus
-              \gor    \gtintzero
-              \gor    \langle \eta,fun(x) \mapsto S \rangle
-          }
-          \grule[pointers to scopes]{\eta}{}
-          \grule[environments]{E}{\eta \mapsto B}
-          \grule[parental maps]{P}{\eta \mapsto \eta}
-
-
-        \end{grammar}
-        \caption{Operational Semantics Grammar}
-        \label{fig_cfgGrammar}
-    \end{figure}
-
-
-    \begin{figure}\center
-        \begin{mathpar}
-          \relationRule{Literal Assignment}{
-              S(l) \gteq l:l':x=v \\
-              H' \gteq H[m \mapsto v] \\
-              m \notin H \\
-              B \gteq E(\eta) \\
-              B' \gteq B[x \mapsto m] \\
-              E' \gteq E[\eta \mapsto B'] \\
-              l \islexicallybefore l''
-          }{
-              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
-              [\langle l'',S \rangle] \listConcat T,H',E',P,\eta
-          }
-
-          \relationRule{Variable Assignment}{
-              S(l) \gteq l:l':x_1=v_2 \\
-              m \gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_1)\\
-              B \gteq E(\eta) \\
-              B' \gteq B[x_1 \mapsto m] \\
-              E' \gteq E[\eta \mapsto B'] \\
-              l \islexicallybefore l''
-          }{
-              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
-              [\langle l'',S \rangle] \listConcat T,H,E',P,\eta
-          }
-
-          \relationRule{Function Call}{
-              S(l) \gteq l:l':x_1=x_2(x_3) \\
-              m \gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_2)\\
-              H[m] \gteq \langle \eta',fun(x_4) \mapsto S' \rangle \\
-              \eta'' \notin E \\
-              m'\gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_3) \\
-              B \gteq \{x_4 \mapsto m'\} \\
-              E' \gteq E[\eta'' \mapsto B] \\
-              P' \gteq p \cup \{\eta'' \mapsto \eta'\} \\
-              S' \gteq [l'':l''':d]
-          }{
-              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
-              [\langle l'',S' \rangle,\langle l,S \rangle] \listConcat T,H,E',P',\eta''
-          }
-        \end{mathpar}
-        \caption{Operation Semantics}
-        \label{fig_languageOS}
-    \end{figure}
 
     We write $\cfgnode \islexicallyBefore \cfgnode'$ to denote $(\cfgnode \lexicallyBefore \cfgnode' \in \cfg$ when $\cfg$ is understood from context.  Likewise, we write $\cfgnode \isbefore \cfgnode'$ to denote $(\cfgnode \before \cfgnode' \in \cfg$ when $\cfg$ is understood from context.
 
