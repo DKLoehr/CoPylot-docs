@@ -26,7 +26,8 @@
                 \gor    \gtintzero
             }
             \grule[abstract variables]{\avariable}{}
-            \grule[labels]{\albl}{}
+            \grule[abstract labels]{\albl}{}
+
         \end{grammar}
         \caption{Normalized Python Language Grammar}
         \label{fig_languageGrammar}
@@ -57,6 +58,87 @@
         \end{grammar}
         \caption{Control Flow Graph Grammar}
         \label{fig_cfgGrammar}
+    \end{figure}
+
+    \begin{figure}\center
+        \begin{grammar}
+          \grule[labels]{\overset{*}{l}}{l \gor \gend}
+          \grule[stack]{T}{
+                      [t,\ldots]
+          }
+          \grule[stack frame]{t}{\overset{*}{l} \times S}
+          \grule[programs]{S}{
+                      [s,\ldots]
+          }
+          \grule[directives]{d}{
+                      x \gteq x
+              \gor    x \gteq v
+              \gor    x \gteq x(x)
+
+          }
+          \grule[bindings]{B}{x \mapsto m, \ldots}
+          \grule[heap]{H}{m \mapsto v, \ldots}
+          \grule[values]{v}{
+                      \gtintplus
+              \gor    \gtintminus
+              \gor    \gtintzero
+              \gor    \langle \eta,fun(x) \mapsto S \rangle
+          }
+          \grule[pointers to scopes]{\eta}{}
+          \grule[environments]{E}{\eta \mapsto B}
+          \grule[parental maps]{P}{\eta \mapsto \eta}
+
+
+        \end{grammar}
+        \caption{Operational Semantics Grammar}
+        \label{fig_cfgGrammar}
+    \end{figure}
+
+
+    \begin{figure}\center
+        \begin{mathpar}
+          \relationRule{Literal Assignment}{
+              S(l) \gteq l:l':x=v \\
+              H' \gteq H[m \mapsto v] \\
+              m \notin H \\
+              B \gteq E(\eta) \\
+              B' \gteq B[x \mapsto m] \\
+              E' \gteq E[\eta \mapsto B'] \\
+              l \islexicallybefore l''
+          }{
+              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
+              [\langle l'',S \rangle] \listConcat T,H',E',P,\eta
+          }
+
+          \relationRule{Variable Assignment}{
+              S(l) \gteq l:l':x_1=v_2 \\
+              m \gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_1)\\
+              B \gteq E(\eta) \\
+              B' \gteq B[x_1 \mapsto m] \\
+              E' \gteq E[\eta \mapsto B'] \\
+              l \islexicallybefore l''
+          }{
+              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
+              [\langle l'',S \rangle] \listConcat T,H,E',P,\eta
+          }
+
+          \relationRule{Function Call}{
+              S(l) \gteq l:l':x_1=x_2(x_3) \\
+              m \gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_2)\\
+              H[m] \gteq \langle \eta',fun(x_4) \mapsto S' \rangle \\
+              \eta'' \notin E \\
+              m'\gteq \text{\textsmaller{\sc Lookup}} (\eta,P,E,x_3) \\
+              B \gteq \{x_4 \mapsto m'\} \\
+              E' \gteq E[\eta'' \mapsto B] \\
+              P' \gteq p \cup \{\eta'' \mapsto \eta'\} \\
+              S' \gteq [l'':l''':d]
+          }{
+              [\langle l,S \rangle] \listConcat T,H,E,P,\eta \cfgClosureStep
+              [\langle l'',S' \rangle,\langle l,S \rangle] \listConcat T,H,E',P',\eta''
+          }
+        \end{mathpar}
+        \caption{Operation Semantics}
+        \label{fig_languageOS}
     \end{figure}
 
     We write $\cfgnode \islexicallyBefore \cfgnode'$ to denote $(\cfgnode \lexicallyBefore \cfgnode' \in \cfg$ when $\cfg$ is understood from context.  Likewise, we write $\cfgnode \isbefore \cfgnode'$ to denote $(\cfgnode \before \cfgnode' \in \cfg$ when $\cfg$ is understood from context.
