@@ -2,6 +2,8 @@
 
 \input{macros}
 \usepackage{enumitem}
+\usepackage{caption}
+
 
 \begin{document}
     \section{CoPylot}
@@ -12,7 +14,7 @@
 
         \begin{figure}\center
               \begin{grammar}
-                \grule[labels]{\oglbl}{\olbl \gor \gend}
+                \grule[labels]{\oglbl}{\olbl \gor \osend}
                 \grule[stack]{\ostack}{
                             [\ostackframe,\ldots]
                 }
@@ -20,19 +22,30 @@
                 \grule[programs]{\oprogram}{
                             [\ostmt,\ldots]
                 }
+                % statements
                 \grule[directives]{\odirective}{
-                            \ovariable \gteq \ovariable
-                    \gor    \ovariable \gteq \ovalue
-                    \gor    \ovariable \gteq \ovariable(\ovariable)
+                            \ovariable \gteq \oexpr % x = e
+                    \gor    def \quad \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
+                            % def x(x, ...) = {S}
+                    \gor    return \quad \ovariable % return x
 
                 }
-                \grule[bindings]{\obinding}{\ovariable \mapsto \omem, \ldots}
-                \grule[heap]{\oheap}{\omem \mapsto \ovalue, \ldots}
+                \grule[bindings]{\obinding}{\{\ovariable \mapsto \omem, \ldots\}}
+                \grule[heap]{\oheap}{\{\omem \mapsto \ovalue, \ldots\}}
+                % value types
                 \grule[values]{\ovalue}{
-                            \gtintplus
-                    \gor    \gtintminus
-                    \gor    \gtintzero
-                    \gor    \langle \opscope,\ofunc(x) \mapsto \oprogram \rangle
+                            \mathbb{Z}
+                    \gor    \langle \opscope,\ofunc(\ovariable) \ofuncarr \oprogram \rangle % < eta, fun(x) -> S >
+                    \gor    [\omem, \ldots] % [m, ...]
+                    \gor    (\omem, \ldots) % (m, ...)
+                }
+                % expressions
+                \grule[expressions]{\oexpr}{
+                            \mathbb{Z}
+                    \gor    \ovariable % x
+                    \gor    \ovariable(\ovariable) % x(x)
+                    \gor    [\ovariable, \ldots] % [x, ...]
+                    \gor    (\ovariable, \ldots) % (x, ...)
                 }
                 \grule[pointers to scopes]{\opscope}{}
                 \grule[environments]{\oenv}{\opscope \mapsto \obinding}
@@ -48,40 +61,173 @@
                   \obinding \gteq \oenv(\opscope) \\
                   \obinding' \gteq \obinding[\ovariable \mapsto \omem] \\
                   \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
-                  \olbl \osBefore \olbl''
+                  \olbl \osBefore{S} \olbl''
               }{
                   [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
                   [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap',\oenv',\oparent,\opscope
               }
 
-              \relationRule{Variable Assignment}{
+              \relationRule{Name Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1=\ovalue_2 \\
                   \omem \gteq \osLookup (\opscope,\oparent,\oenv,\ovariable_2)\\
                   \obinding \gteq \oenv(\opscope) \\
                   \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
                   \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
-                  \olbl \osBefore \olbl''
+                  \olbl \osBefore{S} \olbl''
               }{
                   [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
                   [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap,\oenv',\oparent,\opscope
               }
 
-              \relationRule{Function Call}{
-                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1=\ovariable_2(\ovariable_3) \\
-                  \omem \gteq \ocLookup (\opscope,\oparent,\oenv,\ovariable_2)\\
-                  \oheap[\omem] \gteq \langle \opscope',\ofunc(\ovariable_4) \mapsto \oprogram' \rangle \\
-                  \opscope'' \notin \oenv \\
-                  \omem' \gteq \ocLookup (\opscope,\oparent,\oenv,\ovariable_3) \\
-                  \obinding \gteq \{\ovariable_4 \mapsto \omem'\} \\
-                  \oenv' \gteq \oenv[\opscope'' \mapsto \obinding] \\
-                  \oparent' \gteq \oparent \cup \{\opscope'' \mapsto \opscope'\} \\
-                  \oprogram' \gteq [\olbl'':\olbl''':\odirective]
+              \relationRule{List Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable \gteq [\ovariable_1,\ldots,\ovariable_n] \\
+                  \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\opscope,\oparent,\oenv,\ovariable_i) \\
+                  \ovalue \gteq [\omem_1,\ldots,\omem_2] \\
+                  \oheap' \gteq \oheap[\omem' \mapsto \ovalue] \\
+                  \omem' \notin \oheap \\
+                  \obinding \gteq \oenv(\opscope) \\
+                  \obinding' \gteq \obinding[\ovariable \mapsto \omem'] \\
+                  \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
+                  \olbl \osBefore{S} \olbl''
+              }{
+                  \langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap',\oenv',\oparent,\opscope
+              }
+
+              \relationRule{Tuple Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable \gteq (\ovariable_1,\ldots,\ovariable_n) \\
+                  \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\opscope,\oparent,\oenv,\ovariable_i) \\
+                  \ovalue \gteq (\omem_1,\ldots,\omem_2) \\
+                  \oheap' \gteq \oheap[\omem' \mapsto \ovalue] \\
+                  \omem' \notin \oheap \\
+                  \obinding \gteq \oenv(\opscope) \\
+                  \obinding' \gteq \obinding[\ovariable \mapsto \omem'] \\
+                  \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
+                  \olbl \osBefore{S} \olbl''
+              }{
+                  \langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap',\oenv',\oparent,\opscope
+              }
+
+
+              \relationRule{Function Definition}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl': def \quad \ovariable_1(\ovariable_2) \gteq \{\oprogram\} \\
+                  \ovalue \gteq \langle \eta, \ofunc(\ovariable_2) \ofuncarr \oprogram \rangle \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue] \\
+                  \omem \notin \oheap \\
+                  \obinding \gteq \oenv(\opscope) \\
+                  \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
+                  \oenv' \gteq \oenv[\opscope \mapsto \obinding'] \\
+                  \olbl \osBefore{S} \olbl''
               }{
                   [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
-                  [\langle \olbl'',\oprogram' \rangle,\langle l,S \rangle] \listConcat \ostack,\oheap',\oenv',\oparent',\opscope''
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap',\oenv',\oparent,\opscope
               }
+
+                  \relationRule{Function Call}{
+                  % TODO: multiargs
+                      \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1=\ovariable_2(\ovariable_3) \\
+                      \omem \gteq \osLookup (\opscope,\oparent,\oenv,\ovariable_2)\\
+                      \oheap[\omem] \gteq \langle \opscope',\ofunc(\ovariable_4) \mapsto \oprogram' \rangle \\
+                      \opscope'' \notin \oenv \\
+                      \omem' \gteq \osLookup (\opscope,\oparent,\oenv,\ovariable_3) \\
+                      \obinding' \gteq \obinding [\ovariable_4 \mapsto \omem'] \\
+                      \oenv' \gteq \oenv[\opscope'' \mapsto \obinding'] \\
+                      \oparent' \gteq \oparent \cup \{\opscope'' \mapsto \opscope'\} \\
+                      \oprogram' \gteq [\olbl'':\olbl''':\odirective] \listConcat \oprogram''
+                  }{
+                      [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                      [\langle \olbl'',\oprogram' \rangle,\langle l,S \rangle] \listConcat \ostack,\oheap',\oenv',\oparent',\opscope''
+                  }
+
             \end{mathpar}
             \caption{Operation Semantics}
+            \label{fig_languageOS}
+            \end{figure}
+
+            \begin{figure}\center
+              \ContinuedFloat
+                \begin{mathpar}
+
+              \relationRule{Pass}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl': pass \\
+                  \olbl \osBefore{S} \olbl''
+              }{
+                  [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope
+              }
+
+              \relationRule{Return}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl' : return \\
+                  \ostack \gteq [\ostackframe,\langle \olbl'',\oprogram' \rangle] \listConcat \ostack' \\
+                  \opscope' \gteq \oparent[\opscope] \\
+                  \olbl'' \osBefore{S'} \olbl''' \\
+              }{
+                  [\ostackframe,\langle \olbl'',\oprogram' \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram' \rangle] \listConcat \ostack',\oheap,\oenv,\oparent,\opscope'
+              }
+
+              % TODO: fix format here
+              \relationRule{Return with Arguments}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl' : return \ovariable \\
+                  \ostack \gteq [\ostackframe,\langle \olbl'',\oprogram' \rangle] \listConcat \ostack' \\
+                  \omem \gteq \osLookup(\opscope,\oparent,\oenv,\ovariable) \\
+
+                  \oprogram'(\olbl'') \gteq \olbl'':\olbl''' : \ovariable_1=\ovariable_2(\ovariable_3) \\ % TODO: multiargs
+
+                  \opscope' \gteq \oparent[\opscope] \\
+                  \obinding \gteq \oenv(\opscope') \\
+                  \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
+                  \oenv' \gteq \oenv[\opscope' \mapsto \obinding'] \\
+
+                  \olbl'' \osBefore{S'} \olbl'''' \\
+
+              }{
+                  [\ostackframe,\langle \olbl'',\oprogram' \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl'',\oprogram' \rangle] \listConcat \ostack,\oheap,\oenv',\oparent,\opscope'
+              }
+
+              \relationRule{Goto}{
+                  
+              }{
+
+              }
+
+              \relationRule{GotoIfNot}{
+
+              }{
+
+              }
+
+              \relationRule{Name Statement}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl' : \oexpr \\
+                  \forall \ovariable \in \oexpr \exists \obinding[\ovariable] \\
+                  %%% \ovariable | \ovalue | \ovariable(\ovariable_1,\ldots,\ovariable_n) | \ovariable.\ovariable' | [\ovariable_1,\ldots,\ovariable_n] | (\ovariable_1,\ldots,\ovariable_n)
+                  \olbl \osBefore{S'} \olbl'' \\
+              }{
+                  [\langle \olbl,\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl',\oprogram \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope
+              }
+
+              \relationRule{End of Function}{
+                  \ostack \gteq [\langle \osend,\oprogram \rangle,\langle \olbl,\oprogram' \rangle]\listConcat \ostack' \\
+                  \opscope' \gteq \oparent[\opscope] \\
+                  \olbl \osBefore{S'} \olbl'
+              }{
+                  [\langle \osend,\oprogram \rangle,\langle \olbl,\oprogram' \rangle] \listConcat \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [\langle \olbl',\oprogram' \rangle] \listConcat \ostack',\oheap,\oenv,\oparent,\opscope'
+              }
+
+              \relationRule{End of Program}{
+                  \ostack = [(\osend,\ostackframe)] \\
+              }{
+                  \ostack,\oheap,\oenv,\oparent,\opscope \osTransition
+                  [],\oheap,\oenv,\oparent,\opscope'
+              }
+
+
+            \end{mathpar}
+            \caption{Operation Semantics (cont.)}
             \label{fig_languageOS}
         \end{figure}
 

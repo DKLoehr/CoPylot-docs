@@ -122,7 +122,10 @@
 \defgn{oparent}{P}
 \defgn{omem}{m}
 \defgn{ofunc}{fun}
-\newcommand{\osBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{S}}}{\lexicallyBefore}}}
+\defgn{ofuncarr}{\rightarrow}
+\defgn{oexpr}{e}
+\newcommand{\osend}{\text{\textsmaller{\sc End}}}
+\newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
 \newcommand{\osLookup}{\text{\textsmaller{\sc Lookup}}}
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
 
