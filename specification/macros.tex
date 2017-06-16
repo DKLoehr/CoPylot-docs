@@ -16,6 +16,8 @@
 \let\rmdefault\oldrmdefault
 \let\sfdefault\oldsfdefault
 
+\definecolor{purple}{RGB}{138,43,226}
+
 %%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Produces the contents of the second argument only if the first argument is
@@ -117,16 +119,25 @@
 \defgn{ostackframe}{t}
 \defgn{obinding}{B}
 \defgn{oheap}{H}
-\defgn{opscope}{\eta}
-\defgn{oenv}{E}
+% \defgn{opscope}{\eta}
+% \defgn{oenv}{E}
 \defgn{oparent}{P}
 \defgn{omem}{m}
-\defgn{ofunc}{fun}
+% \defgn{ofunc}{fun}
 \defgn{ofuncarr}{\rightarrow}
 \defgn{oexpr}{e}
+
+\newcommand{\opscope}{{\color{red}\eta}}
+\newcommand{\oenv}{{\color{red}E}}
+
+\newcommand{\okw}[1]{\;\text{\texttt{{\color{purple}#1}}}\;}
+
 \newcommand{\osend}{\text{\textsmaller{\sc End}}}
+\newcommand{\ostrue}{\text{\textsmaller{\sc True}}}
+\newcommand{\osfalse}{\text{\textsmaller{\sc False}}}
 \newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
 \newcommand{\osLookup}{\text{\textsmaller{\sc Lookup}}}
+\newcommand{\osBind}{\text{\textsmaller{\sc Bind}}}
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
 
 %%% Abstract language grammar
