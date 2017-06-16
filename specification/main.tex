@@ -60,11 +60,24 @@
 
               \end{grammar}
 
+              \begin{definition}
+                $$
+                  \text{\textsmaller{\sc Bind}}(\oheap,\omem_0,\ovariable,\omem) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
+                $$
+
+              \end{definition}
+              \begin{definition}
+                $$
+                  \text{\textsmaller{\sc Bind}}(\oheap,\omem_0,\ovariable_1,\omem_1,\ldots,\ovariable_n,\omem_n) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
+                $$
+
+              \end{definition}
+
               \begin{mathpar}
               \relationRule{Literal Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq \ovalue \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem) \\
-                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \ovalue_{\texttt{obj}}] \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
                   \osBind (\oheap',\omem_0,\ovariable,\omem') \gteq \oheap'' \\
                   \olbl \osBefore{S} \oglbl''
@@ -90,8 +103,8 @@
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq [\ovariable_1,\ldots,\ovariable_n] \\
                   \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
                   \ovalue \gteq [\omem_1,\ldots,\omem_2] \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem) \\
-                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \ovalue_{\texttt{obj}}] \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
                   % \obinding \gteq \oenv(\omem_0) \\
                   % \obinding' \gteq \obinding[\ovariable \mapsto \omem'] \\
@@ -107,8 +120,8 @@
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq (\ovariable_1,\ldots,\ovariable_n) \\
                   \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
                   \ovalue \gteq (\omem_1,\ldots,\omem_2) \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem) \\
-                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \ovalue_{\texttt{obj}}] \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
                   % \obinding \gteq \oenv(\omem_0) \\
                   % \obinding' \gteq \obinding[\ovariable \mapsto \omem'] \\
@@ -124,8 +137,8 @@
               \relationRule{Function Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \ovariable_1 \gteq \okw{def} (\ovariable_2, \ldots, \ovariable_n) \gteq \{\oprogram\} \\
                   \ovalue \gteq \osLR{ \eta, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem) \\
-                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \ovalue_{\texttt{obj}}] \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
+                  \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
                   % \obinding \gteq \oenv(\omem_0) \\
                   % \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
@@ -183,9 +196,9 @@
                   \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
                   \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
                   \omem[\ovariable_3] \gteq \omem' \\
-                  \oheap[\omem'] = \osLR{omem_0, omem, \okw{def} \ovariable_4 (\ovariable_5,\ldots) \ofuncarr \oprogram'} \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem') \\
-                  \oheap' \gteq \oheap[\omem'' \mapsto \ovalue] \\
+                  \oheap[\omem'] = \osLR{\omem_0, \omem, \okw{def} \ovariable_4 (\ovariable_5,\ldots) \ofuncarr \oprogram'} \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem'\} \\
+                  \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem', \omem', \omem \notin \oheap \\
                   \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
                   \olbl \osBefore{S} \oglbl'
@@ -195,13 +208,12 @@
               }
 
               \relationRule{Magic Method Assignment}{
-              % FIXME: write pattern matching
                   \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
                   \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
                   \omem[\ovariable_3] \gteq \omem' \\
                   \oheap[\omem'] = \osLR{ \omem'', \omagicm } \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem') \\
-                  \oheap' \gteq \oheap[\omem'' \mapsto \ovalue] \\
+                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem'\} \\
+                  \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem', \omem', \omem \notin \oheap \\
                   \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
                   \olbl \osBefore{S} \oglbl'
