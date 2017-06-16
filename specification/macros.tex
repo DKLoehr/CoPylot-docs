@@ -17,6 +17,7 @@
 \let\sfdefault\oldsfdefault
 
 \definecolor{purple}{RGB}{138,43,226}
+\definecolor{func}{RGB}{233,105,0}
 
 %%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -132,13 +133,17 @@
 
 \newcommand{\okw}[1]{\;\text{\texttt{{\color{purple}#1}}}\;}
 
-\newcommand{\osend}{\text{\textsmaller{\sc End}}}
-\newcommand{\ostrue}{\text{\textsmaller{\sc True}}}
-\newcommand{\osfalse}{\text{\textsmaller{\sc False}}}
+\newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
+\newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
+\newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
+\newcommand{\osalphanumeric}{\text{\textsmaller{{\color{func}\sc AlphaNumeric}}}}
 \newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
-\newcommand{\osLookup}{\text{\textsmaller{\sc Lookup}}}
-\newcommand{\osBind}{\text{\textsmaller{\sc Bind}}}
+\newcommand{\osLookup}{\text{\textsmaller{{\color{func}\sc Lookup}}}}
+\newcommand{\osBind}{\text{\textsmaller{{\color{func}\sc Bind}}}}
+\newcommand{\osMakeObj}{\text{\textsmaller{{\color{func}\sc MakeObj}}}}
+\newcommand{\osCatch}{\text{\textsmaller{{\color{func}\sc Catch}}}}
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\osLR}[1]{\langle #1 \rangle}
 
 %%% Abstract language grammar
 
