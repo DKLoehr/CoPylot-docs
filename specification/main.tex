@@ -47,13 +47,14 @@
                 }
                 % expressions
                 \grule[expressions]{\oexpr}{
-                            \mathbb{Z}
+                            \ovalue
                     \gor    \ovariable % x
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
                     \gor    [\ovariable, \ldots] % [x, ...]
                     \gor    (\ovariable, \ldots) % (x, ...)
                 }
                 \grule[parental map]{\oparent}{\omem \mapsto \omem}
+                \grule[memory locations]{\omem}{}
                 \grule[magic functions]{\omagicf}{}
                 \grule[magic methods]{\omagicm}{}
 

@@ -17,8 +17,10 @@
 \let\rmdefault\oldrmdefault
 \let\sfdefault\oldsfdefault
 
-\definecolor{purple}{RGB}{138,43,226}
-\definecolor{func}{RGB}{233,105,0}
+% \definecolor{kw}{RGB}{138,43,226}
+\definecolor{kw}{RGB}{94,129,172}
+% \definecolor{func}{RGB}{233,105,0}
+\definecolor{func}{RGB}{191,97,106}
 
 %%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -131,10 +133,11 @@
 \defgn{omagicf}{\mathfrak{F}}
 \defgn{omagicm}{\mathfrak{M}}
 
+% These are wrong and should not emerge.
 \newcommand{\opscope}{{\color{red}\eta}}
 \newcommand{\oenv}{{\color{red}E}}
 
-\newcommand{\okw}[1]{\;\text{\texttt{{\color{purple}#1}}}\;}
+\newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
 
 \newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
 \newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
