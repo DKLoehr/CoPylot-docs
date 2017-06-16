@@ -42,7 +42,8 @@
                     \gor    [\omem, \ldots] % [m, ...]
                     \gor    (\omem, \ldots) % (m, ...)
                     \gor    \obinding % B
-                    %TODO: Magic functions and methods
+                    \gor    \omagicf
+                    \gor    \osLR{ \omem, \omagicm }
                 }
                 % expressions
                 \grule[expressions]{\oexpr}{
@@ -53,6 +54,8 @@
                     \gor    (\ovariable, \ldots) % (x, ...)
                 }
                 \grule[parental map]{\oparent}{\omem \mapsto \omem}
+                \grule[magic functions]{\omagicf}{}
+                \grule[magic methods]{\omagicm}{}
 
               \end{grammar}
 
@@ -165,11 +168,10 @@
               \relationRule{Attribute Assignment}{
                   \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
                   \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \omem' \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_3) \\
-                  \omem[\omem'] \gteq \omem'' \\
-                  \omem', \omem'' \notin \oheap \\
-                  \oheap[\omem''] = \obinding \\
-                  \osBind (\oheap,\omem_0,\ovariable_1,\omem'') \gteq \oheap' \\
+                  \omem[\ovariable_3] \gteq \omem' \\
+                  \omem' \notin \oheap \\
+                  \oheap[\omem'] = \obinding \\
+                  \osBind (\oheap,\omem_0,\ovariable_1,\omem') \gteq \oheap' \\
                   \olbl \osBefore{S} \oglbl'
               }{
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
@@ -179,14 +181,28 @@
               \relationRule{Method Assignment}{
                   \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
                   \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  % FIXME: Is x3 an object?
-                  \omem' \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_3) \\
-                  \omem[\omem'] \gteq \omem'' \\
-                  \oheap[\omem''] = \osLR{omem_0, omem, \okw{def} \ovariable_4 (\ovariable_5,\ldots) \ofuncarr \oprogram'} \\
-                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem'') \\
-                  \oheap' \gteq \oheap[\omem''' \mapsto \ovalue] \\
-                  \omem', \omem'', \omem''' \notin \oheap \\
-                  \osBind (\oheap',\omem_0,\ovariable_1,\omem''') \gteq \oheap'' \\
+                  \omem[\ovariable_3] \gteq \omem' \\
+                  \oheap[\omem'] = \osLR{omem_0, omem, \okw{def} \ovariable_4 (\ovariable_5,\ldots) \ofuncarr \oprogram'} \\
+                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem') \\
+                  \oheap' \gteq \oheap[\omem'' \mapsto \ovalue] \\
+                  \omem', \omem', \omem \notin \oheap \\
+                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
+                  \olbl \osBefore{S} \oglbl'
+              }{
+                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
+                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
+              }
+
+              \relationRule{Magic Method Assignment}{
+              % FIXME: write pattern matching
+                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
+                  \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
+                  \omem[\ovariable_3] \gteq \omem' \\
+                  \oheap[\omem'] = \osLR{ \omem'', \omagicm } \\
+                  \ovalue_{\texttt{obj}} \gteq \osMakeObj(\omem') \\
+                  \oheap' \gteq \oheap[\omem'' \mapsto \ovalue] \\
+                  \omem', \omem', \omem \notin \oheap \\
+                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
                   \olbl \osBefore{S} \oglbl'
               }{
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
