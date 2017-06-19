@@ -62,15 +62,28 @@
 
               \begin{definition}
                 $$
-                  \text{\textsmaller{\sc Bind}}(\oheap,\omem_0,\ovariable,\omem) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
+                  \osBind (\oheap,\omem_0,\ovariable,\omem) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
                 $$
-
               \end{definition}
+
               \begin{definition}
                 $$
-                  \text{\textsmaller{\sc Bind}}(\oheap,\omem_0,\ovariable_1,\omem_1,\ldots,\ovariable_n,\omem_n) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
+                  \osBind (\oheap,\omem_0,\ovariable_1,\omem_1,\ldots,\ovariable_n,\omem_n) \gteq \osBind (\ldots ((\osBind ((\osBind (\oheap, \omem_0, \ovariable_1, \omem_1)), \omem_0, \ovariable_2, \omem_2), \ldots), \omem_0, \ovariable_n, \omem_n)
                 $$
+              \end{definition}
 
+              % TODO: add lookup rule
+              \begin{definition}
+                $$
+                  \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \gteq
+                $$
+              \end{definition}
+
+              % TODO: add catch rule
+              \begin{definition}
+                $$
+                  \osCatch (\osLR{\olbl,\oprogram}) \gteq
+                $$
               \end{definition}
 
               \begin{mathpar}
@@ -116,6 +129,15 @@
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
 
+            \end{mathpar}
+            \caption{Operational Semantics}
+            \label{fig_languageOS}
+            \end{figure}
+
+            \begin{figure}\center
+              \ContinuedFloat
+                \begin{mathpar}
+
               \relationRule{Tuple Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq (\ovariable_1,\ldots,\ovariable_n) \\
                   \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
@@ -133,7 +155,6 @@
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
 
-
               \relationRule{Function Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \ovariable_1 \gteq \okw{def} (\ovariable_2, \ldots, \ovariable_n) \gteq \{\oprogram\} \\
                   \ovalue \gteq \osLR{ \eta, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
@@ -149,17 +170,6 @@
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
-
-
-
-            \end{mathpar}
-            \caption{Operation Semantics}
-            \label{fig_languageOS}
-            \end{figure}
-
-            \begin{figure}\center
-              \ContinuedFloat
-                \begin{mathpar}
 
               \relationRule{Function Call Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2(\ovariable_3,\ldots,\ovariable_n) \\
@@ -222,6 +232,15 @@
                   [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
 
+            \end{mathpar}
+            \caption{Operational Semantics (cont.)}
+            \label{fig_languageOS}
+        \end{figure}
+
+        \begin{figure}\center
+          \ContinuedFloat
+            \begin{mathpar}
+
               \relationRule{Raise Exception Caught}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \okw{raise} \ovariable \\
                   \ostack \gteq [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
@@ -253,15 +272,6 @@
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
               }
-
-            \end{mathpar}
-            \caption{Operation Semantics (cont.)}
-            \label{fig_languageOS}
-        \end{figure}
-
-        \begin{figure}\center
-          \ContinuedFloat
-            \begin{mathpar}
 
               \relationRule{Return}{
                   \oprogram(\olbl) \gteq \olbl:\olbl' : \okw{return}  \\
@@ -318,6 +328,15 @@
                 [\osLR{ \olbl',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
             }
 
+        \end{mathpar}
+        \caption{Operational Semantics (cont.)}
+        \label{fig_languageOS}
+    \end{figure}
+
+    \begin{figure}\center
+      \ContinuedFloat
+        \begin{mathpar}
+
             \relationRule{End of Function}{
                 \ostack \gteq [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }]\listConcat \ostack' \\
                 \omem_0' \gteq \oparent[\omem_0] \\
@@ -333,10 +352,10 @@
                 \ostack,\oheap,\oparent,\omem_0 \osTransition
                 [\;],\oheap,\oparent,\omem_0
             }
-            \end{mathpar}
-            \caption{Operation Semantics (cont.)}
-            \label{fig_languageOS}
-        \end{figure}
+        \end{mathpar}
+        \caption{Operational Semantics (cont.)}
+        \label{fig_languageOS}
+    \end{figure}
 
     \begin{figure}\center
         \begin{grammar}
