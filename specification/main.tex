@@ -31,6 +31,9 @@
                     \gor    \okw{return} \ovariable % return x
                     \gor    \okw{goto} \olbl % return x
                     \gor    \okw{goto} \olbl \okw{if not} \ovariable % return x
+                    \gline
+                    \gor    \okw{raise} \ovariable % raise x
+                    \gor    \okw{catch} \ovariable % catch x
                 }
                 \grule[bindings]{\obinding}{\{\ovariable \mapsto \omem, \ldots\}}
                 \grule[heap]{\oheap}{\{\omem \mapsto \ovalue, \ldots\}}
@@ -41,9 +44,11 @@
                     \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
                     \gor    [\omem, \ldots] % [m, ...]
                     \gor    (\omem, \ldots) % (m, ...)
+                    \gline
                     \gor    \obinding % B
                     \gor    \omagicf
                     \gor    \osLR{ \omem, \omagicm }
+                    \gor    \okw{undefined}
                 }
                 % expressions
                 \grule[expressions]{\oexpr}{
@@ -81,18 +86,20 @@
 
               \begin{definition}
                   \begin{equation}
-                      \osCatch (\osLR{\olbl,\oprogram}) \gteq
+                      \osCatch (\osLR{\oparent,\olbl,\oprogram,\omem}) \gteq
                       \begin{cases}
-                        \olbl', \ovariable, & \text{if}\ \odirective \gteq \okw{catch} \ovariable \\
-                        \okw{undefined}, & \text{otherwise}
+                        \olbl', \ovariable, \omem' & \text{if}\ \odirective' \gteq \okw{catch} \ovariable \\
+                        \okw{undefined}, \omem' & \text{otherwise}
                       \end{cases}
                       , \olbl:\olbl':\odirective \in \oprogram
+                      , \olbl':\olbl'':\odirective' \in \oprogram
+                      , \omem' = \oparent[\omem]
                     \end{equation}
               \end{definition}
 
               \begin{definition}
                   \begin{equation}
-                    \osGetObj (\omem) \gteq
+                    \osGetObj (\oheap, \omem) \gteq
                       \begin{cases}
                         \obinding, & \text{if}\ \ovalue \gteq \obinding \\
                         \obinding[\ostarvalue{value} \mapsto \ovalue], & \text{otherwise}
@@ -100,6 +107,29 @@
                       , \oheap[\omem] \gteq \ovalue
                     \end{equation}
               \end{definition}
+
+              \begin{definition}
+                $\oheap[\omem][\text{\_\_call\_\_}] \gteq \omem'
+                , \oheap[\omem'] \gteq \ovalue$
+                  \begin{equation}
+                    \osGetCall (\oheap, \omem) \gteq
+                      \begin{cases}
+                        \osGetCall (\oheap, \omem'), & \text{if }\ \ovalue \gteq \obinding \\
+                        \omem',
+                        & \text{if } \ovalue \gteq \osLR{\omem_0,\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \;|\;
+                        \osLR{\omem_0,\omem_{\texttt{obj}},\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \;|\;
+                        \osLR{\omagicf} \;|\;
+                        \osLR{\omagicm}
+                      \end{cases}
+                    \end{equation}
+              \end{definition}
+
+            \caption{Operational Semantics}
+            \label{fig_languageOS}
+            \end{figure}
+
+            \begin{figure}\center
+              \ContinuedFloat
 
               \begin{mathpar}
               \relationRule{Literal Assignment}{
@@ -144,13 +174,8 @@
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
 
-            \end{mathpar}
-            \caption{Operational Semantics}
-            \label{fig_languageOS}
-            \end{figure}
+              \end{mathpar}
 
-            \begin{figure}\center
-              \ContinuedFloat
                 \begin{mathpar}
 
               \relationRule{Tuple Assignment}{
@@ -173,7 +198,7 @@
               \relationRule{Function Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \ovariable_1 \gteq \okw{def} (\ovariable_2, \ldots, \ovariable_n) \gteq \{\oprogram\} \\
                   \ovalue \gteq \osLR{ \omem_0, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
-                  \obinding_{\texttt{obj}} \gteq \{\ostarvalue{value} \mapsto \omem\} \\
+                  \obinding_{\texttt{obj}} \gteq \{\ostarvalue{value} \mapsto \omem, \text{\_\_call\_\_} \mapsto \omem \} \\
                   \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
                   % \obinding \gteq \oenv(\omem_0) \\
@@ -186,15 +211,11 @@
                   [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
               }
 
-              \relationRule{Method Assignment}{
-                  % TODO
-              }{
-              }
-
               \relationRule{Function Call Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2(\ovariable_3,\ldots,\ovariable_n) \\
-                  \omem \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
-                  \oheap[\omem][\ostarvalue{obj}] \gteq \osLR{ \omem_0',\okw{def}(\ovariable_3',\ldots,\ovariable_n') \mapsto \oprogram' } \\
+                  \omem_{\texttt{raw}} \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
+                  \omem \gteq \osGetCall(\oheap,\omem_{\texttt{raw}}) \\
+                  \oheap[\omem][\ostarvalue{obj}] \gteq \osLR{ \omem_0',\okw{def}(\ovariable_3',\ldots,\ovariable_n') \ofuncarr \oprogram' } \\
                   \omem_0'' \notin \oheap \\
                   \oheap' \gteq \oheap[\omem_0'' \mapsto \{\;\}] \\
                   \forall i, 3 \leq i \leq n, \omem_i' \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
@@ -208,25 +229,6 @@
                   [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
               }
 
-
-              \relationRule{Attribute Assignment}{
-                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
-                  \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \oheap[\omem] \gteq \obinding \\
-                  \obinding[\ovariable_3] \gteq \omem' \\
-                  % \omem' \notin \oheap \\
-                  % \oheap[\omem'] = \ovalue \\
-                  % TODO: determine whether is object, wrap accordingly
-                  \obinding_{\texttt{obj}} \gteq \osGetObj (\omem') \\
-                  \omem'' \notin \oheap \\
-                  \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
-                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
-                  \olbl \osBefore{S} \oglbl'
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
             \end{mathpar}
             \caption{Operational Semantics (cont.)}
             \label{fig_languageOS}
@@ -236,18 +238,55 @@
           \ContinuedFloat
             \begin{mathpar}
 
+              \relationRule{Method Call Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2(\ovariable_3,\ldots,\ovariable_n) \\
+                  \omem_{\texttt{raw}} \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
+                  \omem \gteq \osGetCall(\oheap,\omem_{\texttt{raw}}) \\
+                  \oheap[\omem][\ostarvalue{obj}] \gteq \osLR{ \omem_0',\omem_{\texttt{obj}}, \okw{def}(\ovariable_3',\ldots,\ovariable_n') \ofuncarr \oprogram' } \\
+                  \omem_0'' \notin \oheap \\
+                  \oheap' \gteq \oheap[\omem_0'' \mapsto \{\ovariable_{\texttt{self}} \mapsto \omem_\texttt{obj}\}] \\
+                  \forall i, 3 \leq i \leq n, \omem_i' \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
+                  \osBind  (\oheap', \omem_0'', \ovariable_1', \omem_1', \ldots, \ovariable_n', \omem_n') \gteq \oheap'' \\
+                  \oparent' \gteq \oparent \cup \{\omem_0'' \mapsto \omem_0'\} \\
+                  \oprogram' \gteq [\olbl'':\olbl''':\odirective, \ldots]
+              }{
+                  [\osLR{ \olbl,\oprogram }] \listConcat  \ostack,\oheap,\oparent,\omem_0 \osTransition
+                  [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
+              }
+
+              \relationRule{Attribute Assignment}{
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
+                  \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
+                  \oheap[\omem] \gteq \obinding \\
+                  \obinding[\ovariable_3] \gteq \omem' \\
+                  % \omem' \notin \oheap \\
+                  % \oheap[\omem'] = \ovalue \\
+                  % TODO: determine whether is object, wrap accordingly
+                  \obinding_{\texttt{obj}} \gteq \osGetObj (\oheap, \omem') \\
+                  \omem'' \notin \oheap \\
+                  \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
+                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
+                  \olbl \osBefore{S} \oglbl'
+              }{
+                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
+                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
+              }
+
+              \tnote{Gets values wrapped in objects.}
+
               \relationRule{Raise Exception Caught}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \okw{raise} \ovariable \\
                   \ostack \gteq [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
-                  \olbl_1 \gteq \olbl' \\
-                  \forall i, 1 \leq i \leq k, k \le n, \osCatch (\osLR{\olbl_i,\oprogram_i}) \gteq \okw{undefined} \\
-                  \osCatch(\osLR{\olbl_{k+1},\oprogram_{k+1}}) \gteq \olbl', \ovariable' \\
-                  \omem = \osLookup(\omem_0,\oparent,\oheap,\ovariable) \\
+                  % \olbl_1 \gteq \olbl' \\
+                  \omem_0^0 \gteq \omem_0 \\
+                  \forall i, 1 \leq i \leq k, k < n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) \gteq \okw{undefined}, \okw{undefined}, \omem_0^i \\
+                  \osCatch(\osLR{\oparent,\olbl_{k+1},\oprogram_{k+1},\omem_0^k}) \gteq \olbl', \ovariable', \omem_0' \\
+                  \omem = \osLookup(\omem_0',\oparent,\oheap,\ovariable) \\
                   \osBind(\oheap,\omem_0,\ovariable',\omem) \gteq \oheap' \\
-                  \olbl_(k+1)' \osBefore{S_{k+1}} \oglbl''
+                  \olbl_{s}' \osBefore{S_{k+1}} \oglbl''
               }{
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram_{k+1} }] \listConcat \ostack,\oheap',\oparent,\omem_0
+                  [\osLR{ \oglbl'',\oprogram_{k+1} }] \listConcat \ostack,\oheap',\oparent,\omem_0'
               }
 
               \relationRule{Raise Exception Escaped}{
@@ -288,13 +327,23 @@
                   % \obinding \gteq \oenv(\omem_0') \\
                   % \obinding' \gteq \obinding[\ovariable_1 \mapsto \omem] \\
                   % \oenv' \gteq \oenv[\omem_0' \mapsto \obinding'] \\
+                  \oprogram'(\olbl'') = \olbl'':\olbl''':\ovariable_1 \gteq \oexpr \\
                   \osBind (\oheap,\omem_0',\ovariable_1,\omem) \gteq \oheap' \\
 %
                   \olbl'' \osBefore{S'} \oglbl'''' \\
               }{
-                  [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'''',\oprogram' }] \listConcat \ostack,\oheap',\oparent,\omem_0'
+                  [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0 \osTransition
+                  [\osLR{ \oglbl'''',\oprogram' }] \listConcat \ostack',\oheap',\oparent,\omem_0'
               }
+
+        \end{mathpar}
+        \caption{Operational Semantics (cont.)}
+        \label{fig_languageOS}
+    \end{figure}
+
+    \begin{figure}\center
+      \ContinuedFloat
+        \begin{mathpar}
 
               \relationRule{Goto}{
                   \oprogram(\olbl) \gteq \olbl:\olbl' : \okw{goto} \olbl'' \\
@@ -326,7 +375,8 @@
 
             \relationRule{Name Statement}{
                 \oprogram(\olbl) \gteq \olbl:\olbl' : \oexpr \\
-                \forall \ovariable \in \oexpr \exists \obinding[\ovariable] \\
+                \obinding \gteq \oheap[\omem_0] \\
+                \forall \ovariable \in \oexpr, \exists \obinding[\ovariable] \\
                 %%% \ovariable | \ovalue | \ovariable(\ovariable_1,\ldots,\ovariable_n) | \ovariable.\ovariable' | [\ovariable_1,\ldots,\ovariable_n] | (\ovariable_1,\ldots,\ovariable_n)
                 \olbl \osBefore{S'} \oglbl'' \\
             }{
@@ -334,21 +384,12 @@
                 [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
             }
 
-        \end{mathpar}
-        \caption{Operational Semantics (cont.)}
-        \label{fig_languageOS}
-    \end{figure}
-
-    \begin{figure}\center
-      \ContinuedFloat
-        \begin{mathpar}
-
             \relationRule{End of Function}{
                 \ostack \gteq [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }]\listConcat \ostack' \\
                 \omem_0' \gteq \oparent[\omem_0] \\
                 \olbl \osBefore{S'} \oglbl'
             }{
-                [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
+                [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0 \osTransition
                 [\osLR{ \olbl',\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0'
             }
 
