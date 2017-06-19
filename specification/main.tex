@@ -177,12 +177,12 @@
                   \oheap[\omem] \gteq \osLR{ \omem_0',\okw{def}(\ovariable_3',\ldots,\ovariable_n') \mapsto \oprogram' } \\
                   \omem_0'' \notin \oheap \\
                   \oheap' \gteq \oheap[\omem_0'' \mapsto \{\;\}] \\
-                  \forall i, 3 \leq i \leq n, \omem' \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
+                  \forall i, 3 \leq i \leq n, \omem_i' \gteq \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
                   % \obinding' \gteq \obinding [\ovariable_4 \mapsto \omem'] \\
                   % \oenv' \gteq \oenv[\omem_0'' \mapsto \obinding'] \\
-                  \osBind (\oheap',\omem_0'',\ovariable_i,\omem_i,\ldots,\ovariable_n,\omem_n) \gteq \oheap'' \\
+                  \osBind (\oheap',\omem_0'',\ovariable_1',\omem_1',\ldots,\ovariable_n',\omem_n') \gteq \oheap'' \\
                   \oparent' \gteq \oparent \cup \{\omem_0'' \mapsto \omem_0'\} \\
-                  \oprogram' \gteq [\olbl'':\olbl''':\odirective]
+                  \oprogram' \gteq [\olbl'':\olbl''':\odirective, \ldots]
               }{
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
                   [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
@@ -190,41 +190,16 @@
 
 
               \relationRule{Attribute Assignment}{
-                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
+                  \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
                   \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \omem[\ovariable_3] \gteq \omem' \\
-                  \omem' \notin \oheap \\
-                  \oheap[\omem'] = \obinding \\
-                  \osBind (\oheap,\omem_0,\ovariable_1,\omem') \gteq \oheap' \\
-                  \olbl \osBefore{S} \oglbl'
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap',\oparent,\omem_0
-              }
-
-              \relationRule{Method Assignment}{
-                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
-                  \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \omem[\ovariable_3] \gteq \omem' \\
-                  \oheap[\omem'] = \osLR{\omem_0, \omem, \okw{def} \ovariable_4 (\ovariable_5,\ldots) \ofuncarr \oprogram'} \\
-                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem'\} \\
+                  \oheap[\omem] \gteq \obinding \\
+                  \obinding[\ovariable_3] \gteq \omem' \\
+                  % \omem' \notin \oheap \\
+                  % \oheap[\omem'] = \ovalue \\
+                  % TODO: determine whether is object, wrap accordingly
+                  \obinding_{\texttt{obj}} \gteq \osGetObj (\omem') \\
+                  \omem'' \notin \oheap \\
                   \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem', \omem', \omem \notin \oheap \\
-                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
-                  \olbl \osBefore{S} \oglbl'
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \relationRule{Magic Method Assignment}{
-                  \oprogram(\olbl) \gteq \olbl:olbl':\ovariable_1 \gteq \ovariable_2.\ovariable_3 \\
-                  \omem \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \omem[\ovariable_3] \gteq \omem' \\
-                  \oheap[\omem'] = \osLR{ \omem'', \omagicm } \\
-                  \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem'\} \\
-                  \oheap' \gteq \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem', \omem', \omem \notin \oheap \\
                   \osBind (\oheap',\omem_0,\ovariable_1,\omem'') \gteq \oheap'' \\
                   \olbl \osBefore{S} \oglbl'
               }{
