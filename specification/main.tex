@@ -62,7 +62,7 @@
 
               \begin{definition}
                 $$
-                  \osBind (\oheap,\omem_0,\ovariable,\omem) \gteq \oheap' \text{ such that } \obinding \gteq \oheap. \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
+                  \osBind (\oheap,\omem_0,\ovariable,\omem) \gteq \oheap' \text{ such that } \obinding \gteq \oheap[\omem_0], \obinding' \gteq \obinding[\ovariable \mapsto \omem], \oheap' \gteq \oheap[\omem_0 \mapsto \obinding']
                 $$
               \end{definition}
 
@@ -108,14 +108,14 @@
                   \osBind (\oheap,\omem_0,\ovariable_1,\omem) \gteq \oheap' \\
                   \olbl \osBefore{S} \oglbl''
               }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap',oparent,\omem_0
+                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
+                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap',\oparent,\omem_0
               }
 
               \relationRule{List Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq [\ovariable_1,\ldots,\ovariable_n] \\
                   \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  \ovalue \gteq [\omem_1,\ldots,\omem_2] \\
+                  \ovalue \gteq [\omem_1,\ldots,\omem_n] \\
                   \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
                   \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
@@ -141,7 +141,7 @@
               \relationRule{Tuple Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl':\ovariable \gteq (\ovariable_1,\ldots,\ovariable_n) \\
                   \forall i \in \{1,\ldots,n\}, \omem_i \gteq \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  \ovalue \gteq (\omem_1,\ldots,\omem_2) \\
+                  \ovalue \gteq (\omem_1,\ldots,\omem_n) \\
                   \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
                   \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
@@ -157,7 +157,7 @@
 
               \relationRule{Function Assignment}{
                   \oprogram(\olbl) \gteq \olbl:\olbl': \ovariable_1 \gteq \okw{def} (\ovariable_2, \ldots, \ovariable_n) \gteq \{\oprogram\} \\
-                  \ovalue \gteq \osLR{ \eta, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
+                  \ovalue \gteq \osLR{ \omem_0, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
                   \obinding_{\texttt{obj}} \gteq \{\star \ovariable_{\texttt{value}} \mapsto \omem\} \\
                   \oheap' \gteq \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
