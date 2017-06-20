@@ -40,14 +40,15 @@
                 % value types
                 \grule[values]{\ovalue}{
                             \mathbb{Z}
-                    \gor    \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
-                    \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
+                    % \gor    \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
+                    % \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
                     \gor    [\omem, \ldots] % [m, ...]
                     \gor    (\omem, \ldots) % (m, ...)
-                    \gline
                     \gor    \obinding % B
-                    \gor    \omagicf
-                    \gor    \osLR{ \omem, \omagicm }
+                    % \gor    \omagicf
+                    % \gor    \osLR{ \omem, \omagicm }
+                    \gor    \ogenf
+                    \gor    \ogenm
                     \gor    \okw{undefined}
                     \gor    \osnone
                 }
@@ -61,6 +62,14 @@
                 }
                 \grule[parental map]{\oparent}{\omem \mapsto \omem}
                 \grule[memory locations]{\omem}{}
+                \grule[general functions]{\ogenf}{
+                            \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
+                    \gor    \omagicf
+                }
+                \grule[general methods]{\ogenm}{
+                            \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
+                    \gor    \osLR{ \omem, \omagicm }
+                }
                 \grule[magic functions]{\omagicf}{}
                 \grule[magic methods]{\omagicm}{}
 
@@ -119,11 +128,12 @@
                       \begin{cases}
                         \osGetCall (\oheap, \omem'), & \text{if }\ \ovalue = \obinding \\
                         \omem',
-                        & \parbox[t]{.4\textwidth}
-                        {$\text{if } \ovalue = \osLR{\omem_0,\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
-                        \osLR{\omem_0,\omem_{\texttt{obj}},\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
-                        \osLR{\omagicf} \; | \;
-                        \osLR{\omem_{\texttt{obj}},\omagicm}$}
+                        % & \parbox[t]{.4\textwidth}
+                        % {$\text{if } \ovalue = \osLR{\omem_0,\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
+                        % \osLR{\omem_0,\omem_{\texttt{obj}},\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
+                        % \osLR{\omagicf} \; | \;
+                        % \osLR{\omem_{\texttt{obj}},\omagicm}$}
+                        & \text{if } \ovalue = \ogenf \;|\; \ogenm
                       \end{cases}
                     % \end{aligned}
                     \end{equation}
