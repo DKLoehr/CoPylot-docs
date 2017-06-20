@@ -120,7 +120,7 @@
 %%% Operational semantics
 
 \defgn{olbl}{\ell}
-\defgn{oglbl}{\overset{*}{\ell}}
+\defgn{oglbl}{\overset{\star}{\ell}}
 \defgn{ovalue}{v}
 \defgn{ovariable}{x}
 \defgn{odirective}{d}
@@ -130,10 +130,11 @@
 \defgn{ostackframe}{t}
 \defgn{obinding}{B}
 \defgn{oheap}{H}
-% \defgn{opscope}{\eta}
+\defgn{opscope}{\eta}
 % \defgn{oenv}{E}
 \defgn{oparent}{P}
 \defgn{omem}{m}
+\defgn{ogmem}{\overset{\star}{m}}
 % \defgn{ofunc}{fun}
 \defgn{ofuncarr}{\rightarrow}
 \defgn{oexpr}{e}
@@ -141,9 +142,10 @@
 \defgn{omagicm}{\mathfrak{M}}
 \defgn{ogenf}{F}
 \defgn{ogenm}{M}
+\defgn{osplat}{\ast}
 
 % These are wrong and should not emerge.
-\newcommand{\opscope}{{\color{red}\eta}}
+% \newcommand{\opscope}{{\color{red}\eta}}
 \newcommand{\oenv}{{\color{red}E}}
 
 \newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}

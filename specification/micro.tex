@@ -1,0 +1,81 @@
+\documentclass{article}
+
+\input{macros}
+\usepackage{enumitem}
+\usepackage{caption}
+
+
+\begin{document}
+
+
+        \begin{figure}\center
+              \begin{grammar}
+                \grule[variables]{\ovariable}{\osalphanumeric \gor \star \osalphanumeric}
+                \grule[labels]{\oglbl}{\olbl \gor \osplat}
+                \grule[stack]{\ostack}{
+                            [\ostackframe,\ldots]
+                }
+                \grule[stack frames]{\ostackframe}{\oglbl \times \oprogram}
+                \grule[programs]{\oprogram}{
+                            [\ostmt,\ldots]
+                }
+                % FIXME: add s definition
+                % statements
+                \grule[directives]{\odirective}{
+                            \ovariable \gteq \oexpr % x = e
+                    \gor    \okw{return} \ovariable % return x
+                    \gor    \okw{goto} \olbl % return x
+                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % return x
+                    \gline
+                    \gor    \okw{raise} \ovariable % raise x
+                    \gor    \okw{catch} \ovariable % catch x
+                }
+                \grule[bindings]{\obinding}{\{\ovariable \mapsto \omem, \ldots\}}
+                \grule[heap]{\oheap}{\{\omem \mapsto \ovalue, \ldots\}}
+                % value types
+                \grule[values]{\ovalue}{
+                            \mathbb{Z}
+                    % \gor    \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
+                    % \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
+                    \gor    [\omem, \ldots] % [m, ...]
+                    \gor    (\omem, \ldots) % (m, ...)
+                    \gor    \obinding % B
+                    % \gor    \omagicf
+                    % \gor    \osLR{ \omem, \omagicm }
+                    \gor    \ogenf
+                    \gor    \ogenm
+                    \gor    \okw{undefined}
+                    \gor    \osnone
+                }
+                % expressions
+                \grule[expressions]{\oexpr}{
+                            \ovalue
+                    \gor    \ovariable % x
+                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
+                            % def x(x, ...) = {S}
+                    \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
+                    \gor    [\ovariable, \ldots] % [x, ...]
+                    \gor    (\ovariable, \ldots) % (x, ...)
+                }
+                \grule[parental map]{\oparent}{\omem \mapsto \omem}
+                \grule[memory locations]{\ogmem}{
+                            \omem
+                    \gor    \opscope
+                    \gor    \osplat
+                }
+                \grule[general functions]{\ogenf}{
+                            \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
+                    \gor    \omagicf
+                }
+                \grule[general methods]{\ogenm}{
+                            \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
+                    \gor    \osLR{ \omem, \omagicm }
+                }
+                \grule[magic functions]{\omagicf}{}
+                \grule[magic methods]{\omagicm}{}
+
+              \end{grammar}
+              \caption{Operational Semantics}
+              \label{fig_languageOS}
+          \end{figure}
+\end{document}

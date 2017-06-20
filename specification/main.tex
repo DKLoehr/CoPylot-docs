@@ -23,11 +23,10 @@
                 \grule[programs]{\oprogram}{
                             [\ostmt,\ldots]
                 }
+                % FIXME: add s definition
                 % statements
                 \grule[directives]{\odirective}{
                             \ovariable \gteq \oexpr % x = e
-                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
-                            % def x(x, ...) = {S}
                     \gor    \okw{return} \ovariable % return x
                     \gor    \okw{goto} \olbl % return x
                     \gor    \okw{goto} \olbl \okw{if not} \ovariable % return x
@@ -56,6 +55,8 @@
                 \grule[expressions]{\oexpr}{
                             \ovalue
                     \gor    \ovariable % x
+                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
+                            % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
                     \gor    [\ovariable, \ldots] % [x, ...]
                     \gor    (\ovariable, \ldots) % (x, ...)
@@ -113,7 +114,7 @@
                     \osGetObj (\oheap, \omem) =
                       \begin{cases}
                         \obinding, & \text{if}\ \ovalue = \obinding \\
-                        \obinding[\ostarvalue{value} \mapsto \ovalue], & \text{otherwise}
+                        \obinding = {\ostarvalue{value} \mapsto \ovalue}, & \text{otherwise}
                       \end{cases}
                       , \oheap[\omem] = \ovalue
                     \end{equation}
@@ -160,7 +161,7 @@
               }
 
               \relationRule{Name Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovalue_2 \\
+                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovariable_2 \\
                   \omem = \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
                   % \obinding = \oenv(\omem_0) \\
                   % \obinding' = \obinding[\ovariable_1 \mapsto \omem] \\
@@ -240,6 +241,8 @@
                   [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
               }
 
+              \tnote{Real python functions don't work as above. They just run the code. Fix it later.}
+
             \end{mathpar}
             \caption{Operational Semantics (cont.)}
             \label{fig_languageOS}
@@ -290,8 +293,8 @@
                   \ostack = [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
                   % \olbl_1 = \olbl' \\
                   \omem_0^0 = \omem_0 \\
-                  \forall i, 1 \leq i \leq k, k < n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) = \okw{undefined}, \okw{undefined}, \omem_0^i \\
-                  \osCatch(\osLR{\oparent,\olbl_{k+1},\oprogram_{k+1},\omem_0^k}) = \olbl', \ovariable', \omem_0' \\
+                  \forall i, 1 \leq i \leq k, k < n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) = \osLR{\okw{undefined}, \okw{undefined}, \omem_0^i} \\
+                  \osCatch(\osLR{\oparent,\olbl_{k+1},\oprogram_{k+1},\omem_0^k}) = \osLR{\olbl', \ovariable', \omem_0'} \\
                   \omem = \osLookup(\omem_0',\oparent,\oheap,\ovariable) \\
                   \osBind(\oheap,\omem_0,\ovariable',\omem) = \oheap' \\
                   \olbl_{s}' \osBefore{S_{k+1}} \oglbl''
@@ -304,7 +307,7 @@
                   \oprogram(\olbl) = \olbl:\olbl': \okw{raise} \ovariable \\
                   \ostack = [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
                   \olbl_1 = \olbl' \\
-                  \forall i, 1 \leq i \leq n, \osCatch (\osLR{\olbl_i,\oprogram_i}) = \okw{undefined} \\
+                  \forall i, 1 \leq i \leq n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) = \osLR{\okw{undefined}, \okw{undefined}, \omem_0^i} \\
               }{
                   [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
                   [\;],\oheap,\oparent,\omem_0
