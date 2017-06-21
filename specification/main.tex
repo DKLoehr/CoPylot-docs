@@ -23,13 +23,13 @@
                 \grule[programs]{\oprogram}{
                             [\ostmt,\ldots]
                 }
-                % FIXME: add s definition
+                \grule[clauses]{\olbl:\oglbl:\odirective}
                 % statements
                 \grule[directives]{\odirective}{
                             \ovariable \gteq \oexpr % x = e
                     \gor    \okw{return} \ovariable % return x
-                    \gor    \okw{goto} \olbl % return x
-                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % return x
+                    \gor    \okw{goto} \olbl % goto x
+                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % goto x if not v
                     \gline
                     \gor    \okw{raise} \ovariable % raise x
                     \gor    \okw{catch} \ovariable % catch x

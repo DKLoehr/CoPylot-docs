@@ -11,7 +11,8 @@
         \begin{figure}\center
               \begin{grammar}
                 \grule[variables]{\ovariable}{\osalphanumeric \gor \star \osalphanumeric}
-                \grule[labels]{\oglbl}{\olbl \gor \osplat}
+                \grule[general labels]{\oglbl}{\olbl \gor \osplat}
+                \grule[labels]{\olbl}{}
                 \grule[stack]{\ostack}{
                             [\ostackframe,\ldots]
                 }
@@ -19,29 +20,26 @@
                 \grule[programs]{\oprogram}{
                             [\ostmt,\ldots]
                 }
-                % FIXME: add s definition
+                \grule[clauses]{\ostmt}{\olbl:\oglbl:\odirective}
                 % statements
                 \grule[directives]{\odirective}{
                             \ovariable \gteq \oexpr % x = e
                     \gor    \okw{return} \ovariable % return x
-                    \gor    \okw{goto} \olbl % return x
-                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % return x
+                    \gor    \okw{goto} \olbl % goto x
+                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % goto x if not v
                     \gline
                     \gor    \okw{raise} \ovariable % raise x
                     \gor    \okw{catch} \ovariable % catch x
+                    \gor    \okw{pass} % pass
                 }
                 \grule[bindings]{\obinding}{\{\ovariable \mapsto \omem, \ldots\}}
                 \grule[heap]{\oheap}{\{\omem \mapsto \ovalue, \ldots\}}
                 % value types
                 \grule[values]{\ovalue}{
                             \mathbb{Z}
-                    % \gor    \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
-                    % \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
                     \gor    [\omem, \ldots] % [m, ...]
                     \gor    (\omem, \ldots) % (m, ...)
                     \gor    \obinding % B
-                    % \gor    \omagicf
-                    % \gor    \osLR{ \omem, \omagicm }
                     \gor    \ogenf
                     \gor    \ogenm
                     \gor    \okw{undefined}
@@ -51,18 +49,38 @@
                 \grule[expressions]{\oexpr}{
                             \ovalue
                     \gor    \ovariable % x
-                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
-                            % def x(x, ...) = {S}
+                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
                     \gor    [\ovariable, \ldots] % [x, ...]
                     \gor    (\ovariable, \ldots) % (x, ...)
                 }
+                \grule[microcode stack]{\omstack}{[\omcode,\ldots]}
+                \grule[microcode literal stack]{\olstack}{[\olcode,\ldots]}
+                \grule[microcode commands]{\omcode}{
+                            \osMC{Store}
+                    \gor    \osMC{Wrap}
+                    \gor    \osMC{Bind}
+                    \gor    \osMC{LookUp}
+                    \gor    \osMC{List} \;n
+                    \gor    \osMC{Tuple} \;n
+                    \gline
+                    \gor    \osMC{Advance}
+                    \gor    \osMC{Pop}
+                    \gor    \osMC{Raise}
+                    \gor    \osMC{AllocNameError}
+                }
+                \grule[microcode literals]{\olcode}{
+                            \ovariable
+                    \gor    \omem
+                    \gor    \ovalue
+                }
                 \grule[parental map]{\oparent}{\omem \mapsto \omem}
-                \grule[memory locations]{\ogmem}{
+                \grule[general memory locations]{\ogmem}{
                             \omem
                     \gor    \opscope
                     \gor    \osplat
                 }
+                \grule[memory locations]{\opscope, \omem}{}
                 \grule[general functions]{\ogenf}{
                             \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
                     \gor    \omagicf
@@ -75,7 +93,168 @@
                 \grule[magic methods]{\omagicm}{}
 
               \end{grammar}
-              \caption{Operational Semantics}
-              \label{fig_languageOS}
+              \caption{Expression Grammar}
+              \label{fig_langExpr}
           \end{figure}
+
+
+      \begin{figure}\center
+          \begin{mathpar}
+
+              \relationRule{Store \ovalue}{
+                  \omem \notin \oheap \\
+                  \oheap' = \oheap[\omem \mapsto \ovalue]
+              }{
+                  \oparent, \olstack \listConcat [\ovalue, \osMC{Store}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\omem] \listConcat, \ostack, \oheap', \opscope
+              }
+
+              \relationRule{Wrap \omem}{
+                  \obinding = \oheap[\opscope] \\
+                  \obinding' = \obinding[\ovariable \mapsto \omem] \\
+                  \oheap' = \oheap[\opscope \mapsto \obinding']
+              }{
+                  \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Wrap}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Bind \omem \! to \ovariable}{
+                  \ovalue = \osGetObj(\oheap, \omem)
+              }{
+                  \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Bind}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack, \ostack, \oheap', \opscope
+              }
+
+              \relationRule{Advance}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \odirective \\
+                  \olbl \osBefore{\oprogram} \oglbl''
+              }{
+                  \oparent, \olstack \listConcat [\osMC{Advance}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\oglbl'', \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Pop}{
+                  \opscope' = \oparent[\opscope] \\
+                  \ostack = [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
+                  \olbl'' \osBefore{\oprogram'} \oglbl''''
+              }{
+                  \oparent, \olstack \listConcat [\osMC{Pop}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\oglbl'''', \oprogram}] \listConcat \ostack', \oheap, \opscope'
+              }
+
+              \relationRule{Look up \ovariable \,(bound)}{
+                  \obinding = \oheap[\opscope] \\
+                  \omem = \obinding[\ovariable]
+              }{
+                  \oparent, \olstack \listConcat [\ovariable, \osMC{LookUp}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\omem] \listConcat \omstack, \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Look up \ovariable \,(NameError)}{
+                  \osLookup(\oparent, \oheap, \opscope, \ovariable) = \osplat
+              }{
+                  \oparent, \olstack \listConcat [\ovariable, \osMC{LookUp}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\osMC{AllocNameError}, \osMC{Raise}], \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Make List}{
+                  \ovalue = [\omem_1, \ldots, \omem_n]
+              }{
+                  \oparent, \olstack \listConcat [\omem_1, \ldots, \omem_n, \osMC{List}\;n] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Make Tuple}{
+                  \ovalue = (\omem_1, \ldots, \omem_n)
+              }{
+                  \oparent, \olstack \listConcat [\omem_1, \ldots, \omem_n, \osMC{Tuple}\;n] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Raise \,(no exception label)}{
+                  \oprogram(\olbl) = \olbl:\osplat: \odirective \\
+              }{
+                  \oparent, \olstack \listConcat [\osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\osMC{Pop}, \osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Raise \,(caught)}{
+                  \oprogram(\olbl) = \olbl:\olbl_0: \odirective \\
+                  \oprogram(\olbl_0) = \olbl_0:\olbl_1: \osCatch \ovariable \\
+                  \omstack' = [\ovariable, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, \olstack \listConcat [\osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\olbl_0, \oprogram}] \listConcat \ostack, \oheap, \opscope'
+              }
+
+          \end{mathpar}
+          \caption{Microcommands}
+          \label{fig_langMicro}
+      \end{figure}
+
+      \begin{figure}\center
+          \begin{mathpar}
+
+              \relationRule{Literal Assignment}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr \\
+                  \osFunc{Valueofliteral}(\oexpr) = \ovalue \\
+                  \omstack = [\ovalue, \osMC{Store}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Name Assignment}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable_1 = \ovariable_2 \\
+                  \omstack = [\ovariable_2, \osMC{Lookup}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{List Assignment}{
+                  \oprogram(\olbl) = \olbl:\oglbl':\ovariable = [\ovariable_1, \ldots, \ovariable_n] \\
+                  \omstack = [(\ovariable_1, \osMC{Lookup}, \osMC{Store}), \ldots, (\ovariable_n, \osMC{Lookup}, \osMC{Store}), \osMC{List} \; n, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Tuple Assignment}{
+                  \oprogram(\olbl) = \olbl:\oglbl':\ovariable = [\ovariable_1, \ldots, \ovariable_n] \\
+                  \omstack = [(\ovariable_1, \osMC{Lookup}, \osMC{Store}), \ldots, (\ovariable_n, \osMC{Lookup}, \osMC{Store}), \osMC{Tuple} \; n, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+          \end{mathpar}
+          \caption{Operational Semantics: Assignment}
+          \label{fig_langOS}
+      \end{figure}
+      \begin{figure}\center
+          \begin{mathpar}
+
+              \relationRule{Pass}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \okw{pass} \\
+                  \omstack = [\osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Return}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
+                  \ostack = [\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
+                  \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' = \oexpr \\
+                  \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+          \end{mathpar}
+          \caption{Operational Semantics: Flow}
+          \label{fig_langOS}
+      \end{figure}
 \end{document}

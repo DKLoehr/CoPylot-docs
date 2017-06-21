@@ -18,13 +18,26 @@
 \let\sfdefault\oldsfdefault
 
 
-% Palette: default
+% Palette: defunct
 % \definecolor{kw}{RGB}{138,43,226}
 % \definecolor{func}{RGB}{233,105,0}
+% \definecolor{microcode}{RGB}{143,188,187}
 
 % Palette: Nord
-\definecolor{kw}{RGB}{94,129,172}
-\definecolor{func}{RGB}{191,97,106}
+% \definecolor{kw}{RGB}{94,129,172}
+% \definecolor{func}{RGB}{191,97,106}
+% \definecolor{microcode}{RGB}{180,142,173}
+
+% Palette: Solarized
+\definecolor{kw}{HTML}{268BD2} % blue
+\definecolor{func}{HTML}{D33682} % magenta
+% \definecolor{microcode}{HTML}{2AA198} % cyan
+\definecolor{microcode}{HTML}{AF005F} % violet
+
+% Palette: Gotham
+% \definecolor{kw}{HTML}{33859E} % blue
+% \definecolor{func}{HTML}{C23127} % red
+% \definecolor{microcode}{HTML}{EDB443} % magenta
 
 \definecolor{flame}{RGB}{233,105,0}
 
@@ -131,20 +144,27 @@
 \defgn{obinding}{B}
 \defgn{oheap}{H}
 \defgn{opscope}{\eta}
-% \defgn{oenv}{E}
 \defgn{oparent}{P}
 \defgn{omem}{m}
 \defgn{ogmem}{\overset{\star}{m}}
-% \defgn{ofunc}{fun}
-\defgn{ofuncarr}{\rightarrow}
 \defgn{oexpr}{e}
+% Function related
+\defgn{ofuncarr}{\rightarrow}
 \defgn{omagicf}{\mathfrak{F}}
 \defgn{omagicm}{\mathfrak{M}}
 \defgn{ogenf}{F}
 \defgn{ogenm}{M}
 \defgn{osplat}{\ast}
+% Code stack related
+\defgn{omstack}{Y}
+\defgn{omcode}{y}
+\defgn{olstack}{Z}
+\defgn{olcode}{z}
+
 
 % These are wrong and should not emerge.
+% \defgn{oenv}{E}
+% \defgn{ofunc}{fun}
 % \newcommand{\opscope}{{\color{red}\eta}}
 \newcommand{\oenv}{{\color{red}E}}
 
@@ -165,6 +185,9 @@
 \newcommand{\osGetCall}{\text{\textsmaller{{\color{func}\sc GetCall}}}}
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
 \newcommand{\osLR}[1]{\langle #1 \rangle}
+\newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
+\newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+
 
 %%% Abstract language grammar
 
