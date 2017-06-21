@@ -10,7 +10,7 @@
 
         \begin{figure}\center
               \begin{grammar}
-                \grule[variables]{\ovariable}{\osalphanumeric \gor \star \osalphanumeric}
+                \grule[variables]{\ovariable}{\osType{alphanumeric} \gor \star \osType{alphanumeric}}
                 \grule[general labels]{\oglbl}{\olbl \gor \osplat}
                 \grule[labels]{\olbl}{}
                 \grule[stack]{\ostack}{
@@ -42,8 +42,7 @@
                     \gor    \obinding % B
                     \gor    \ogenf
                     \gor    \ogenm
-                    \gor    \okw{undefined}
-                    \gor    \osnone
+                    \gor    \osType{undefined}
                 }
                 % expressions
                 \grule[expressions]{\oexpr}{
@@ -70,6 +69,8 @@
                     \gor    \osMC{Raise}
                     \gor    \osMC{Goto} \;\olbl
                     \gor    \osMC{Gotoifn} \;\olbl
+                    \gor    \osMC{Ignore}
+                    \gline
                     \gor    \osMC{AllocNameError}
                 }
                 \grule[microcode literals]{\olcode}{
@@ -83,7 +84,10 @@
                     \gor    \opscope
                     \gor    \osplat
                 }
-                \grule[memory locations]{\opscope, \omem}{}
+                \grule[memory locations]{\opscope, \omem}{
+                            \osType{<address>}
+                    % \gor    \osnone
+                }
                 \grule[general functions]{\ogenf}{
                             \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
                     \gor    \omagicf
@@ -207,8 +211,8 @@
                   \oheap[\omem] = \osfalse \\
                   \oprogram(\olbl) = \olbl:\oglbl': \odirective
               }{
-                  \oparent, \olstack \listConcat [\omem, \osMC{Gotoifn}\;\olbl] \listConcat \omstack, [\osLR{\olbl', \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
-                  \oparent, \olstack \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+                  \oparent, \olstack \listConcat [\omem, \osMC{Gotoifn}\;\olbl] \listConcat \omstack, \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\osMC{Goto}] \listConcat \omstack, \ostack, \oheap, \opscope
               }
 
               \relationRule{Gotoifn \olbl \,(failure)}{
@@ -216,6 +220,12 @@
               }{
                   \oparent, \olstack \listConcat [\omem, \osMC{Gotoifn}\;\olbl] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
                   \oparent, \olstack \listConcat [\osMC{Advance}] \listConcat \omstack, \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Ignore \olstack}{
+              }{
+                  \oparent, \olstack \listConcat [\omem, \osMC{Ignore}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack, \ostack, \oheap, \opscope
               }
 
           \end{mathpar}
@@ -302,6 +312,31 @@
               }{
                   \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Name Statement}{
+                  \oprogram(\olbl) = \olbl:\olbl' : \ovariable \\
+                  \omstack = [\ovariable_1, \osMC{Lookup}, \osMC{Ignore}, \osMC{Advance}]
+              }{
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{End of Function}{
+                  \ostackframe = \osLR{ \olbl,\oprogram' } \\
+                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr \\
+                  \omstack = [\omem_{\osnone}, \ovariable, \osMC{Bind}, \osMC{Pop}, \osMC{Advance}]
+              }{
+                  \oparent, [\;], [\osLR{\osplat, \oprogram}, \ostackframe] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\osplat, \oprogram}, \ostackframe] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \tnote{$\omem_{\osnone}$ is a memory location reserved for \osnone.}
+
+              \relationRule{End of Program}{
+              }{
+                  \oparent, [\;], [\osLR{\osplat, \oprogram}], \oheap, \opscope \osTransition
+                  \oparent, [\;], [\;], \oheap, \opscope
               }
 
           \end{mathpar}
