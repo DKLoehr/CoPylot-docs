@@ -51,6 +51,7 @@
                     \gor    \ovariable % x
                     \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
+                    \gor    \ovariable.\ovariable % x.x
                     \gor    [\ovariable, \ldots] % [x, ...]
                     \gor    (\ovariable, \ldots) % (x, ...)
                 }
@@ -67,6 +68,8 @@
                     \gor    \osMC{Advance}
                     \gor    \osMC{Pop}
                     \gor    \osMC{Raise}
+                    \gor    \osMC{Goto} \;\olbl
+                    \gor    \osMC{Gotoifn} \;\olbl
                     \gor    \osMC{AllocNameError}
                 }
                 \grule[microcode literals]{\olcode}{
@@ -91,6 +94,7 @@
                 }
                 \grule[magic functions]{\omagicf}{}
                 \grule[magic methods]{\omagicm}{}
+                \grule[integers]{n}{}
 
               \end{grammar}
               \caption{Expression Grammar}
@@ -130,21 +134,19 @@
                   \olbl \osBefore{\oprogram} \oglbl''
               }{
                   \oparent, \olstack \listConcat [\osMC{Advance}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
-                  \oparent, [\;], [\osLR{\oglbl'', \oprogram}] \listConcat \ostack, \oheap, \opscope
+                  \oparent, \olstack \listConcat \omstack, [\osLR{\oglbl'', \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
               \relationRule{Pop}{
-                  \opscope' = \oparent[\opscope] \\
-                  \ostack = [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
-                  \olbl'' \osBefore{\oprogram'} \oglbl''''
+                  \opscope' = \oparent[\opscope]
               }{
-                  \oparent, \olstack \listConcat [\osMC{Pop}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
-                  \oparent, [\;], [\osLR{\oglbl'''', \oprogram}] \listConcat \ostack', \oheap, \opscope'
+                  \oparent, \olstack \listConcat [\osMC{Pop}] \listConcat \omstack, \ostackframe \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack, \ostack, \oheap, \opscope'
               }
 
               \relationRule{Look up \ovariable \,(bound)}{
-                  \obinding = \oheap[\opscope] \\
-                  \omem = \obinding[\ovariable]
+                  % \obinding = \oheap[\opscope] \\
+                  \osLookup(\oparent, \oheap, \opscope, \ovariable) = \omem
               }{
                   \oparent, \olstack \listConcat [\ovariable, \osMC{LookUp}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
                   \oparent, \olstack \listConcat [\omem] \listConcat \omstack, \ostack, \oheap, \opscope
@@ -177,18 +179,47 @@
                   \oparent, \olstack \listConcat [\osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \olstack \listConcat [\osMC{Pop}, \osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
+            \end{mathpar}
+            \caption{Microcommands}
+            \label{fig_langMicro}
+          \end{figure}
+
+          \begin{figure}\center
+              \begin{mathpar}
 
               \relationRule{Raise \,(caught)}{
                   \oprogram(\olbl) = \olbl:\olbl_0: \odirective \\
-                  \oprogram(\olbl_0) = \olbl_0:\olbl_1: \osCatch \ovariable \\
+                  \oprogram(\olbl_0) = \olbl_0:\olbl_1: \okw{catch} x \\
                   \omstack' = [\ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
                   \oparent, \olstack \listConcat [\osMC{Raise}] \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
-                  \oparent, \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\olbl_0, \oprogram}] \listConcat \ostack, \oheap, \opscope'
+                  \oparent, \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\olbl_0, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Goto \olbl}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \odirective
+              }{
+                  \oparent, \olstack \listConcat [\osMC{Goto}\;\olbl] \listConcat \omstack, [\osLR{\olbl', \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Gotoifn \olbl \,(success)}{
+                  \oheap[\omem] = \osfalse \\
+                  \oprogram(\olbl) = \olbl:\oglbl': \odirective
+              }{
+                  \oparent, \olstack \listConcat [\omem, \osMC{Gotoifn}\;\olbl] \listConcat \omstack, [\osLR{\olbl', \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Gotoifn \olbl \,(failure)}{
+                  \oheap[\omem] = \ostrue
+              }{
+                  \oparent, \olstack \listConcat [\omem, \osMC{Gotoifn}\;\olbl] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\osMC{Advance}] \listConcat \omstack, \ostack, \oheap, \opscope
               }
 
           \end{mathpar}
-          \caption{Microcommands}
+          \caption{Microcommands (cont.)}
           \label{fig_langMicro}
       \end{figure}
 
@@ -196,35 +227,39 @@
           \begin{mathpar}
 
               \relationRule{Literal Assignment}{
-                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr \\
-                  \osFunc{Valueofliteral}(\oexpr) = \ovalue \\
+                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \mathbb{Z} \\
+                  % \osFunc{Valueofliteral}(\oexpr) = \ovalue \\
                   \omstack = [\ovalue, \osMC{Store}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
+
+              \tnote{TODO: make literal category (ints, str, bool, None)}
 
               \relationRule{Name Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl': \ovariable_1 = \ovariable_2 \\
                   \omstack = [\ovariable_2, \osMC{Lookup}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
               \relationRule{List Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl':\ovariable = [\ovariable_1, \ldots, \ovariable_n] \\
-                  \omstack = [(\ovariable_1, \osMC{Lookup}, \osMC{Store}), \ldots, (\ovariable_n, \osMC{Lookup}, \osMC{Store}), \osMC{List} \; n, \ovariable, \osMC{Bind}, \osMC{Advance}]
+                  \omstack = [(\ovariable_1, \osMC{Lookup}), \ldots, (\ovariable_n, \osMC{Lookup}), \osMC{List} \; n, \osMC{Store}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
+              \tnote{Parentheses in \omstack group instructions together for convenience of reading.}
+
               \relationRule{Tuple Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl':\ovariable = [\ovariable_1, \ldots, \ovariable_n] \\
-                  \omstack = [(\ovariable_1, \osMC{Lookup}, \osMC{Store}), \ldots, (\ovariable_n, \osMC{Lookup}, \osMC{Store}), \osMC{Tuple} \; n, \ovariable, \osMC{Bind}, \osMC{Advance}]
+                  \omstack = [(\ovariable_1, \osMC{Lookup}), \ldots, (\ovariable_n, \osMC{Lookup}), \osMC{Tuple} \; n, \osMC{Store}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
@@ -239,7 +274,7 @@
                   \oprogram(\olbl) = \olbl:\oglbl': \okw{pass} \\
                   \omstack = [\osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
@@ -249,17 +284,23 @@
                   \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' = \oexpr \\
                   \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
               \relationRule{Goto}{
-                  \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \\
-                  \ostack = [\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
-                  \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' = \oexpr \\
-                  \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+                  \oprogram(\olbl) = \olbl:\oglbl': \okw{goto} \olbl'' \\
+                  \omstack = [\osMC{Goto} \;\olbl'']
               }{
-                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{GotoIfNot}{
+                  \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
+                  \omstack = [\ovariable, \osMC{Lookup}, \osMC{Gotoifn} \;\olbl'']
+              }{
+                  \oparent, [\;], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
                   \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
               }
 
