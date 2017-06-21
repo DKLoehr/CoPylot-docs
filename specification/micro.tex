@@ -106,20 +106,20 @@
                   \oheap' = \oheap[\omem \mapsto \ovalue]
               }{
                   \oparent, \olstack \listConcat [\ovalue, \osMC{Store}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
-                  \oparent, \olstack \listConcat [\omem] \listConcat, \ostack, \oheap', \opscope
+                  \oparent, \olstack \listConcat [\omem] \listConcat \omstack, \ostack, \oheap', \opscope
               }
 
               \relationRule{Wrap \omem}{
-                  \obinding = \oheap[\opscope] \\
-                  \obinding' = \obinding[\ovariable \mapsto \omem] \\
-                  \oheap' = \oheap[\opscope \mapsto \obinding']
+                  \ovalue = \osGetObj(\oheap, \omem)
               }{
-                  \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Wrap}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
+                  \oparent, \olstack \listConcat [\omem, \osMC{Wrap}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
                   \oparent, \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap, \opscope
               }
 
               \relationRule{Bind \omem \! to \ovariable}{
-                  \ovalue = \osGetObj(\oheap, \omem)
+                  \obinding = \oheap[\opscope] \\
+                  \obinding' = \obinding[\ovariable \mapsto \omem] \\
+                  \oheap' = \oheap[\opscope \mapsto \obinding']
               }{
                   \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Bind}] \listConcat \omstack, \ostack, \oheap, \opscope \osTransition
                   \oparent, \olstack \listConcat \omstack, \ostack, \oheap', \opscope
@@ -245,6 +245,16 @@
 
               \relationRule{Return}{
                   \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
+                  \ostack = [\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
+                  \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' = \oexpr \\
+                  \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+              }{
+                  \oparent, [], [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope \osTransition
+                  \oparent, \omstack, [\osLR{\olbl, \oprogram}] \listConcat \ostack, \oheap, \opscope
+              }
+
+              \relationRule{Goto}{
+                  \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \\
                   \ostack = [\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
                   \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' = \oexpr \\
                   \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
