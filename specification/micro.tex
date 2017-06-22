@@ -50,7 +50,8 @@
                 }
                 % expressions
                 \grule[expressions]{\oexpr}{
-                            \ovalue
+                            \mathbb{Z} % int
+                    \gor    \osnone % None
                     \gor    \ovariable % x
                     \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
@@ -60,7 +61,7 @@
                 }
                 \grule[microcode stack]{\omstack}{[\omcode,\ldots]}
                 \grule[microcode literal stack]{\olstack}{[\olcode,\ldots]}
-                \grule[microcode commands]{\omcode}{
+                \grule[microcode instructions]{\omcode}{
                             \osMC{Store}
                     \gor    \osMC{Wrap}
                     \gor    \osMC{Bind}
@@ -77,7 +78,10 @@
                     % \gor    \osMC{Ignore}
                     \gline
                     \gor    \osMC{Call} \;n
+                    \gor    \osMC{GetCall} \;n
+                    \gor    \osMC{Convert} \;n
                     \gor    \osMC{Retrieve}
+                    \gline
                     \gor    \osMC{AllocNameError}
                     \gor    \osMC{AllocTypeError}
                     \gor    \osMC{AllocAttrError}
@@ -272,9 +276,9 @@
                   \oparent, [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
               }
 
-              \relationRule{Get Call}{
-                  \ovalue = \osGetCall(\oheap, \omem_0) % returns F,M
-                  \omstack' = [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert}]
+              \relationRule{Get Call \omem}{
+                  \ovalue = \osGetCall(\oheap, \omem_0) \\ % returns F,M
+                  \omstack' = [\ovalue, \omem_1, \ldots, \omem_n]
               }{
                   \oparent, \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
@@ -286,11 +290,26 @@
                   \oparent, \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
               }
+          \end{mathpar}
+          \caption{Microcommands (cont.)}
+          \label{fig_langMicro}
+      \end{figure}
 
-              \relationRule{Convert Function}{
+
+      \begin{figure}\center
+          \begin{mathpar}
+              \relationRule{Convert Function \ovalue}{
               }{
-                  \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert}] \listConcat \omstack, \ostack, \oheap \osTransition
+                  \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n] \listConcat \omstack, \ostack, \oheap
+              }
+
+              \relationRule{Convert Method \ovalue}{
+                  \ovalue = \osLR{ \omem_0, \ogenf } \\
+                  \ovalue' = \ogenf \\
+              }{
+                  \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
+                  \oparent, \olstack \listConcat [\ovalue', \omem_0, \omem_1, \ldots, \omem_n, \osMC{Call} \;n+1] \listConcat \omstack, \ostack, \oheap
               }
 
               % \relationRule{Call method \omem}{
@@ -329,6 +348,14 @@
 
       \begin{figure}\center
           \begin{mathpar}
+
+              \relationRule{None Assignment}{
+                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \osnone \\
+                  \omstack = [\omem_{\osnone}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              }{
+                  \oparent, [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
+                  \oparent, \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
+              }
 
               \relationRule{Literal Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \mathbb{Z} \\
@@ -386,7 +413,7 @@
 
               \relationRule{Call Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
-                  \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n]
+                  \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
               }{
                   \oparent, [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \oparent, \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
@@ -469,7 +496,7 @@
               \tnote{$\omem_{\osnone}$ is a memory location reserved for \osnone.}
 
               \relationRule{End of Program}{
-                  \ostack = [\osLR{\opscope, \osplat, \oprogram}]
+                  \ostack = [\osLR{\opscope, \osplat, \oprogram}] \\
                   \omstack = [\osMC{Pop}]
               }{
                   \oparent, [\;], \ostack, \oheap \osTransition
