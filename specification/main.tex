@@ -208,8 +208,8 @@
               }
 
               \relationRule{Function Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl': \ovariable_1 = \okw{def} (\ovariable_2, \ldots, \ovariable_n) = \{\oprogram\} \\
-                  \ovalue = \osLR{ \omem_0, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
+                  \oprogram(\olbl) = \olbl:\olbl': \ovariable_1 = \okw{def} (\ovariable_2, \ldots, \ovariable_n) = \{\oprogram'\} \\
+                  \ovalue = \osLR{ \omem_0, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram' } \\
                   \obinding_{\texttt{obj}} = \{\ostarvalue{value} \mapsto \omem, \text{\_\_call\_\_} \mapsto \osLR{\omem', \omagicm_{\texttt{call}}} \} \\
                   \oheap' = \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
                   \omem,\omem' \notin \oheap \\
