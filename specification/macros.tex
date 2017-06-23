@@ -1,3 +1,4 @@
+\input{colors}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
@@ -16,37 +17,6 @@
 \usepackage{lmodern}
 \let\rmdefault\oldrmdefault
 \let\sfdefault\oldsfdefault
-
-
-% Palette: defunct
-% \definecolor{kw}{RGB}{138,43,226}
-% \definecolor{func}{RGB}{233,105,0}
-% \definecolor{microcode}{RGB}{143,188,187}
-
-% Palette: Nord
-% \definecolor{kw}{RGB}{94,129,172}
-% \definecolor{func}{RGB}{191,97,106}
-% \definecolor{microcode}{RGB}{180,142,173}
-
-% Palette: Solarized
-% \definecolor{kw}{HTML}{268BD2} % blue
-% \definecolor{func}{HTML}{D33682} % magenta
-\definecolor{microcode}{HTML}{2AA198} % cyan
-% \definecolor{microcode}{HTML}{B58900} % yellow
-% \definecolor{microcode}{HTML}{D26937} % orange
-% \definecolor{microcode}{HTML}{AF005F} % violet
-
-% Palette: Gotham
-\definecolor{kw}{HTML}{33859E} % cyan
-\definecolor{func}{HTML}{C23127} % red
-% \definecolor{microcode}{HTML}{D26937} % orange
-% \definecolor{microcode}{HTML}{2AA889} % green
-% \definecolor{microcode}{HTML}{4E5166} % violet
-% \definecolor{microcode}{HTML}{888CA6} % magenta
-% \definecolor{microcode}{HTML}{EDB443} % yellow
-
-\definecolor{flame}{RGB}{233,105,0}
-\definecolor{gothamorange}{HTML}{D26937} % orange
 
 %%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -175,26 +145,36 @@
 % \newcommand{\opscope}{{\color{red}\eta}}
 \newcommand{\oenv}{{\color{red}E}}
 
-\newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
-
-\newcommand{\ostarvalue}[1]{\star \ovariable_{\texttt{#1}}}
+% Special
 \newcommand{\osnone}{\texttt{None}}
-\newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
 \newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
 \newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
-\newcommand{\osType}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
-\newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
-\newcommand{\osLookup}{\text{\textsmaller{{\color{func}\sc Lookup}}}}
-\newcommand{\osBind}{\text{\textsmaller{{\color{func}\sc Bind}}}}
-\newcommand{\osGetObj}{\text{\textsmaller{{\color{func}\sc GetObj}}}}
-\newcommand{\osMakeObj}{\text{\textsmaller{{\color{func}\sc MakeObj}}}}
-\newcommand{\osCatch}{\text{\textsmaller{{\color{func}\sc Catch}}}}
-\newcommand{\osGetCall}{\text{\textsmaller{{\color{func}\sc GetCall}}}}
+% Relations
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
+% Helpers
+\newcommand{\osLookup}{\text{\textsmaller{{\color{func}\sc Lookup}}}}
+\newcommand{\osGetObj}{\text{\textsmaller{{\color{func}\sc GetObj}}}}
+\newcommand{\osGetCall}{\text{\textsmaller{{\color{func}\sc GetCall}}}}
+% Format
 \newcommand{\osLR}[1]{\langle #1 \rangle}
+\newcommand{\osI}[2]{#1 &= #2}
+% Stylize
+\newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
 \newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
 \newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+\newcommand{\osType}[1]{\text{\textsmaller{{\color{type}\sc #1}}}}
+\newcommand{\osMagic}[1]{\text{{\color{magic}\sc $\mathfrak{#1}$}}}
+% -fix
+\newcommand{\ostarvalue}[1]{\star \ovariable_{\texttt{#1}}}
 \newcommand{\osInit}[1]{#1_{\text{\textsmaller{{\sc Init}}}}}
+
+% Used in main
+\newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
+\newcommand{\osBind}{\text{\textsmaller{{\color{func}\sc Bind}}}}
+\newcommand{\osMakeObj}{\text{\textsmaller{{\color{func}\sc MakeObj}}}}
+\newcommand{\osCatch}{\text{\textsmaller{{\color{func}\sc Catch}}}}
+
 
 
 %%% Abstract language grammar

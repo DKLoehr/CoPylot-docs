@@ -109,7 +109,9 @@
                 \grule[general methods]{\ogenm}{
                             \osLR{ \omem, \ogenf } % < m, F >
                 }
-                \grule[magic functions]{\omagicf, \omagicm}{}
+                \grule[magic functions]{\omagicf, \omagicm}{
+                            \osMagic{GetAttribute}
+                }
                 \grule[integers]{n}{}
 
               \end{grammar}
@@ -117,15 +119,30 @@
               \label{fig_langExpr}
           \end{figure}
 
-
-          \begin{figure}\center
-                \begin{grammar}
-                  \grule[heap]{\osInit{\oheap}}{}
-
-                \end{grammar}
-                \caption{Initialization}
-                \label{fig_langinit}
-            \end{figure}
+          \begin{definition} Initialization
+            \begin{flalign*}
+            \osI{\osInit{\oheap}}{
+                \{
+                      \osInit{\opscope} \mapsto \osInit{\obinding},
+                      \omem_{\osnone} \mapsto \osplat,
+                      \omem_{\texttt{AttrError}} \mapsto \{\;\},
+                      \omem_{\texttt{FunType}} \mapsto \{\;\}
+                \}
+            } \\
+            \osI{\osInit{\obinding}}{
+                \{
+                      \osType{AttributeError} \mapsto \omem_{\texttt{AttrError}},
+                      \osType{FunctionType} \mapsto \omem_{\texttt{FunType}}
+                \}
+            } \\
+            \osI{\osInit{\ostackframe}}{\osLR{\osInit{\olbl}, \osInit{\oprogram}}} \\
+            \osI{\osInit{\ostack}}{[\osInit{\ostackframe}]} \\
+            \osI{\osInit{\oparent}}{\{\;\}} \\
+            % \osI{\omagicf}{\{\;\}} \\
+            % \osI{\omagicm}{\{\;\}} \\
+          \end{flalign*}
+          \end{definition}
+          \tnote{todo: add builtin mappings $\omem \mapsto \ogenf$}
 
 
       \begin{figure}\center
@@ -277,7 +294,7 @@
               }
 
               \relationRule{Get Call \omem}{
-                  \ovalue = \osGetCall(\oheap, \omem_0) \\ % returns F,M
+                  \ovalue = \oheap[\omem_0], \text{\;\ovalue\, is of form \ogenf\, or \ogenm} \\ % F,M
                   \omstack' = [\ovalue, \omem_1, \ldots, \omem_n]
               }{
                   \oparent, \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
@@ -285,7 +302,7 @@
               }
 
               \relationRule{Get Call (TypeError)}{
-                  \osplat = \osGetCall(\oheap, \omem_0) % returns *
+                  \ovalue = \oheap[\omem_0], \text{\;\ovalue\, is not of form \ogenf\, or \ogenm} % *
               }{
                   \oparent, \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
@@ -299,6 +316,7 @@
       \begin{figure}\center
           \begin{mathpar}
               \relationRule{Convert Function \ovalue}{
+                  \ovalue = \ogenf \\
               }{
                   \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n] \listConcat \omstack, \ostack, \oheap
@@ -311,6 +329,14 @@
                   \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, \olstack \listConcat [\ovalue', \omem_0, \omem_1, \ldots, \omem_n, \osMC{Call} \;n+1] \listConcat \omstack, \ostack, \oheap
               }
+
+              % \relationRule{Convert Object \ovalue}{
+              %     \ovalue = \osLR{ \omem_0, \ogenf } \\
+              %     \ovalue' = \ogenf \\
+              % }{
+              %     \oparent, \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
+              %     \oparent, \olstack \listConcat [\ovalue', \omem_0, \omem_1, \ldots, \omem_n, \osMC{Call} \;n+1] \listConcat \omstack, \ostack, \oheap
+              % }
 
               % \relationRule{Call method \omem}{
               %     \oheap[\omem] = \osLR{ \omem_0, \opscope, \okw{def}(\ovariable_0, \ldots, \ovariable_n) \ofuncarr \oprogram } \\
@@ -328,14 +354,17 @@
               % }
 
               \relationRule{Retrieve \ovariable}{
-                  \osFunc{LookupObj}(\oparent, \oheap, \omem, \ovariable) = \omem'
+                  % \osFunc{LookupObj}(\oparent, \oheap, \omem, \ovariable) = \omem'
+                  \ovalue = \oheap[\omem] \\
+                  \omstack' = [\ovalue, \osMC{Store}]
               }{
                   \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Retrieve}] \listConcat \omstack, \ostack, \oheap \osTransition
-                  \oparent, \olstack \listConcat [\omem'] \listConcat \omstack, \ostack, \oheap
+                  \oparent, \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
               }
 
               \relationRule{Retrieve \ovariable \,(AttributeError)}{
-                  \osFunc{LookupObj}(\oparent, \oheap, \omem, \ovariable) = \osplat
+                  % \osFunc{LookupObj}(\oparent, \oheap, \omem, \ovariable) = \osplat
+                  \osplat = \oheap[\omem]
               }{
                   \oparent, \olstack \listConcat [\omem, \ovariable, \osMC{Retrieve}] \listConcat \omstack, \ostack, \oheap \osTransition
                   \oparent, [\osMC{AllocAttrError}, \osMC{Raise}], \ostack, \oheap
@@ -520,29 +549,35 @@
           \end{definition}
 
           % LookupObj
-          \begin{definition}
-            $$
-              \osFunc{LookupObj}(\oparent,\oheap,\omem,\ovariable) =
-              \tnote{todo}
-            $$
-          \end{definition}
+          % \begin{definition}
+          %   $$
+          %     \osFunc{LookupObj}(\oparent,\oheap,\omem,\ovariable) =
+          %     \tnote{todo}
+          %   $$
+          % \end{definition}
 
           % GetObj
           \begin{definition}
+            $$
+            \oheap[\omem] = \ovalue,
+            \obinding_{\texttt{obj}} = \{
+                \ostarvalue{value} \mapsto \ovalue, \text{\_\_getattribute\_\_} \mapsto \osMagic{Getattribute} \} % the base object
+            $$
               \begin{equation}
                 \osGetObj (\oheap, \omem) =
                   \begin{cases}
-                    \obinding, & \text{if}\ \ovalue = \obinding \\
-                    \obinding = {\ostarvalue{value} \mapsto \ovalue}, & \text{otherwise}
+                    \obinding, & \text{if}\; \ovalue = \obinding \\
+                    \obinding = \obinding_{\texttt{obj}}[\text{\_\_class\_\_} \mapsto \star \osType{funType}], & \text{if}\; \ovalue = \ogenf \\
                   \end{cases}
-                  , \oheap[\omem] = \ovalue
                 \end{equation}
           \end{definition}
 
           % GetCall
           \begin{definition}
-            $\oheap[\omem] = \obinding
-            , \obinding[\ostarvalue{value}] = \ovalue$
+            $$
+            \oheap[\omem] = \obinding
+            , \obinding[\ostarvalue{value}] = \ovalue
+            $$
               \begin{equation}
                 \osGetCall (\oheap, \omem) =
                   \begin{cases}
