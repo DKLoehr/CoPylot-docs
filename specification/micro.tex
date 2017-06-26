@@ -304,7 +304,7 @@
               }
 
               \relationRule{Get Call \omem}{
-                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is of form \ogenf\, or \ogenm} \\ % F,M
+                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is of form \ogenm, \omagicm \;or \omagicf} \\ % F,M
                   \omstack' = [\ovalue, \omem_1, \ldots, \omem_n]
               }{
                   \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
@@ -312,7 +312,7 @@
               }
 
               \relationRule{Get Call (TypeError)}{
-                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is not of form \ogenf\, or \ogenm} % *
+                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is not of form \ogenm, \omagicm \;or \omagicf} % *
               }{
                   \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
