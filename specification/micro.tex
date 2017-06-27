@@ -55,7 +55,7 @@
                 \grule[expressions]{\oexpr}{
                             \mathbb{Z} % int
                     \gor    \mathbb{S} % string
-                    \gor    \osnone % None
+                    %\gor    \osnone % None
                     \gor    \ovariable % x
                     \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
@@ -129,13 +129,14 @@
             \osI{\osInit{\oheap}}{
                 \{
                       \osInit{\opscope} \mapsto \osInit{\obinding},
-                      \omem_{\osnone} \mapsto \osplat,
+                      \omem_{\osnone} \mapsto \{\;\},
                       \omem_{\texttt{AttrError}} \mapsto \{\;\},
                       \omem_{\texttt{FunType}} \mapsto \{\;\}
                 \}
             } \\
             \osI{\osInit{\obinding}}{
                 \{
+                      \star\osnone \mapsto \omem_{\osnone},
                       \osType{AttributeError} \mapsto \omem_{\texttt{AttrError}},
                       \osType{FunctionType} \mapsto \omem_{\texttt{FunType}}
                 \}
@@ -402,13 +403,13 @@
       \begin{figure}\center
           \begin{mathpar}
 
-              \relationRule{None Assignment}{
-                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \osnone \\
-                  \omstack = [\omem_{\osnone}, \ovariable, \osMC{Bind}, \osMC{Advance}]
-              }{
-                  [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
-                  \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
-              }
+              % \relationRule{None Assignment}{
+              %     \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \osnone \\
+              %     \omstack = [\omem_{\osnone}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              % }{
+              %     [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
+              %     \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
+              % }
 
               \relationRule{Literal Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr,\,\oexpr \text{ is of form } \mathbb{Z}, \mathbb{S}\\
