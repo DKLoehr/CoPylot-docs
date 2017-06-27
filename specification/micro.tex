@@ -82,7 +82,7 @@
                     % \gor    \osMC{Ignore}
                     \gline
                     \gor    \osMC{Call} \;n
-                    \gor    \osMC{GetCall} \;n
+                    % \gor    \osMC{GetCall} \;n
                     \gor    \osMC{Convert} \;n
                     \gor    \osMC{Retrieve}
                     \gline
@@ -202,7 +202,7 @@
                   \oprogram = [\olbl:\oglbl':\odirective, \ldots]
               }{
                   \olstack \listConcat [\opscope, \osMC{Push} \;\oprogram] \listConcat \omstack, \ostack, \oheap \osTransition
-                  \oparent', \olstack \listConcat \omstack, [\osLR{\opscope', \olbl, \oprogram}] \listConcat \ostack, \oheap'
+                  \olstack \listConcat \omstack, [\osLR{\opscope', \olbl, \oprogram}] \listConcat \ostack, \oheap'
               }
 
               \relationRule{Look up \ovariable \,(bound)}{
@@ -296,27 +296,27 @@
               }
 
               \relationRule{Call function (wrong args)}{
-                  \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \oprogram } q \neq n
+                  \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \oprogram }\\  q \neq n
                   % \oheap[\omem_0] = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \oprogram }, q \neq n
               }{
                   \olstack \listConcat [\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
                   [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
               }
 
-              \relationRule{Get Call \omem}{
-                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is of form \ogenm, \omagicm \;or \omagicf} \\ % F,M
-                  \omstack' = [\ovalue, \omem_1, \ldots, \omem_n]
-              }{
-                  \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
-                  \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
-              }
+              % \relationRule{Get Call \omem}{
+              %     \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is of form \ogenm, \omagicm \;or \omagicf} \\ % F,M
+              %     \omstack' = [\ovalue, \omem_1, \ldots, \omem_n]
+              % }{
+              %     \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
+              %     \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
+              % }
 
-              \relationRule{Get Call (TypeError)}{
-                  \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is not of form \ogenm, \omagicm \;or \omagicf} % *
-              }{
-                  \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
-                  [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
-              }
+              % \relationRule{Get Call (TypeError)}{
+              %     \ovalue = \oheap[\omem_0][\ostarvalue{value}], \text{\;\ovalue\, is not of form \ogenm, \omagicm \;or \omagicf} % *
+              % }{
+              %     \olstack \listConcat [\omem_0, \ldots, \omem_n, \osMC{GetCall} \;n] \listConcat \omstack, \ostack, \oheap \osTransition
+              %     [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
+              % }
           \end{mathpar}
           \caption{Microcommands (cont.)}
           \label{fig_langMicro}
@@ -466,7 +466,8 @@
 
               \relationRule{Call Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
-                  \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
+                  % \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
+                  \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
               }{
                   [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
