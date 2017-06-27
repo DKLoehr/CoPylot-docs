@@ -364,11 +364,11 @@
 
               \relationRule{Retrieve \ovariable}{
                   % \osFunc{LookupObj}(\oparent, \oheap, \omem, \ovariable) = \omem'
-                  \ovalue = \oheap[\omem][\ovariable] \\
-                  \omstack' = [\ovalue, \osMC{Store}]
+                  \omem' = \oheap[\omem][\ovariable] \\
+                  %\omstack' = [\ovalue, \osMC{Store}]
               }{
                   \olstack \listConcat [\omem, \ovariable, \osMC{Retrieve}] \listConcat \omstack, \ostack, \oheap \osTransition
-                  \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
+                  \olstack \listConcat [\omem'] \listConcat \omstack, \ostack, \oheap
               }
 
               \relationRule{Retrieve \ovariable \,(AttributeError)}{
@@ -458,7 +458,8 @@
 
               \relationRule{Attribute Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_1.\ovariable_2 \\
-                  \omstack = [\ovariable_1, \osMC{LookUp}, \ovariable_2, \osMC{Retrieve}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+                  % \omstack = [\ovariable_1, \osMC{LookUp}, \ovariable_2, \osMC{Retrieve}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+                  \omstack = [\ovariable_1, \osMC{LookUp}, \ovariable_2, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
                   [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
