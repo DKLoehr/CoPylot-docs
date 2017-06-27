@@ -85,6 +85,7 @@
                     % \gor    \osMC{GetCall} \;n
                     \gor    \osMC{Convert} \;n
                     \gor    \osMC{Retrieve}
+                    \gor    \osMC{Get}
                     \gline
                     \gor    \osMC{AllocNameError}
                     \gor    \osMC{AllocTypeError}
@@ -131,27 +132,27 @@
                       \osInit{\opscope} \mapsto \osInit{\obinding},
                       \omem_{\osnone} \mapsto \{\;\},
                       \omem_{\texttt{AttrError}} \mapsto \{\;\},
-                      \omem_{\texttt{FunType}} \mapsto \{\;\}
+                      \omem_{\texttt{FunType}} \mapsto \{\;\}, \\
+                      &
+                      \osMem{GetAttribute} \mapsto \obinding,
+                      \osMem{SetAttr} \mapsto \obinding,
                 \}
             } \\
             \osI{\osInit{\obinding}}{
                 \{
                       \star\osnone \mapsto \omem_{\osnone},
-                      \osType{AttributeError} \mapsto \omem_{\texttt{AttrError}},
-                      \osType{FunctionType} \mapsto \omem_{\texttt{FunType}}
+                      \osType{AttributeError} \mapsto \osMem{AttrError},
+                      \osType{FunctionType} \mapsto \osMem{FunType} \\
                 \}
             } \\
-            \osI{\osInit{\ostackframe}}{\osLR{\osInit{\olbl}, \osInit{\oprogram}}} \\
+            \osI{\osInit{\ostackframe}}{\osLR{\osInit{\opscope}, \osInit{\olbl}, \osInit{\oprogram}}} \\
             \osI{\osInit{\ostack}}{[\osInit{\ostackframe}]} \\
             % \osI{\osInit{\oparent}}{\{\;\}} \\
-            \osI{\osFunc{GetAttribute}}{\osLR{\opscope, \okw{def}(o,a) \ofuncarr
-            \$1 = o.a; }} \\
             % \osI{\omagicf}{\{\;\}} \\
             % \osI{\omagicm}{\{\;\}} \\
-            \osI{\osFunc{GetCall}}{\osLR{\opscope, \okw{def}(f) \ofuncarr
-             }} \\
+            % \osI{\osFunc{GetCall}}{\osLR{\opscope, \okw{def}(f) \ofuncarr
           \end{flalign*}
-          \text{\tnote{"if \$1 == None then return getattribute(o.\_\_class\_\_,a) else return \$1"}} \\
+          \text{\tnote{"if \$1 == None then return getattribute(o.\osClown{class},a) else return \$1"}} \\
           \tnote{todo: add builtin mappings $\omem \mapsto \ogenf$}
           \end{definition}
 
@@ -381,6 +382,13 @@
                   [\osMC{AllocAttrError}, \osMC{Raise}], \ostack, \oheap
               }
 
+              \relationRule{Get \omem}{
+                  \ovariable = \oheap[\omem]
+              }{
+                  \olstack \listConcat [\omem, \osMC{Get}] \listConcat \omstack, \ostack, \oheap \osTransition
+                  \olstack \listConcat [\ovariable] \listConcat \omstack, \ostack, \oheap
+              }
+
           \end{mathpar}
           \caption{Microcommands (cont.)}
           \label{fig_langMicro}
@@ -470,7 +478,7 @@
               \relationRule{Call Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
                   % \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
-                  \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
+                  \omstack = [\ovariable_0, \osMC{LookUp}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
               }{
                   [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
@@ -579,9 +587,16 @@
           % Lookup
           \begin{definition}
             $$
-              \osLookup(\oheap,\opscope,\ovariable) =
-              \tnote{todo}
+              \obinding = \oheap[\opscope]
             $$
+            \begin{equation}
+              \osLookup(\oheap,\opscope,\ovariable) =
+                \begin{cases}
+                  \omem, & \text{if}\; \omem = \obinding[\ovariable] \\
+                  \osLookup(\oheap,\opscope',\ovariable), & \text{if}\; \osplat = \obinding[\ovariable], \opscope' = \obinding[\ostarvalue{parent}] \\
+                  \osplat, & \text{if}\; \osplat = \obinding[\ovariable], \osplat = \obinding[\ostarvalue{parent}]
+                \end{cases}
+              \end{equation}
           \end{definition}
 
           % LookupObj
@@ -597,17 +612,18 @@
             $$
             \oheap[\omem] = \ovalue,
             \obinding_{\texttt{obj}} = \{
-                \ostarvalue{value} \mapsto \ovalue, \text{\_\_getattribute\_\_} \mapsto \osMagic{Getattribute} \} % the base object
+                \ostarvalue{value} \mapsto \omem, \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
             $$
               \begin{equation}
                 \osGetObj (\oheap, \omem) =
                   \begin{cases}
                     \obinding, & \text{if}\; \ovalue = \obinding \\
-                    \obinding = \obinding_{\texttt{obj}}[\text{\_\_class\_\_} \mapsto \star \osType{funType}], & \text{if}\; \ovalue = \ogenf \\
+                    \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{funType}], & \text{if}\; \ovalue = \ogenf \\
                   \end{cases}
                 \end{equation}
           \end{definition}
           \tnote{getobj takes (H,m,memory location of getattribute)}
+          \tnote{setattr}
 
           % GetCall
           % \begin{definition}

@@ -145,6 +145,9 @@
 % \newcommand{\opscope}{{\color{red}\eta}}
 \newcommand{\oenv}{{\color{red}E}}
 
+\newlength\dunder
+\settowidth{\dunder}{\_}
+
 % Special
 \newcommand{\osnone}{\texttt{None}}
 \newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
@@ -168,6 +171,8 @@
 % -fix
 \newcommand{\ostarvalue}[1]{\star \ovariable_{\texttt{#1}}}
 \newcommand{\osInit}[1]{#1_{\text{\textsmaller{{\sc Init}}}}}
+\newcommand{\osMem}[1]{\omem_{\texttt{#1}}}
+\newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
 
 % Used in main
 \newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
