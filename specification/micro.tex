@@ -57,7 +57,7 @@
                     \gor    \mathbb{S} % string
                     %\gor    \osnone % None
                     \gor    \ovariable % x
-                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
+                    \gor    \okw{def} (\ovariable,\ldots) \gteq \{ \oprogram \} % def x(x, ...) = {S}
                     \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
                     \gor    \ovariable.\ovariable % x.x
                     \gor    [\ovariable, \ldots] % [x, ...]
@@ -478,7 +478,7 @@
               \relationRule{Call Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
                   % \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
-                  \omstack = [\ovariable_0, \osMC{LookUp}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
+                  \omstack = [\ovariable_0, \osMC{LookUp}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
               }{
                   [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
