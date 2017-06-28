@@ -167,11 +167,11 @@
                   \olstack \listConcat [\omem] \listConcat \omstack, \ostack, \oheap'
               }
 
-              \relationRule{Wrap \omem}{
-                  \ovalue = \osGetObj(\oheap, \omem)
+              \relationRule{Wrap \ovalue \! in \omem}{
+                  \ovalue' = \osGetObj(\omem, \ovalue)
               }{
-                  \olstack \listConcat [\omem, \osMC{Wrap}] \listConcat \omstack, \ostack, \oheap \osTransition
-                  \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap
+                  \olstack \listConcat [\omem, \ovalue, \osMC{Wrap}] \listConcat \omstack, \ostack, \oheap \osTransition
+                  \olstack \listConcat [\ovalue'] \listConcat \omstack, \ostack, \oheap
               }
 
               \relationRule{Bind \omem \! to \ovariable}{
@@ -383,7 +383,7 @@
               }
 
               \relationRule{Get \omem}{
-                  \ovariable = \oheap[\omem]
+                  \ovalue = \oheap[\omem]
               }{
                   \olstack \listConcat [\omem, \osMC{Get}] \listConcat \omstack, \ostack, \oheap \osTransition
                   \olstack \listConcat [\ovalue] \listConcat \omstack, \ostack, \oheap
@@ -423,7 +423,7 @@
               \relationRule{Literal Assignment}{
                   \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr,\,\oexpr \text{ is of form } \mathbb{Z}, \mathbb{S}\\
                   \ovalue = \oexpr \\
-                  \omstack = [\ovalue, \osMC{Store}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+                  \omstack = [\ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
               }{
                   [\;], [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl, \oprogram}] \listConcat \ostack, \oheap
@@ -610,12 +610,11 @@
           % GetObj
           \begin{definition}
             $$
-            \oheap[\omem] = \ovalue,
             \obinding_{\texttt{obj}} = \{
                 \ostarvalue{value} \mapsto \omem, \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
             $$
               \begin{equation}
-                \osGetObj (\oheap, \omem) =
+                \osGetObj (\omem, \ovalue) =
                   \begin{cases}
                     \obinding, & \text{if}\; \ovalue = \obinding \\
                     \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{funType}], & \text{if}\; \ovalue = \ogenf \\
