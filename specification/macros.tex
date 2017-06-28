@@ -138,7 +138,6 @@
 \defgn{olstack}{Z}
 \defgn{olcode}{z}
 
-
 % These are wrong and should not emerge.
 % \defgn{oenv}{E}
 % \defgn{ofunc}{fun}
@@ -179,6 +178,25 @@
 \newcommand{\osBind}{\text{\textsmaller{{\color{func}\sc Bind}}}}
 \newcommand{\osMakeObj}{\text{\textsmaller{{\color{func}\sc MakeObj}}}}
 \newcommand{\osCatch}{\text{\textsmaller{{\color{func}\sc Catch}}}}
+
+%%% Graph semantics
+
+\defgn{ggraph}{G}
+\defgn{gedge}{g}
+\defgn{gnode}{a}
+\defgn{gtime}{\chi}
+\defgn{genter}{\llparenthesis}
+\defgn{gleave}{\rrparenthesis}
+
+% Special
+\newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
+\newcommand{\gsend}{\text{\textsmaller{{\color{func}\sc End}}}}
+% Relations
+\newcommand{\gsBefore}{\ll}
+\newcommand{\gsSkip}{\lll}
+% Format
+\newcommand{\gsLR}[1]{\langle #1 \rangle}
+
 
 
 
