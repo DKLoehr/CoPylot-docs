@@ -731,7 +731,10 @@
           Let $ \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable) = \gsSet{\ogmem, \ldots} = \gresult $ be the function returning the least set satisfying the following rules:
 
           \begin{itemize}
-            \item If $ \gnode_1 \gsBefore \gnode_0 \in \ggraph$, $\gnode_1 = \gstart$, then $ \gresult \supseteq \gsSet{\osplat}$.
+            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph$, $\gnode_1 = \gstart$, then $ \gresult \supseteq \gsSet{\osplat}$.
+            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph, \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable, \osMC{Bind}}, \gtime}$, then $\gresult \supseteq \gsSet{\omem}$.
+            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph, \gnode_1 = \gsLR{\olbl, \osInStack{}, \gtime}, \omstack = [\omcode_0, \ldots], \omcode_0 \in \gsSet{\osMC{Store}, \osMC{Wrap}, \osMC{LookUp}, \osMC{Advance}}$, then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
+            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph$, $\gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable', \osMC{Bind}}, \gtime}, \ovariable \neq \ovariable'$, then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
           \end{itemize}
       \end{definition}
 
