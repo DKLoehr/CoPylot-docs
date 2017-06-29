@@ -192,21 +192,22 @@
               \relationRule{Advance (end of function)}{
                   \ostackframe = \osLR{ \opscope', \olbl } \\
                   \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr \\
-                  \omstack = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
+                  \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
               }{
-                  [\osMC{Advance}], [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap \osTransition
-                  \omstack, [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap
+                  \osInStack{\osMC{Advance}}, [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap \osTransition
+                  \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap
               }
 
               % \tnote{$\omem_{\osnone}$ is a memory location reserved for \osnone.}
 
               \relationRule{Advance (EOF)}{
                   \ostack = [\osLR{\opscope, \osplat}] \\
-                  \omstack = [\osMC{Pop}]
+                  \omstack' = [\osMC{Pop}]
               }{
-                  [\osMC{Advance}], \ostack, \oheap \osTransition
-                  \omstack, \ostack, \oheap
+                  \osInStack{\osMC{Advance}}, \ostack, \oheap \osTransition
+                  \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
               }
+              \\
 
               \relationRule{Pop}{
                   % \opscope' = \oparent[\opscope]
@@ -565,9 +566,7 @@
           % TODO: add lookup rule
           % Lookup
           \begin{definition}
-            $$
-              \obinding = \oheap[\opscope]
-            $$
+            Let $ \obinding = \oheap[\opscope] $ in
             \begin{equation}
               \osLookup(\oheap,\opscope,\ovariable) =
                 \begin{cases}
@@ -588,10 +587,9 @@
 
           % GetObj
           \begin{definition}
-            $$
-            \obinding_{\texttt{obj}} = \{
+            Let $ \obinding_{\texttt{obj}} = \{
                 \ostarvalue{value} \mapsto \omem, \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
-            $$
+            $ in
               \begin{equation}
                 \osGetObj (\omem, \ovalue) =
                   \begin{cases}
@@ -639,8 +637,8 @@
                     \gsstart
             \gor    \gsend
             \gor    \gsLR{\olbl, \omstack, \gtime}
-            \gor    \gsLR{\genter, \olbl, \gtime}
-            \gor    \gsLR{\gleave, \olbl, \gtime}
+            \gor    \gsLR{\genter \olbl, \gtime}
+            \gor    \gsLR{\gleave \olbl, \gtime}
         }
         \grule[time stamps]{\gtime}{\mathbb{N}}
 
@@ -701,6 +699,36 @@
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
         }
 
+        \relationRule{Push}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \osMC{Push}\;\olbl'}, \gtime} \\
+            \gnode_3 = \gsLR{\genter \olbl, \gtime + 1}
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gsLR{\olbl', \osInStack{}, \gtime + 2}}
+        }
+
+        \relationRule{Pop}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Pop}}, \gtime} \\
+            \gnode_3 = \gsLR{\gleave' \olbl, \gtime + 1} \\
+            \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
+            \gnode_1' = \gsBefore \gnode_0' \\
+            \gnode_4 = \gsLR{\olbl', \osInStack{}, \gtime + 2}
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gnode_4, \gnode_1' \gsSkip \gnode_4}
+        }
+
       \end{mathpar}
+
+      \subsection{Helper Functions}
+
+      \begin{definition}
+          Let $ \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable) = \gsSet{\ogmem, \ldots} = \gresult $ be the function returning the least set satisfying the following rules:
+
+          \begin{itemize}
+            \item If $ \gnode_1 \gsBefore \gnode_0 \in \ggraph$, $\gnode_1 = \gstart$, then $ \gresult \supseteq \gsSet{\osplat}$.
+          \end{itemize}
+      \end{definition}
+
 
 \end{document}
