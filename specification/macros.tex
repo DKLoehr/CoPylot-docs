@@ -161,7 +161,7 @@
 % Format
 \newcommand{\osLR}[1]{\langle #1 \rangle}
 \newcommand{\osI}[2]{#1 &= #2}
-\newcommand{\osInStack}[1]{\olstack \ifthenelse {\equal{#1}{}} {\listConcat} {\listConcat [#1] \listConcat} \omstack}
+\newcommand{\osInStack}[1]{\olstack \ifthenelse {\equal{#1}{}} {\listConcat} {\ifthenelse {\equal{#1}{\omstack'}}{\listConcat #1 \listConcat}{\listConcat [#1] \listConcat}} \omstack}
 % Stylize
 \newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
 \newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
@@ -190,6 +190,7 @@
 \defgn{gleave}{\rrparenthesis}
 \defgn{gresult}{R}
 
+\newcommand{\niton}{\not\owns}
 
 % Special
 \newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
