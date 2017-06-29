@@ -355,11 +355,11 @@
                 \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \osMC{Bind}]
               }{
                 \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
-                \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
+                \osInStack{\omstack'}, \ostack, \oheap
               }
 
               \relationRule{Call function (wrong args)}{
-                \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \olbl }\\  q \neq n
+                \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \olbl }, q \neq n
                 % \oheap[\omem_0] = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \oprogram }, q \neq n
               }{
                 \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
@@ -580,6 +580,22 @@
 
           \end{mathpar}
 
+      \subsection{Magic}
+          \begin{mathpar}
+            \relationRule{Call IntAdd}{
+              \ovalue = \osMagic{IntAdd} \\
+              \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+              \oprogram(\olbl) = \olbl:\oglbl':\ovariable = \oexpr \\
+              \ovalue_1 = \oheap[\omem_1] = \mathbb{Z} \\
+              \ovalue_2 = \oheap[\omem_2] = \mathbb{Z} \\
+              \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
+              \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+            }{
+              \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+              \osInStack{\omstack'}, \ostack, \oheap
+            }
+          \end{mathpar}
+
       \subsection{Helper Functions}
 
           % TODO: add lookup rule
@@ -683,7 +699,9 @@
         }{
             \gsAddEdge{\gsstart \gsBefore \gsLR{\olbl, [\;], 0}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Literal Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \oexpr, \oexpr \text{ is of form } \mathbb{Z}, \mathbb{S}\\
@@ -692,7 +710,9 @@
         } {
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Name Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \ovariable_2 \\
@@ -700,7 +720,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{List Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl':\ovariable \gteq [\ovariable_1, \ldots, \ovariable_n] \\
@@ -718,7 +740,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{FunctionDef Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl': \ovariable \gteq \okw{def} (\ovariable_1, \ldots, \ovariable_n)\{\oprogram'\} \\
@@ -728,7 +752,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Attribute Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
@@ -736,7 +762,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Call Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
@@ -744,7 +772,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Raise}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl': \okw{raise} \ovariable \\
@@ -752,7 +782,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Pass}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl': \okw{pass} \\
@@ -760,7 +792,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Return}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
@@ -770,7 +804,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Goto}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl': \okw{goto} \olbl'' \\
@@ -778,7 +814,9 @@
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{GotoIfNot}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
@@ -798,7 +836,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Wrap}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovalue, \osMC{Wrap}}, \gtime} \\
@@ -806,14 +846,18 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Bind}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovariable, \osMC{Bind}}, \gtime} \\
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Lookup}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovariable, \osMC{LookUp}}, \gtime} \\
@@ -821,7 +865,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Lookup (NameError)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovariable, \osMC{LookUp}}, \gtime} \\
@@ -829,7 +875,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{AllocNameError}, \osMC{Raise}}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Push}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \osMC{Push}\;\olbl'}, \gtime} \\
@@ -837,7 +885,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gsLR{\olbl', \osInStack{}, \gtime + 2}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Pop}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Pop}}, \gtime} \\
@@ -848,7 +898,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gnode_4, \gnode_1' \gsSkip \gnode_4}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Advance}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Advance}}, \gtime} \\
@@ -856,7 +908,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Advance (end of function)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Advance}}, \gtime} \\
@@ -869,7 +923,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\omstack'}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Advance (EOF)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Advance}}, \gtime} \\
@@ -895,7 +951,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Raise (no exception label)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Raise}}, \gtime} \\
@@ -903,7 +961,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{Pop}, \osMC{Raise}}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Raise (caught)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Raise}}, \gtime} \\
@@ -912,7 +972,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\ovariable, \osMC{Bind}, \osMC{Advance}}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Goto}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Goto}\;\olbl'}, \gtime} \\
@@ -920,7 +982,30 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
+        \relationRule{Call function}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \gtime} \\
+            \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
+            \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \osMC{Bind}]
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Call function (wrong args)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \gtime} \\
+            \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \olbl }, q \neq n
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{AllocTypeError}, \osMC{Raise}}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
         \relationRule{Convert Function}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n}, \gtime} \\
@@ -928,7 +1013,9 @@
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \gtime + 1}}
         }
+      \end{mathpar}
 
+      \begin{mathpar}
         \relationRule{Convert Method}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n}, \gtime} \\
@@ -960,4 +1047,6 @@
           \end{flalign*}
       \end{definition}
 
+
+\tnote{Get rid of mathpar blocks when we settle down.}
 \end{document}
