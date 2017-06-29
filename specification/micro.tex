@@ -182,26 +182,27 @@
               }
 
               \relationRule{Advance}{
-                  \oprogram(\olbl) = \olbl:\oglbl': \odirective \\
-                  \olbl \osBefore{\oprogram} \oglbl''
+                  \olbl \osBefore{\oprogram} \olbl'
               }{
                   \osInStack{\osMC{Advance}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-                  \osInStack{}, [\osLR{\opscope, \oglbl''}] \listConcat \ostack, \oheap
+                  \osInStack{}, [\osLR{\opscope, \olbl'}] \listConcat \ostack, \oheap
               }
 
               \relationRule{Advance (end of function)}{
-                  \ostackframe = \osLR{ \opscope', \olbl } \\
-                  \oprogram(\olbl) = \olbl:\oglbl': \ovariable = \oexpr \\
+                  \olbl \osBefore{\oprogram} \osplat \\
+                  \ostackframe = \osLR{ \opscope', \olbl' } \\
+                  \oprogram(\olbl') = \olbl':\oglbl'': \ovariable = \oexpr \\
                   \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
               }{
-                  \osInStack{\osMC{Advance}}, [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap \osTransition
-                  \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \osplat}, \ostackframe] \listConcat \ostack, \oheap
+                  \osInStack{\osMC{Advance}}, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap \osTransition
+                  \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap
               }
 
               % \tnote{$\omem_{\osnone}$ is a memory location reserved for \osnone.}
 
               \relationRule{Advance (EOF)}{
-                  \ostack = [\osLR{\opscope, \osplat}] \\
+                  \ostack = [\osLR{\opscope, \olbl}] \\
+                  \olbl \osBefore{\oprogram} \osplat \\
                   \omstack' = [\osMC{Pop}]
               }{
                   \osInStack{\osMC{Advance}}, \ostack, \oheap \osTransition
