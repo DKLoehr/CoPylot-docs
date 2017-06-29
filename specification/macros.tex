@@ -161,6 +161,7 @@
 % Format
 \newcommand{\osLR}[1]{\langle #1 \rangle}
 \newcommand{\osI}[2]{#1 &= #2}
+\newcommand{\osInStack}[1]{\olstack \ifthenelse {\equal{#1}{}} {\listConcat} {\listConcat [#1] \listConcat} \omstack}
 % Stylize
 \newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
 \newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
@@ -192,11 +193,16 @@
 \newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
 \newcommand{\gsend}{\text{\textsmaller{{\color{func}\sc End}}}}
 % Relations
+\newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
 \newcommand{\gsBefore}{\ll}
 \newcommand{\gsSkip}{\lll}
 % Format
 \newcommand{\gsLR}[1]{\langle #1 \rangle}
+\newcommand{\gsSet}[1]{\{ #1 \}}
+%Stylize
+\newcommand{\gsFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
 
+\newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
 
 
 
