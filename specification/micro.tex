@@ -735,10 +735,10 @@
       \end{definition}
 
       \begin{definition}[Start of Function]
-          \begin{equation}
-
-
-          \end{equation}
+          $$
+           \gnode_1 \gsPrecede \gnode_2 \iff \gnode_1 \gsBefore \gnode_2 \text{ or } \gnode_1 \gsSkip \gnode_2
+          $$
+          $ \gsFunc{Startof}(\gnode_n) = \gnode_0 \iff \gsSet{\gnode_0 \gsPrecede \gnode_1 \gsPrecede \ldots \gsPrecede \gnode_n} \in \ggraph$ where $\nexists \gnode_i$ of form $\gsLR{\genter \olbl' \gtime}$ or $\gsLR{\gleave \olbl' \gtime'}$
       \end{definition}
 
 \end{document}
