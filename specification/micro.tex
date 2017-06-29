@@ -644,6 +644,10 @@
 
       \end{grammar}
 
+      \begin{theorem}[Bisimulation]
+        If $\osLR{\omstack, \ostack, \oheap} \approx \ggraph$ and $\osLR{\omstack, \ostack, \oheap} \osTransition \osLR{\omstack', \ostack', \oheap'}$, then $\ggraph \gsTransition \ggraph'$ such that $\osLR{\omstack', \ostack', \oheap'} \approx \ggraph'$.
+      \end{theorem}
+
       \subsection{Rules}
 
       \begin{mathpar}
@@ -722,7 +726,7 @@
 
       \subsection{Helper Functions}
 
-      \begin{definition}
+      \begin{definition}[Value Lookup]
           Let $ \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable) = \gsSet{\ogmem, \ldots} = \gresult $ be the function returning the least set satisfying the following rules:
 
           \begin{itemize}
@@ -730,5 +734,11 @@
           \end{itemize}
       \end{definition}
 
+      \begin{definition}[Start of Function]
+          \begin{equation}
+
+
+          \end{equation}
+      \end{definition}
 
 \end{document}
