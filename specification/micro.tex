@@ -483,7 +483,7 @@
               \relationRule{Call Assignment}{
                   \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
                   % \omstack = [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{GetCall} \;n, \osMC{Convert} \;n]
-                  \omstack = [\ovariable_0, \osMC{LookUp}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, [\ovariable_0, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
+                  \omstack = [\ovariable_0, \osMC{LookUp}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
               }{
                   [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
