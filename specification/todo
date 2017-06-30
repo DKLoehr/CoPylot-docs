@@ -6,8 +6,11 @@ separate rule/language grammar
 
 update ADVANCE
 
+=== future ===
+rmv mathpar blocks
+
 === 6.30 ===
-wrap attribute assign   DONE
+mod attr assign to wrap DONE
   add DUP               DONE
 add GET                 DONE
 mod RETRIEVE to take v  DONE
@@ -16,3 +19,4 @@ add is assignment       DONE
 mod GOTOIFN to take v   DONE
 add GOTOIFN             DONE
 Q lookup and get returns set but want m/v
+Q what does alloc() do? take in lbl and return memloc?
