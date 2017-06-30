@@ -6,7 +6,11 @@ separate rule/language grammar
 
 update ADVANCE
 
+=== 6.30 ===
 wrap attribute assign   DONE
-  make DUP              DONE
-get rules
-is assignment           DONE
+  add DUP               DONE
+add GET                 DONE
+mod RETRIEVE to take v  DONE
+add RETRIEVE            DONE
+add is assignment       DONE
+Q lookup and get returns set but want m/v
