@@ -5,3 +5,8 @@ add type()
 separate rule/language grammar
 
 update ADVANCE
+
+wrap attribute assign   DONE
+  make DUP              DONE
+get rules
+is assignment           DONE
