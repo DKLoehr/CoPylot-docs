@@ -13,4 +13,6 @@ add GET                 DONE
 mod RETRIEVE to take v  DONE
 add RETRIEVE            DONE
 add is assignment       DONE
+mod GOTOIFN to take v   DONE
+add GOTOIFN             DONE
 Q lookup and get returns set but want m/v

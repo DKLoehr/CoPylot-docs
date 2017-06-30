@@ -196,6 +196,41 @@
             \end{mathpar}
 
             \begin{mathpar}
+              \relationRule{Look up \ovariable \,(bound)}{
+                  \osLookup(\oheap, \opscope, \ovariable) = \omem
+              }{
+                  \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+                  \osInStack{\omem}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+              }
+            \end{mathpar}
+
+            \begin{mathpar}
+              \relationRule{Look up \ovariable \,(NameError)}{
+                  \osLookup(\oheap, \opscope, \ovariable) = \osplat
+              }{
+                  \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+                  [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+              }
+            \end{mathpar}
+
+            \begin{mathpar}
+              \relationRule{Push \olbl}{
+                  \oheap' = \oheap[\opscope' \mapsto \{\ostarvalue{parent} \mapsto \opscope\}],  \opscope' \notin \oheap
+              }{
+                  \osInStack{\opscope, \osMC{Push} \;\olbl}, \ostack, \oheap \osTransition
+                  \osInStack{}, [\osLR{\opscope', \olbl}] \listConcat \ostack, \oheap'
+              }
+            \end{mathpar}
+
+            \begin{mathpar}
+              \relationRule{Pop}{
+              }{
+                  \osInStack{\osMC{Pop}}, \ostackframe \listConcat \ostack, \oheap \osTransition
+                  \osInStack{}, \ostack, \oheap
+              }
+            \end{mathpar}
+
+            \begin{mathpar}
               \relationRule{Advance}{
                   \olbl \osBefore{\oprogram} \olbl'
               }{
@@ -224,39 +259,6 @@
               }{
                   \osInStack{\osMC{Advance}}, \ostack, \oheap \osTransition
                   \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
-              }
-            \end{mathpar}
-
-            \begin{mathpar}
-              \relationRule{Pop}{
-              }{
-                  \osInStack{\osMC{Pop}}, \ostackframe \listConcat \ostack, \oheap \osTransition
-                  \osInStack{}, \ostack, \oheap
-              }
-
-              \relationRule{Push \olbl}{
-                  \oheap' = \oheap[\opscope' \mapsto \{\ostarvalue{parent} \mapsto \opscope\}],  \opscope' \notin \oheap
-              }{
-                  \osInStack{\opscope, \osMC{Push} \;\olbl}, \ostack, \oheap \osTransition
-                  \osInStack{}, [\osLR{\opscope', \olbl}] \listConcat \ostack, \oheap'
-              }
-            \end{mathpar}
-
-            \begin{mathpar}
-              \relationRule{Look up \ovariable \,(bound)}{
-                  \osLookup(\oheap, \opscope, \ovariable) = \omem
-              }{
-                  \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-                  \osInStack{\omem}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
-              }
-            \end{mathpar}
-
-            \begin{mathpar}
-              \relationRule{Look up \ovariable \,(NameError)}{
-                  \osLookup(\oheap, \opscope, \ovariable) = \osplat
-              }{
-                  \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-                  [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
               }
             \end{mathpar}
 
@@ -309,19 +311,19 @@
 
             \begin{mathpar}
               \relationRule{Gotoifn \olbl \,(success)}{
-                  \oheap[\omem] = \osfalse \\
+                  \ovalue = \osfalse \\
                   \oprogram(\olbl) = \olbl:\oglbl': \odirective
               }{
-                  \osInStack{\omem, \osMC{Gotoifn}\;\olbl}, \ostack, \oheap \osTransition
+                  \osInStack{\ovalue, \osMC{Gotoifn}\;\olbl}, \ostack, \oheap \osTransition
                   \osInStack{\osMC{Goto}\;\olbl}, \ostack, \oheap
               }
             \end{mathpar}
 
             \begin{mathpar}
               \relationRule{Gotoifn \olbl \,(failure)}{
-                  \oheap[\omem] = \ostrue
+                  \ovalue = \ostrue
               }{
-                  \osInStack{\omem, \osMC{Gotoifn}\;\olbl}, \ostack, \oheap \osTransition
+                  \osInStack{\ovalue, \osMC{Gotoifn}\;\olbl}, \ostack, \oheap \osTransition
                   \osInStack{\osMC{Advance}}, \ostack, \oheap
               }
             \end{mathpar}
@@ -556,7 +558,7 @@
             \begin{mathpar}
               \relationRule{GotoIfNot}{
                   \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-                  \omstack = [\ovariable, \osMC{Lookup}, \osMC{Gotoifn} \;\olbl'']
+                  \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
               }{
                   [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
                   \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -641,151 +643,6 @@
       \begin{theorem}[Bisimulation]
         If $\osLR{\omstack, \ostack, \oheap} \approx \ggraph$ and $\osLR{\omstack, \ostack, \oheap} \osTransition \osLR{\omstack', \ostack', \oheap'}$, then $\ggraph \gsTransition \ggraph'$ such that $\osLR{\omstack', \ostack', \oheap'} \approx \ggraph'$.
       \end{theorem}
-
-      \subsection{Rules}
-
-      \begin{mathpar}
-        \relationRule{Start}{
-            \oprogram = [\ostmt, \ldots] \\
-            \ostmt = \olbl:\oglbl':\odirective
-        }{
-            \gsAddEdge{\gsstart \gsBefore \gsLR{\olbl, [\;], 0}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Literal Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \oexpr, \oexpr \text{ is of form } \mathbb{Z}, \mathbb{S}\\
-            \ovalue = \oexpr \\
-            \omstack = [\ovalue, \ovariable_1, \osMC{Assign}, \osMC{Advance}]
-        } {
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Name Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \ovariable_2 \\
-            \omstack = [\ovariable_2, \osMC{LookUp}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{List Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl':\ovariable \gteq [\ovariable_1, \ldots, \ovariable_n] \\
-            \omstack = [\ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{List} \; n, \ovariable, \osMC{Assign}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Tuple Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl':\ovariable \gteq (\ovariable_1, \ldots, \ovariable_n) \\
-            \omstack = [\ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Tuple} \; n, \ovariable, \osMC{Assign}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{FunctionDef Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\olbl': \ovariable \gteq \okw{def} (\ovariable_1, \ldots, \ovariable_n)\{\oprogram'\} \\
-            \oprogram' = [\olbl'':\olbl''':\odirective, \ldots] \\
-            \ovalue = \osLR{ \opscope, \okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl'' } \\
-            \omstack = [\ovalue, \ovariable, \osMC{Assign}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Attribute Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-            \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Call Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
-            \omstack = [\ovariable_0, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Is Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1 \okw{is} \ovariable_2\\
-            \omstack = [\ovariable_1, \osMC{LookUp}, \ovariable_2, \osMC{LookUp}, \osMC{Eq}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Raise}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl': \okw{raise} \ovariable \\
-            \omstack = [\ovariable, \osMC{LookUp}, \osMC{Raise}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Pass}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl': \okw{pass} \\
-            \omstack = [\osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Return}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
-            \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
-            \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Goto}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\oglbl': \okw{goto} \olbl'' \\
-            \omstack = [\osMC{Goto} \;\olbl'']
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{GotoIfNot}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
-            \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-            \omstack = [\ovariable, \osMC{Lookup}, \osMC{Gotoifn} \;\olbl'']
-        }{
-            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
-        }
-      \end{mathpar}
 
       \subsection{Micro-Instruction Rules}
 
@@ -947,6 +804,26 @@
         }
       \end{mathpar}
 
+      \begin{mathpar}
+        \relationRule{Gotoifn \olbl \,(success)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Gotoifn}\;\olbl'}, \gtime} \\
+            \ovalue = \osfalse \\
+            \oprogram(\olbl') = \olbl:\oglbl': \odirective
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\osMC{Goto}\;\olbl}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Gotoifn \olbl \,(failure)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Gotoifn}\;\olbl'}, \gtime} \\
+            \ovalue = \ostrue
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\osMC{Advance}}, \gtime + 1}}
+        }
+      \end{mathpar}
 
       \begin{mathpar}
         \relationRule{Convert Function}{
@@ -1051,6 +928,151 @@
             \gnode_2 = \gsLR{\olbl, \osInStack{\olcode, \osMC{Dup}}, \gtime} \\
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\olcode,\olcode}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \subsection{Rules}
+
+      \begin{mathpar}
+        \relationRule{Start}{
+            \oprogram = [\ostmt, \ldots] \\
+            \ostmt = \olbl:\oglbl':\odirective
+        }{
+            \gsAddEdge{\gsstart \gsBefore \gsLR{\olbl, [\;], 0}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Literal Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \oexpr, \oexpr \text{ is of form } \mathbb{Z}, \mathbb{S}\\
+            \ovalue = \oexpr \\
+            \omstack = [\ovalue, \ovariable_1, \osMC{Assign}, \osMC{Advance}]
+        } {
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Name Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl':\ovariable_1 \gteq \ovariable_2 \\
+            \omstack = [\ovariable_2, \osMC{LookUp}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{List Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl':\ovariable \gteq [\ovariable_1, \ldots, \ovariable_n] \\
+            \omstack = [\ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{List} \; n, \ovariable, \osMC{Assign}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Tuple Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl':\ovariable \gteq (\ovariable_1, \ldots, \ovariable_n) \\
+            \omstack = [\ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Tuple} \; n, \ovariable, \osMC{Assign}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{FunctionDef Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\olbl': \ovariable \gteq \okw{def} (\ovariable_1, \ldots, \ovariable_n)\{\oprogram'\} \\
+            \oprogram' = [\olbl'':\olbl''':\odirective, \ldots] \\
+            \ovalue = \osLR{ \opscope, \okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl'' } \\
+            \omstack = [\ovalue, \ovariable, \osMC{Assign}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Attribute Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
+            \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Call Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
+            \omstack = [\ovariable_0, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Is Assignment}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1 \okw{is} \ovariable_2\\
+            \omstack = [\ovariable_1, \osMC{LookUp}, \ovariable_2, \osMC{LookUp}, \osMC{Eq}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Raise}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl': \okw{raise} \ovariable \\
+            \omstack = [\ovariable, \osMC{LookUp}, \osMC{Raise}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Pass}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl': \okw{pass} \\
+            \omstack = [\osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Return}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
+            \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
+            \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Goto}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\oglbl': \okw{goto} \olbl'' \\
+            \omstack = [\osMC{Goto} \;\olbl'']
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{GotoIfNot}{
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
+            \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
+        }{
+            \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
       \end{mathpar}
 
