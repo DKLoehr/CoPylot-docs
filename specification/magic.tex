@@ -1,6 +1,6 @@
 \begin{mathpar}
   \relationRule{IntAdd}{
-    \ovalue = \osLR{\omem, \osMagic{IntAdd}} \\
+    \ovalue = \osMagic{IntAdd} \\
     \ovalue_1 = \oheap[\omem_1] = \mathbb{Z} \\
     \ovalue_2 = \oheap[\omem_2] = \mathbb{Z} \\
     \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
@@ -49,6 +49,24 @@
     \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{LstContains}{
+    \ovalue = \osMagic{LstContains} \\
+    \ovalue_1 = \oheap[\omem] = [\omem_1,\omem_2,\ldots] \\
+    \ovalue_2 = \oheap[\omem'] \\
+    \ovalue' = [\oheap[\omem_1],\oheap[\omem_2],\ldots] \\
+    \ovalue_{\texttt{has}} =
+    \begin{cases}
+      \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
+      \osfalse, & \text{otherwise}
+    \end{cases} \\
+    \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem, \omem', \osMC{Call} \;2}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}

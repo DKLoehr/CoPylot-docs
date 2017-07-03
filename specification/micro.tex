@@ -641,7 +641,7 @@
                 ]
             \end{flalign*}
             \begin{flalign*}
-                & \osFunc{Fillstr}(\omem) = \\
+                & \osFunc{FillStr}(\omem) = \\
                 & [
                 \omem, \osMem{StrType}, \osClown{class}, \osMC{Bind}, \\
                 & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
@@ -650,22 +650,27 @@
                 & \osClown{contains}, \osMC{Bind}
                 ]
             \end{flalign*}
+            \begin{flalign*}
+                & \osFunc{FillLst}(\omem) = \\
+                & [
+                \omem, \osMem{LstType}, \osClown{class}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{LstIter}}, \osMC{Store}, \\
+                & \osClown{iter}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{LstContains}}, \osMC{Store}, \\
+                & \osClown{contains}, \osMC{Bind}
+                ]
+            \end{flalign*}
+            \begin{flalign*}
+                & \osFunc{FillTpl}(\omem) = \\
+                & [
+                \omem, \osMem{TplType}, \osClown{class}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{TplIter}}, \osMC{Store}, \\
+                & \osClown{iter}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{TplContains}}, \osMC{Store}, \\
+                & \osClown{contains}, \osMC{Bind}
+                ]
+            \end{flalign*}
 
-            % \begin{flalign*}
-            %     \osFunc{FillStr}
-            %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
-            %     & [\osClown{class} \mapsto \osMem{StrType}, \\
-            %     & \osClown{add} \mapsto \osLR{\omem, \osMagic{StrAdd}}, \\
-            %     & \osClown{contains} \mapsto \osLR{\omem, \osMagic{StrContains}}] \\
-            % \end{flalign*}
-            % \begin{flalign*}
-            %     \osFunc{FillLst}
-            %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
-            %     & [\osClown{class} \mapsto \osMem{LstType}, \\
-            %     & \osClown{iter} \mapsto \osLR{\omem, \osMagic{LstIter}}, \\
-            %     & \osClown{contains} \mapsto \osLR{\omem, \osMagic{LstContains}}, \\
-            %     & \osClown{getitem} \mapsto \osLR{\omem, \osMagic{LstGetitem}}] \\
-            % \end{flalign*}
             % \begin{flalign*}
             %     \osFunc{FillTpl}
             %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
@@ -706,10 +711,19 @@
       \subsection{Micro-Instruction Rules}
 
       \begin{mathpar}
+        \relationRule{Alloc}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Alloc}}, \gtime} \\
+            \omem = \gsFunc{Alloc}(\gnode_2)
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
         \relationRule{Store}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Store}}, \gtime} \\
-            \omem = \gsFunc{Alloc}(\gnode_2)
+            \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovalue, \osMC{Store}}, \gtime}
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
         }
@@ -718,17 +732,17 @@
       \begin{mathpar}
         \relationRule{Wrap}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovalue, \osMC{Wrap}}, \gtime} \\
-            \ovalue = \gsFunc{GetObj}(\omem, \ovalue)
+            \gnode_2 = \gsLR{\olbl, \osInStack{\omem_{\texttt{obj}}, \omem, \ovalue, \osMC{Wrap}}, \gtime} \\
+            \omstack' = \osFunc{Wrap}(\omem_{\texttt{obj}}, \omem, \ovalue)
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
       \begin{mathpar}
         \relationRule{Bind}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovariable, \osMC{Bind}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \gtime} \\
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{}, \gtime + 1}}
         }

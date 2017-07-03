@@ -31,4 +31,4 @@ mod RETRIEVE to WRAP    DONE
 add scope to BIND       DONE
 mod getobj              DONE
   make WRAP a macro     DONE
-  fix RAISE
+  fix RAISE             DONE
