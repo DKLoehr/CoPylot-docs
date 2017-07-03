@@ -1,0 +1,54 @@
+\begin{mathpar}
+  \relationRule{IntAdd}{
+    \ovalue = \osMagic{IntAdd} \\
+    \ovalue_1 = \oheap[\omem_1] = \mathbb{Z} \\
+    \ovalue_2 = \oheap[\omem_2] = \mathbb{Z} \\
+    \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
+    \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{IntNeg}{
+    \ovalue = \osMagic{IntNeg} \\
+    \ovalue' = \oheap[\omem] = \mathbb{Z} \\
+    \ovalue_{\texttt{neg}} = -(\ovalue') \\
+    \omstack' = [\ovalue_{\texttt{neg}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrAdd}{
+    \ovalue = \osMagic{StrAdd} \\
+    \ovalue_1 = \oheap[\omem_1] = \mathbb{S} \\
+    \ovalue_2 = \oheap[\omem_2] = \mathbb{S} \\
+    \ovalue_{\texttt{concat}} = \ovalue_1 \strConcat \ovalue_2 \\
+    \omstack' = [\ovalue_{\texttt{concat}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrContains}{
+    \ovalue = \osMagic{StrContains} \\
+    \ovalue_1 = \oheap[\omem_1] = \mathbb{S} \\
+    \ovalue_2 = \oheap[\omem_2] = \mathbb{S} \\
+    \ovalue_{\texttt{has}} =
+    \begin{cases}
+      \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
+      \osfalse, & \text{otherwise}
+    \end{cases} \\
+    \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}

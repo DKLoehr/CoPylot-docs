@@ -578,20 +578,7 @@
       \end{mathpar}
 
   \subsection{Magic}
-      \begin{mathpar}
-        \relationRule{Call IntAdd}{
-          \ovalue = \osMagic{IntAdd} \\
-          \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-          \oprogram(\olbl) = \olbl:\oglbl':\ovariable = \oexpr \\
-          \ovalue_1 = \oheap[\omem_1] = \mathbb{Z} \\
-          \ovalue_2 = \oheap[\omem_2] = \mathbb{Z} \\
-          \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
-          \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-        }{
-          \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
-          \osInStack{\omstack'}, \ostack, \oheap
-        }
-      \end{mathpar}
+      \input{magic}
 
   \subsection{Helper Functions}
 
@@ -618,42 +605,46 @@
             \begin{cases}
               \obinding, & \text{if}\; \ovalue = \obinding \\
               % \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{FunType}], & \text{if}\; \ovalue = \ogenf \\
-              \osFunc{GetMetObj}(\obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \ogenm \\
-              \osFunc{GetIntObj}(\obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{Z} \\
-              \osFunc{GetStrObj}(\obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{S} \\
-              \osFunc{GetLstObj}(\obinding_{\texttt{obj}}), & \text{if}\; \ovalue = [\omem, \ldots] \\
-              \osFunc{GetTupObj}(\obinding_{\texttt{obj}}), & \text{if}\; \ovalue = (\omem, \ldots) \\
+              \osFunc{GetMetObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \ogenm \\
+              \osFunc{GetIntObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{Z} \\
+              \osFunc{GetStrObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{S} \\
+              \osFunc{GetLstObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = [\omem, \ldots] \\
+              \osFunc{GetTupObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = (\omem, \ldots) \\
             \end{cases}
           \end{equation}
           \begin{multicols}{2}
             \begin{flalign*}
-                \osFunc{GetMetObj} (\obinding_{\texttt{obj}})
-                & = \obinding_{\texttt{obj}} \\
+                \osFunc{GetMetObj}
+                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{MetType}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetIntObj} (\obinding_{\texttt{obj}})
-                & = \obinding_{\texttt{obj}} \\
-                & [\osClown{add} \mapsto \osMagic{IntAdd}, \\
+                \osFunc{GetIntObj}
+                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
+                & [\osClown{class} \mapsto \osMem{IntType}, \\
+                & \osClown{add} \mapsto \osGetObj(\omem, \osMagic{IntAdd}), \\
                 & \osClown{neg} \mapsto \osMagic{IntNeg}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetStrObj} (\obinding_{\texttt{obj}})
-                & = \obinding_{\texttt{obj}} \\
-                & [\osClown{add} \mapsto \osMagic{StrAdd}, \\
+                \osFunc{GetStrObj}
+                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
+                & [\osClown{class} \mapsto \osMem{StrType}, \\
+                & \osClown{add} \mapsto \osMagic{StrAdd}, \\
                 & \osClown{neg} \mapsto \osMagic{StrContains}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetLstObj} (\obinding_{\texttt{obj}})
-                & = \obinding_{\texttt{obj}} \\
-                & [\osClown{iter} \mapsto \osMagic{LstIter}, \\
+                \osFunc{GetLstObj}
+                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
+                & [\osClown{class} \mapsto \osMem{LstType}, \\
+                & \osClown{iter} \mapsto \osMagic{LstIter}, \\
                 & \osClown{contains} \mapsto \osMagic{LstContains}, \\
                 & \osClown{getitem} \mapsto \osMagic{LstGetitem}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetTupObj} (\obinding_{\texttt{obj}})
-                & = \obinding_{\texttt{obj}} \\
-                & [\osClown{iter} \mapsto \osMagic{TupIter}, \\
+                \osFunc{GetTupObj}
+                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
+                & [\osClown{class} \mapsto \osMem{TupType}, \\
+                & \osClown{iter} \mapsto \osMagic{TupIter}, \\
                 & \osClown{contains} \mapsto \osMagic{TupContains}, \\
                 & \osClown{getitem} \mapsto \osMagic{TupGetitem}] \\
             \end{flalign*}

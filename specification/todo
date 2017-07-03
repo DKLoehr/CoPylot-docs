@@ -2,12 +2,13 @@ add string              DONE
 add getattribute()
 add type()
 
-separate rule/language grammar
+split rule/language grammar
 
 update ADVANCE
 
 === future ===
 rmv mathpar blocks
+define BOOLEAN!!
 
 === 6.30 ===
 mod attr assign to wrap DONE
@@ -18,5 +19,9 @@ add RETRIEVE            DONE
 add is assignment       DONE
 mod GOTOIFN to take v   DONE
 add GOTOIFN             DONE
+wrap built-in method
 Q lookup and get returns set but want m/v
 Q what does alloc() do? take in lbl and return memloc?
+Q do we want to create empty obj when wrapping, and move getobj to micro instructions?
+
+=== 7.3 ===
