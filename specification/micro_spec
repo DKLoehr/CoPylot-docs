@@ -1,0 +1,29 @@
+alloc:    ()        -> m
+store:    m,v       -> m
+wrap:     m,m,v     -> m,v
+bind:     eta,m,x   -> ()
+lookup:   x         -> m
+                       (name error)
+push l:   eta       -> ()
+pop:      ()        -> ()
+advance:  ()        -> eta,pop,m,x,bind,advance     -> ()
+                       pop
+                       ()
+mklst n:  m1,...,mn -> v
+mktpl n:  m1,...,mn -> v
+raise:    m         -> m,pop,raise                  -> ()
+                       eta,m,x,bind,advance
+goto l:   ()        -> ()
+gotoifn l:v         -> goto l                       -> ()
+                       advance
+convert n:v,m1,...,mn  -> v,m1,...,mn,call n        ->
+call:     v,m1,...,mn  -> eta,push l,eta,m1,x1,bind,...,
+                          eta,mn,xn,bind            -> ()
+                          (type error)
+retrieve: v,x       -> alloc,m,dup,get,wrap,store   -> m
+                       (attribute error)
+get:      m         -> v
+assign:   v,x       -> eta,alloc,alloc,v,store,v,
+                       wrap,store,x,bind            -> ()
+eq:       m,m       -> v
+dup:      z         -> z,z

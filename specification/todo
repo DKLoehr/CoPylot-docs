@@ -9,6 +9,7 @@ update ADVANCE
 === future ===
 rmv mathpar blocks
 define BOOLEAN!!
+2 args for PUSH
 
 === 6.30 ===
 mod attr assign to wrap DONE
