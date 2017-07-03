@@ -607,18 +607,20 @@
       % GetObj
       \begin{definition}
         Let $ \obinding_{\texttt{obj}} = \{
-            \ostarvalue{value} \mapsto \omem', \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
-        $ in
+            \ostarvalue{value} \mapsto \omem', \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \}, % the base object
+        $ \\
+        $\Delta = [\omem, \obinding_{\texttt{obj}}, \osMC{Store}], \Gamma = [\omem, \osMC{Get}]$
+        in
           \begin{equation}
             \osWrap (\omem, \omem', \ovalue) =
             \begin{cases}
               [\omem', \obinding], & \text{if}\; \ovalue = \obinding \\
               % \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{FunType}], & \text{if}\; \ovalue = \ogenf \\
-              [\omem] \listConcat \osFunc{FillMet}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \ogenm \\
-              [\omem] \listConcat \osFunc{FillInt}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \mathbb{Z} \\
-              [\omem] \listConcat \osFunc{FillStr}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \mathbb{S} \\
-              [\omem] \listConcat \osFunc{FillLst}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
-              [\omem] \listConcat \osFunc{FillTpl}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
+              \Delta \listConcat \osFunc{FillMet}(\omem) \listConcat \Gamma, & \text{if}\; \ovalue = \ogenm \\
+              \Delta \listConcat \osFunc{FillInt}(\omem) \listConcat \Gamma, & \text{if}\; \ovalue = \mathbb{Z} \\
+              \Delta \listConcat \osFunc{FillStr}(\omem) \listConcat \Gamma, & \text{if}\; \ovalue = \mathbb{S} \\
+              \Delta \listConcat \osFunc{FillLst}(\omem) \listConcat \Gamma, & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
+              \Delta \listConcat \osFunc{FillTpl}(\omem) \listConcat \Gamma, & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
             \end{cases}
           \end{equation}
           \begin{multicols}{2}
