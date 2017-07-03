@@ -29,5 +29,5 @@ mod WRAP to take 3 args DONE
 add ALLOC, mod STORE    DONE
 mod RETRIEVE to WRAP    DONE
 add scope to BIND       DONE
-mod getobj
-  make WRAP a macro
+mod getobj              DONE
+  make WRAP a macro     DONE

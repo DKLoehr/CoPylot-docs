@@ -68,7 +68,8 @@
           \grule[microcode stack]{\omstack}{[\omcode,\ldots]}
           \grule[microcode literal stack]{\olstack}{[\olcode,\ldots]}
           \grule[microcode instructions]{\omcode}{
-                      \osMC{Store}
+                      \osMC{Alloc}
+              \gor    \osMC{Store}
               \gor    \osMC{Wrap}
               \gor    \osMC{Bind}
               \gor    \osMC{LookUp}
@@ -116,7 +117,7 @@
                       \osLR{ \omem, \ogenf } % < m, F >
           }
           \grule[magic functions]{\omagicf, \omagicm}{
-                      \osMagic{CallFunc}
+                      \osMagic{Call}
               \gor    \osMagic{Type}
               \gor    \osMagic{IntAdd}
               \gor    \osMagic{IntNeg}
@@ -613,38 +614,40 @@
             \begin{cases}
               [\omem', \obinding], & \text{if}\; \ovalue = \obinding \\
               % \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{FunType}], & \text{if}\; \ovalue = \ogenf \\
-              [\omem] \listConcat \osFunc{FillMet}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \ogenm \\
-              [\omem] \listConcat \osFunc{FillInt}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{Z} \\
-              [\omem] \listConcat \osFunc{FillStr}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{S} \\
-              [\omem] \listConcat \osFunc{FillLst}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
-              [\omem] \listConcat \osFunc{FillTpl}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
+              [\omem] \listConcat \osFunc{FillMet}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \ogenm \\
+              [\omem] \listConcat \osFunc{FillInt}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \mathbb{Z} \\
+              [\omem] \listConcat \osFunc{FillStr}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = \mathbb{S} \\
+              [\omem] \listConcat \osFunc{FillLst}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
+              [\omem] \listConcat \osFunc{FillTpl}(\omem) \listConcat [\obinding_{\texttt{obj}}], & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
             \end{cases}
           \end{equation}
           \begin{multicols}{2}
             \begin{flalign*}
-                & \osFunc{FillMet}(\omem, \obinding_{\texttt{obj}}) = \\
+                & \osFunc{FillMet}(\omem) = \\
                 & [
                 \osMem{MetType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osLR{\omem, \osMagic{Call}}, \osClown{call}, \omem, \osMC{Bind}, \\
-                & \obinding_{\texttt{obj}}
+                & \osMC{Alloc}, \osLR{\omem, \osMagic{Call}}, \osMC{Store}, \\
+                & \osClown{call}, \omem, \osMC{Bind}
                 ]
             \end{flalign*}
             \begin{flalign*}
-                & \osFunc{FillInt}(\omem, \obinding_{\texttt{obj}}) = \\
+                & \osFunc{FillInt}(\omem) = \\
                 & [
                 \osMem{IntType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osLR{\omem, \osMagic{IntAdd}}, \osClown{add}, \omem, \osMC{Bind}, \\
-                & \osLR{\omem, \osMagic{IntNeg}}, \osClown{neg}, \omem, \osMC{Bind}, \\
-                & \obinding_{\texttt{obj}}
+                & \osMC{Alloc}, \osLR{\omem, \osMagic{IntAdd}}, \osMC{Store}, \\
+                & \osClown{add}, \omem, \osMC{Bind}, \\
+                & \osMC{Alloc}, \osLR{\omem, \osMagic{IntNeg}}, \osMC{Store}, \\
+                & \osClown{neg}, \omem, \osMC{Bind}
                 ]
             \end{flalign*}
             \begin{flalign*}
-                & \osFunc{Fillstr}(\omem, \obinding_{\texttt{obj}}) = \\
+                & \osFunc{Fillstr}(\omem) = \\
                 & [
                 \osMem{StrType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osLR{\omem, \osMagic{StrAdd}}, \osClown{add}, \omem, \osMC{Bind}, \\
-                & \osLR{\omem, \osMagic{StrContains}}, \osClown{contains}, \omem, \osMC{Bind}, \\
-                & \obinding_{\texttt{obj}}
+                & \osMC{Alloc}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
+                & \osClown{add}, \omem, \osMC{Bind}, \\
+                & \osMC{Alloc}, \osLR{\omem, \osMagic{StrContains}}, \osMC{Store}, \\
+                & \osClown{contains}, \omem, \osMC{Bind}
                 ]
             \end{flalign*}
 
