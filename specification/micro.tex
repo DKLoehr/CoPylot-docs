@@ -175,13 +175,20 @@
       \end{definition}
 
   \subsection{Micro-Instruction Rules}
-      \begin{mathpar}
+          \begin{mathpar}
+            \relationRule{Alloc}{
+                \omem \notin \oheap
+            }{
+                \osInStack{\osMC{Alloc}}, \ostack, \oheap \osTransition
+                \osInStack{\omem}, \ostack, \oheap
+            }
+          \end{mathpar}
 
+          \begin{mathpar}
           \relationRule{Store \ovalue}{
-              \omem \notin \oheap \\
               \oheap' = \oheap[\omem \mapsto \ovalue]
           }{
-              \osInStack{\ovalue, \osMC{Store}}, \ostack, \oheap \osTransition
+              \osInStack{\omem, \ovalue, \osMC{Store}}, \ostack, \oheap \osTransition
               \osInStack{\omem}, \ostack, \oheap'
           }
         \end{mathpar}
@@ -381,9 +388,10 @@
         \begin{mathpar}
           \relationRule{Retrieve \ovariable from \ovalue}{
               \omem = \ovalue[\ovariable] \\
+              \omstack' = [\osMC{Alloc}, \omem, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Retrieve}}, \ostack, \oheap \osTransition
-              \osInStack{\omem}, \ostack, \oheap
+              \osInStack{\omstack'}, \ostack, \oheap
           }
         \end{mathpar}
 
@@ -407,7 +415,7 @@
 
         \begin{mathpar}
           \relationRule{Assign \ovalue \! to \ovariable}{
-              \omstack' = [\ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+              \omstack' = [\osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
@@ -497,7 +505,7 @@
         \begin{mathpar}
           \relationRule{Attribute Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-              \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Assign}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
