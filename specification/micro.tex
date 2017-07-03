@@ -209,7 +209,7 @@
               \obinding' = \obinding[\ovariable \mapsto \omem] \\
               \oheap' = \oheap[\opscope \mapsto \obinding']
           }{
-              \osInStack{\omem, \ovariable, \opscope, \osMC{Bind}}, \ostack, \oheap \osTransition
+              \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \ostack, \oheap \osTransition
               \osInStack{}, \ostack, \oheap'
           }
         \end{mathpar}
@@ -263,7 +263,7 @@
               \olbl \osBefore{\oprogram} \osplat \\
               \ostackframe = \osLR{ \opscope', \olbl' } \\
               \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
-              \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \opscope', \osMC{Bind},  \osMC{Advance}]
+              \omstack' = [\osMC{Pop}, \opscope', \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
           }{
               \osInStack{\osMC{Advance}}, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap
@@ -303,8 +303,8 @@
           \relationRule{Raise \,(no exception label)}{
               \oprogram(\olbl) = \olbl:\osplat: \odirective \\
           }{
-              \osInStack{\osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-              \osInStack{\osMC{Pop}, \osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+              \osInStack{\omem, \osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              \osInStack{\osMC{Pop}, \omem, \osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
 
@@ -312,9 +312,9 @@
           \relationRule{Raise \,(caught)}{
               \oprogram(\olbl) = \olbl:\olbl_0: \odirective \\
               \oprogram(\olbl_0) = \olbl_0:\olbl_1: \okw{catch} \ovariable \\
-              \omstack' = [\ovariable, \opscope, \osMC{Bind}, \osMC{Advance}]
+              \omstack' = [\opscope, \omem, \ovariable, \osMC{Bind}, \osMC{Advance}]
           }{
-              \osInStack{\osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              \osInStack{\omem, \osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \olbl_0}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
@@ -369,7 +369,7 @@
         \begin{mathpar}
           \relationRule{Call function \omem}{
             \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
-            \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \opscope, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \opscope, \osMC{Bind}]
+            \omstack' = [\opscope, \osMC{Push} \;\olbl, \opscope, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope, \omem_n, \ovariable_n, \osMC{Bind}]
           }{
             \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
             \osInStack{\omstack'}, \ostack, \oheap
@@ -416,7 +416,7 @@
 
         \begin{mathpar}
           \relationRule{Assign \ovalue \! to \ovariable}{
-              \omstack' = [\osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \opscope, \osMC{Bind}]
+              \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap
@@ -464,7 +464,7 @@
         \begin{mathpar}
           \relationRule{Name Assignment}{
               \oprogram(\olbl) = \olbl:\oglbl': \ovariable_1 \gteq \ovariable_2 \\
-              \omstack = [\ovariable_2, \osMC{Lookup}, \ovariable_1, \opscope, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\opscope, \ovariable_2, \osMC{Lookup}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -506,7 +506,7 @@
         \begin{mathpar}
           \relationRule{Attribute Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-              \omstack = [\osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \opscope, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -558,7 +558,7 @@
               \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
               \ostack = [\osLR{ \opscope', \olbl''}] \listConcat \ostack' \\
               \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
-              \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \opscope', \osMC{Bind},\osMC{Advance}]
+              \omstack = [\opscope', \ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -625,29 +625,29 @@
             \begin{flalign*}
                 & \osFunc{FillMet}(\omem) = \\
                 & [
-                \osMem{MetType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osMC{Alloc}, \osLR{\omem, \osMagic{Call}}, \osMC{Store}, \\
-                & \osClown{call}, \omem, \osMC{Bind}
+                \omem, \osMem{MetType}, \osClown{class}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{Call}}, \osMC{Store}, \\
+                & \osClown{call}, \osMC{Bind}
                 ]
             \end{flalign*}
             \begin{flalign*}
                 & \osFunc{FillInt}(\omem) = \\
                 & [
-                \osMem{IntType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osMC{Alloc}, \osLR{\omem, \osMagic{IntAdd}}, \osMC{Store}, \\
-                & \osClown{add}, \omem, \osMC{Bind}, \\
-                & \osMC{Alloc}, \osLR{\omem, \osMagic{IntNeg}}, \osMC{Store}, \\
-                & \osClown{neg}, \omem, \osMC{Bind}
+                \omem, \osMem{IntType}, \osClown{class}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{IntAdd}}, \osMC{Store}, \\
+                & \osClown{add}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{IntNeg}}, \osMC{Store}, \\
+                & \osClown{neg}, \osMC{Bind}
                 ]
             \end{flalign*}
             \begin{flalign*}
                 & \osFunc{Fillstr}(\omem) = \\
                 & [
-                \osMem{StrType}, \osClown{class}, \omem, \osMC{Bind}, \\
-                & \osMC{Alloc}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
-                & \osClown{add}, \omem, \osMC{Bind}, \\
-                & \osMC{Alloc}, \osLR{\omem, \osMagic{StrContains}}, \osMC{Store}, \\
-                & \osClown{contains}, \omem, \osMC{Bind}
+                \omem, \osMem{StrType}, \osClown{class}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
+                & \osClown{add}, \osMC{Bind}, \\
+                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{StrContains}}, \osMC{Store}, \\
+                & \osClown{contains}, \osMC{Bind}
                 ]
             \end{flalign*}
 
