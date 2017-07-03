@@ -195,20 +195,20 @@
 
         \begin{mathpar}
           \relationRule{Wrap \ovalue \, in \omem}{
-              \omem'', \ovalue' = \osWrap(\omem_{\texttt{obj}}, \omem, \ovalue)
+              \omstack' = \osWrap(\omem_{\texttt{obj}}, \omem, \ovalue)
           }{
               \osInStack{\omem_{\texttt{obj}}, \omem, \ovalue, \osMC{Wrap}}, \ostack, \oheap \osTransition
-              \osInStack{\omem'', \ovalue'}, \ostack, \oheap
+              \osInStack{\omstack'}, \ostack, \oheap
           }
         \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Bind \omem \! to \ovariable}{
+          \relationRule{Bind \omem \, to \ovariable \, in \opscope}{
               \obinding = \oheap[\opscope] \\
               \obinding' = \obinding[\ovariable \mapsto \omem] \\
               \oheap' = \oheap[\opscope \mapsto \obinding']
           }{
-              \osInStack{\omem, \ovariable, \osMC{Bind}}, \ostack, \oheap \osTransition
+              \osInStack{\omem, \ovariable, \opscope, \osMC{Bind}}, \ostack, \oheap \osTransition
               \osInStack{}, \ostack, \oheap'
           }
         \end{mathpar}
@@ -262,7 +262,7 @@
               \olbl \osBefore{\oprogram} \osplat \\
               \ostackframe = \osLR{ \opscope', \olbl' } \\
               \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
-              \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
+              \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \opscope', \osMC{Bind},  \osMC{Advance}]
           }{
               \osInStack{\osMC{Advance}}, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \olbl}, \ostackframe] \listConcat \ostack, \oheap
@@ -311,7 +311,7 @@
           \relationRule{Raise \,(caught)}{
               \oprogram(\olbl) = \olbl:\olbl_0: \odirective \\
               \oprogram(\olbl_0) = \olbl_0:\olbl_1: \okw{catch} \ovariable \\
-              \omstack' = [\ovariable, \osMC{Bind}, \osMC{Advance}]
+              \omstack' = [\ovariable, \opscope, \osMC{Bind}, \osMC{Advance}]
           }{
               \osInStack{\osMC{Raise}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, [\osLR{\opscope, \olbl_0}] \listConcat \ostack, \oheap
@@ -368,7 +368,7 @@
         \begin{mathpar}
           \relationRule{Call function \omem}{
             \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
-            \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \osMC{Bind}]
+            \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \opscope, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \opscope, \osMC{Bind}]
           }{
             \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
             \osInStack{\omstack'}, \ostack, \oheap
@@ -415,10 +415,10 @@
 
         \begin{mathpar}
           \relationRule{Assign \ovalue \! to \ovariable}{
-              \omstack' = [\osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+              \omstack' = [\osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \opscope, \osMC{Bind}]
           }{
-              \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \ostack, \oheap \osTransition
-              \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
+              \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap \osTransition
+              \olstack \listConcat \omstack' \listConcat \omstack, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap
           }
 
       \end{mathpar}
@@ -463,7 +463,7 @@
         \begin{mathpar}
           \relationRule{Name Assignment}{
               \oprogram(\olbl) = \olbl:\oglbl': \ovariable_1 \gteq \ovariable_2 \\
-              \omstack = [\ovariable_2, \osMC{Lookup}, \ovariable_1, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\ovariable_2, \osMC{Lookup}, \ovariable_1, \opscope, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -505,7 +505,7 @@
         \begin{mathpar}
           \relationRule{Attribute Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-              \omstack = [\osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \opscope, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -557,7 +557,7 @@
               \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
               \ostack = [\osLR{ \opscope', \olbl''}] \listConcat \ostack' \\
               \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
-              \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+              \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \opscope', \osMC{Bind},\osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -611,51 +611,66 @@
           \begin{equation}
             \osWrap (\omem, \omem', \ovalue) =
             \begin{cases}
-              \omem', \obinding, & \text{if}\; \ovalue = \obinding \\
+              [\omem', \obinding], & \text{if}\; \ovalue = \obinding \\
               % \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{FunType}], & \text{if}\; \ovalue = \ogenf \\
-              \omem, \osFunc{FillMet}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \ogenm \\
-              \omem, \osFunc{FillInt}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{Z} \\
-              \omem, \osFunc{FillStr}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{S} \\
-              \omem, \osFunc{FillLst}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
-              \omem, \osFunc{FillTpl}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
+              [\omem] \listConcat \osFunc{FillMet}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \ogenm \\
+              [\omem] \listConcat \osFunc{FillInt}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{Z} \\
+              [\omem] \listConcat \osFunc{FillStr}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = \mathbb{S} \\
+              [\omem] \listConcat \osFunc{FillLst}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
+              [\omem] \listConcat \osFunc{FillTpl}(\omem, \obinding_{\texttt{obj}}), & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
             \end{cases}
           \end{equation}
           \begin{multicols}{2}
             \begin{flalign*}
-                \osFunc{FillMet}
-                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
-                & [\osClown{class} \mapsto \osMem{MetType}] \\
+                & \osFunc{FillMet}(\omem, \obinding_{\texttt{obj}}) = \\
+                & [
+                \osMem{MetType}, \osClown{class}, \omem, \osMC{Bind}, \\
+                & \osLR{\omem, \osMagic{Call}}, \osClown{call}, \omem, \osMC{Bind}, \\
+                & \obinding_{\texttt{obj}}
+                ]
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{FillInt}
-                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
-                & [\osClown{class} \mapsto \osMem{IntType}, \\
-                & \osClown{add} \mapsto \osWrap(\omem, \osMagic{IntAdd}), \\
-                & \osClown{neg} \mapsto \osMagic{IntNeg}] \\
+                & \osFunc{FillInt}(\omem, \obinding_{\texttt{obj}}) = \\
+                & [
+                \osMem{IntType}, \osClown{class}, \omem, \osMC{Bind}, \\
+                & \osLR{\omem, \osMagic{IntAdd}}, \osClown{add}, \omem, \osMC{Bind}, \\
+                & \osLR{\omem, \osMagic{IntNeg}}, \osClown{neg}, \omem, \osMC{Bind}, \\
+                & \obinding_{\texttt{obj}}
+                ]
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{FillStr}
-                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
-                & [\osClown{class} \mapsto \osMem{StrType}, \\
-                & \osClown{add} \mapsto \osMagic{StrAdd}, \\
-                & \osClown{neg} \mapsto \osMagic{StrContains}] \\
+                & \osFunc{Fillstr}(\omem, \obinding_{\texttt{obj}}) = \\
+                & [
+                \osMem{StrType}, \osClown{class}, \omem, \osMC{Bind}, \\
+                & \osLR{\omem, \osMagic{StrAdd}}, \osClown{add}, \omem, \osMC{Bind}, \\
+                & \osLR{\omem, \osMagic{StrContains}}, \osClown{contains}, \omem, \osMC{Bind}, \\
+                & \obinding_{\texttt{obj}}
+                ]
             \end{flalign*}
-            \begin{flalign*}
-                \osFunc{FillLst}
-                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
-                & [\osClown{class} \mapsto \osMem{LstType}, \\
-                & \osClown{iter} \mapsto \osMagic{LstIter}, \\
-                & \osClown{contains} \mapsto \osMagic{LstContains}, \\
-                & \osClown{getitem} \mapsto \osMagic{LstGetitem}] \\
-            \end{flalign*}
-            \begin{flalign*}
-                \osFunc{FillTpl}
-                & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
-                & [\osClown{class} \mapsto \osMem{TupType}, \\
-                & \osClown{iter} \mapsto \osMagic{TupIter}, \\
-                & \osClown{contains} \mapsto \osMagic{TupContains}, \\
-                & \osClown{getitem} \mapsto \osMagic{TupGetitem}] \\
-            \end{flalign*}
+
+            % \begin{flalign*}
+            %     \osFunc{FillStr}
+            %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
+            %     & [\osClown{class} \mapsto \osMem{StrType}, \\
+            %     & \osClown{add} \mapsto \osLR{\omem, \osMagic{StrAdd}}, \\
+            %     & \osClown{contains} \mapsto \osLR{\omem, \osMagic{StrContains}}] \\
+            % \end{flalign*}
+            % \begin{flalign*}
+            %     \osFunc{FillLst}
+            %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
+            %     & [\osClown{class} \mapsto \osMem{LstType}, \\
+            %     & \osClown{iter} \mapsto \osLR{\omem, \osMagic{LstIter}}, \\
+            %     & \osClown{contains} \mapsto \osLR{\omem, \osMagic{LstContains}}, \\
+            %     & \osClown{getitem} \mapsto \osLR{\omem, \osMagic{LstGetitem}}] \\
+            % \end{flalign*}
+            % \begin{flalign*}
+            %     \osFunc{FillTpl}
+            %     & (\omem, \obinding_{\texttt{obj}}) = \obinding_{\texttt{obj}} \\
+            %     & [\osClown{class} \mapsto \osMem{TupType}, \\
+            %     & \osClown{iter} \mapsto \osLR{\omem, \osMagic{TupIter}}, \\
+            %     & \osClown{contains} \mapsto \osLR{\omem, \osMagic{TupContains}}, \\
+            %     & \osClown{getitem} \mapsto \osLR{\omem, \osMagic{TupGetitem}}] \\
+            % \end{flalign*}
           \end{multicols}
       \end{definition}
       \tnote{setattr}

@@ -28,4 +28,6 @@ Q do we want to create empty obj when wrapping, and move getobj to micro instruc
 mod WRAP to take 3 args DONE
 add ALLOC, mod STORE    DONE
 mod RETRIEVE to WRAP    DONE
+add scope to BIND       DONE
 mod getobj
+  make WRAP a macro
