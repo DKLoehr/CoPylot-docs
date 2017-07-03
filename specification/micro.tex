@@ -194,11 +194,11 @@
         \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Wrap \ovalue \! in \omem}{
-              \ovalue' = \osGetObj(\omem, \ovalue)
+          \relationRule{Wrap \ovalue \, in \omem}{
+              \omem'', \ovalue' = \osWrap(\omem_{\texttt{obj}}, \omem, \ovalue)
           }{
-              \osInStack{\omem, \ovalue, \osMC{Wrap}}, \ostack, \oheap \osTransition
-              \osInStack{\ovalue'}, \ostack, \oheap
+              \osInStack{\omem_{\texttt{obj}}, \omem, \ovalue, \osMC{Wrap}}, \ostack, \oheap \osTransition
+              \osInStack{\omem'', \ovalue'}, \ostack, \oheap
           }
         \end{mathpar}
 
@@ -386,7 +386,7 @@
 
 
         \begin{mathpar}
-          \relationRule{Retrieve \ovariable from \ovalue}{
+          \relationRule{Retrieve \ovariable \, from \ovalue}{
               \omem = \ovalue[\ovariable] \\
               \omstack' = [\osMC{Alloc}, \omem, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}]
           }{
@@ -415,7 +415,7 @@
 
         \begin{mathpar}
           \relationRule{Assign \ovalue \! to \ovariable}{
-              \omstack' = [\osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+              \omstack' = [\osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, \ostack, \oheap
@@ -505,7 +505,7 @@
         \begin{mathpar}
           \relationRule{Attribute Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-              \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+              \omstack = [\osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -606,42 +606,42 @@
       % GetObj
       \begin{definition}
         Let $ \obinding_{\texttt{obj}} = \{
-            \ostarvalue{value} \mapsto \omem, \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
+            \ostarvalue{value} \mapsto \omem', \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \} % the base object
         $ in
           \begin{equation}
-            \osGetObj (\omem, \ovalue) =
+            \osWrap (\omem, \omem', \ovalue) =
             \begin{cases}
-              \obinding, & \text{if}\; \ovalue = \obinding \\
+              \omem', \obinding, & \text{if}\; \ovalue = \obinding \\
               % \obinding = \obinding_{\texttt{obj}}[\text{\osClown{class}} \mapsto \osMem{FunType}], & \text{if}\; \ovalue = \ogenf \\
-              \osFunc{GetMetObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \ogenm \\
-              \osFunc{GetIntObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{Z} \\
-              \osFunc{GetStrObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{S} \\
-              \osFunc{GetLstObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = [\omem, \ldots] \\
-              \osFunc{GetTupObj}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = (\omem, \ldots) \\
+              \omem, \osFunc{FillMet}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \ogenm \\
+              \omem, \osFunc{FillInt}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{Z} \\
+              \omem, \osFunc{FillStr}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = \mathbb{S} \\
+              \omem, \osFunc{FillLst}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = [\omem_1, \omem_2, \ldots] \\
+              \omem, \osFunc{FillTpl}(\obinding_{\texttt{obj}}, \omem), & \text{if}\; \ovalue = (\omem_1, \omem_2, \ldots) \\
             \end{cases}
           \end{equation}
           \begin{multicols}{2}
             \begin{flalign*}
-                \osFunc{GetMetObj}
+                \osFunc{FillMet}
                 & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{MetType}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetIntObj}
+                \osFunc{FillInt}
                 & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{IntType}, \\
-                & \osClown{add} \mapsto \osGetObj(\omem, \osMagic{IntAdd}), \\
+                & \osClown{add} \mapsto \osWrap(\omem, \osMagic{IntAdd}), \\
                 & \osClown{neg} \mapsto \osMagic{IntNeg}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetStrObj}
+                \osFunc{FillStr}
                 & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{StrType}, \\
                 & \osClown{add} \mapsto \osMagic{StrAdd}, \\
                 & \osClown{neg} \mapsto \osMagic{StrContains}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetLstObj}
+                \osFunc{FillLst}
                 & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{LstType}, \\
                 & \osClown{iter} \mapsto \osMagic{LstIter}, \\
@@ -649,7 +649,7 @@
                 & \osClown{getitem} \mapsto \osMagic{LstGetitem}] \\
             \end{flalign*}
             \begin{flalign*}
-                \osFunc{GetTupObj}
+                \osFunc{FillTpl}
                 & (\obinding_{\texttt{obj}}, \omem) = \obinding_{\texttt{obj}} \\
                 & [\osClown{class} \mapsto \osMem{TupType}, \\
                 & \osClown{iter} \mapsto \osMagic{TupIter}, \\
