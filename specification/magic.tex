@@ -1,3 +1,148 @@
+%<*micro>
+\gor    \osMC{Assert} \;n
+\gor    \osMC{IntSum}
+\gor    \osMC{IntNeg}
+\gor    \osMC{StrSum}
+\gor    \osMC{StrContains}
+\gline
+\gor    \osMC{LstIter}
+\gor    \osMC{LstContains}
+\gor    \osMC{TplIter}
+\gor    \osMC{TplContains}
+%</micro>
+%<*microrules>
+\begin{mathpar}
+  \relationRule{Assert Method}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \ogenm \cr
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{MetType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert Int}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \mathbb{Z} \cr
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{IntType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert String}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \mathbb{S} \cr
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{StrType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert List}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{LstType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert Tuple}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{TplType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert Method (base case)}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \ogenm \cr
+      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{MetType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert Int (base case)}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \mathbb{Z} \cr
+      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{IntType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert String (base case)}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \in \mathbb{S} \cr
+      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{StrType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert List (base case)}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
+      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{LstType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert Tuple (base case)}{
+    \omstack' =
+    \begin{cases}
+      [\;], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
+      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
+    \end{cases} \\
+  }{
+    \osInStack{\ovalue, \osMem{TplType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+%</microrules>
+%<*op>
 \begin{mathpar}
   \relationRule{IntAdd}{
     \ovalue = \osMagic{IntAdd} \\
@@ -80,3 +225,21 @@
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
+%</op>
+%<*graph>
+\begin{mathpar}
+  \relationRule{IntAdd}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \ovalue = \osMagic{IntAdd} \\
+    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{Z} \\
+    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{Z} \\
+    \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
+    \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+%</graph>

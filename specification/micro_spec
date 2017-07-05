@@ -27,3 +27,5 @@ assign:   v,x       -> eta,alloc,alloc,v,store,v,
                        wrap,store,x,bind            -> ()
 eq:       m,m       -> v
 dup:      z         -> z,z
+assert n: v,m1,...,mn  -> v,m2,...,mn
+                       -> ()

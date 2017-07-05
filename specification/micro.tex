@@ -43,6 +43,7 @@
           \grule[values]{\ovalue}{
                       \mathbb{Z}
               \gor    \mathbb{S}
+              \gor    \mathbb{B}
               \gor    [\omem, \ldots] % [m, ...]
               \gor    (\omem, \ldots) % (m, ...)
               \gor    \obinding % B
@@ -56,6 +57,7 @@
           \grule[expressions]{\oexpr}{
                       \mathbb{Z} % int
               \gor    \mathbb{S} % string
+              \gor    \mathbb{B} % bool
               %\gor    \osnone % None
               \gor    \ovariable % x
               \gor    \okw{def} (\ovariable,\ldots)\{ \oprogram \} % def x(x, ...) = {S}
@@ -64,6 +66,10 @@
               \gor    [\ovariable, \ldots] % [x, ...]
               \gor    (\ovariable, \ldots) % (x, ...)
               \gor    \ovariable \okw{is} \ovariable
+          }
+          \grule[booleans]{\mathbb{B}}{
+                      \ostrue
+              \gor    \osfalse
           }
           \grule[microcode stack]{\omstack}{[\omcode,\ldots]}
           \grule[microcode literal stack]{\olstack}{[\olcode,\ldots]}
@@ -90,6 +96,8 @@
               \gor    \osMC{Assign}
               \gor    \osMC{Eq}
               \gor    \osMC{Dup}
+              \gline
+              \ExecuteMetaData [magic]{micro}
               \gline
               \gor    \osMC{AllocNameError}
               \gor    \osMC{AllocTypeError}
@@ -142,16 +150,17 @@
             \{
                   \osInit{\opscope} \mapsto \osInit{\obinding},
                   \omem_{\osnone} \mapsto \{\;\},
-                  \omem_{\texttt{AttrError}} \mapsto \{\;\},
-                  \omem_{\texttt{FunType}} \mapsto \{\;\},
-                  \omem_{\texttt{MetType}} \mapsto \{\;\}, \\
+                  \osMem{AttrError} \mapsto \{\;\},
+                  \osMem{FunType} \mapsto \{\;\},
+                  \osMem{MetType} \mapsto \{\;\}, \\
                   &
-                  \omem_{\texttt{IntType}} \mapsto \{\;\},
-                  \omem_{\texttt{StrType}} \mapsto \{\;\},
-                  \omem_{\texttt{LstType}} \mapsto \{\;\},
-                  \omem_{\texttt{TplType}} \mapsto \{\;\},
-                  \osMem{GetAttribute} \mapsto \obinding, \\
+                  \osMem{IntType} \mapsto \{\;\},
+                  \osMem{StrType} \mapsto \{\;\},
+                  \osMem{BoolType} \mapsto \{\;\},
+                  \osMem{LstType} \mapsto \{\;\},
+                  \osMem{TplType} \mapsto \{\;\}, \\
                   &
+                  \osMem{GetAttribute} \mapsto \obinding,
                   \osMem{SetAttr} \mapsto \obinding,
             \}
         } \\
@@ -165,6 +174,7 @@
                   \osType{IntType} \mapsto \osMem{IntType},
                   \osType{StringType} \mapsto \osMem{StrType}, \\
                   &
+                  \osType{BoolType} \mapsto \osMem{BoolType},
                   \osType{ListType} \mapsto \osMem{LstType},
                   \osType{TupleType} \mapsto \osMem{TplType},
             \}
@@ -445,6 +455,8 @@
         }
       \end{mathpar}
 
+      \ExecuteMetaData [magic]{microrules}
+
       \subsection{Rules}
 
       \begin{mathpar}
@@ -587,7 +599,7 @@
       \end{mathpar}
 
   \subsection{Magic}
-      \input{magic}
+      \ExecuteMetaData [magic]{op}
 
   \subsection{Helper Functions}
 
@@ -1159,6 +1171,9 @@
         }
       \end{mathpar}
 
+      \subsection{Magic}
+          \ExecuteMetaData [magic]{graph}
+
       \subsection{Helper Functions}
 
       \begin{definition}[Alloc Memory]
@@ -1204,17 +1219,15 @@
             \gsFunc{Startof}(\gnode_n) = \gnode_0 & \iff \gsSet{\gnode_0 \gsPrecede \gnode_1 \gsPrecede \ldots \gsPrecede \gnode_n} \in \ggraph, \text{where } \nexists \; \gnode_i \text{ of form } \gsLR{\genter \olbl', \gtime} \text{ or } \gsLR{\gleave \olbl', \gtime'}
           \end{flalign*}
       \end{definition}
-      \begin{definition}[Wrap Object]
-          %
-      \end{definition}
+
       \begin{definition}[Get Scope]
-        Let $\gnode' = \gsFunc{Startof}(\gnode)$ in
-        \begin{flalign*}
-          \gsFunc{Scopeof}(\gnode) =
-          \begin{cases}
-            \opscope, & \text{if } \gsLR{\olbl, \osInStack{\opscope', \opscope, \osMC{Push}}, \gtime} \gsBefore \gnode' \\
-            \osInit{\opscope}, & \text{if } \gsstart \gsBefore \gnode' \\
-          \end{cases}
-        \end{flalign*}
+          Let $\gnode' = \gsFunc{Startof}(\gnode)$ in
+          \begin{flalign*}
+            \gsFunc{Scopeof}(\gnode) =
+            \begin{cases}
+              \opscope, & \text{if } \gsLR{\olbl, \osInStack{\opscope', \opscope, \osMC{Push}}, \gtime} \gsBefore \gnode' \\
+              \osInit{\opscope}, & \text{if } \gsstart \gsBefore \gnode' \\
+            \end{cases}
+          \end{flalign*}
       \end{definition}
 \end{document}
