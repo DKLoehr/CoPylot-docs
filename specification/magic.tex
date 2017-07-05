@@ -1,8 +1,8 @@
 \begin{mathpar}
   \relationRule{IntAdd}{
     \ovalue = \osMagic{IntAdd} \\
-    \ovalue_1 = \oheap[\omem_1] = \mathbb{Z} \\
-    \ovalue_2 = \oheap[\omem_2] = \mathbb{Z} \\
+    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{Z} \\
+    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{Z} \\
     \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
     \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
@@ -14,7 +14,7 @@
 \begin{mathpar}
   \relationRule{IntNeg}{
     \ovalue = \osMagic{IntNeg} \\
-    \ovalue' = \oheap[\omem] = \mathbb{Z} \\
+    \ovalue' = \oheap[\omem][\ostarvalue{value}] = \mathbb{Z} \\
     \ovalue_{\texttt{neg}} = -(\ovalue') \\
     \omstack' = [\ovalue_{\texttt{neg}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
@@ -26,8 +26,8 @@
 \begin{mathpar}
   \relationRule{StrAdd}{
     \ovalue = \osMagic{StrAdd} \\
-    \ovalue_1 = \oheap[\omem_1] = \mathbb{S} \\
-    \ovalue_2 = \oheap[\omem_2] = \mathbb{S} \\
+    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{S} \\
+    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{S} \\
     \ovalue_{\texttt{concat}} = \ovalue_1 \strConcat \ovalue_2 \\
     \omstack' = [\ovalue_{\texttt{concat}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
@@ -39,8 +39,8 @@
 \begin{mathpar}
   \relationRule{StrContains}{
     \ovalue = \osMagic{StrContains} \\
-    \ovalue_1 = \oheap[\omem_1] = \mathbb{S} \\
-    \ovalue_2 = \oheap[\omem_2] = \mathbb{S} \\
+    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{S} \\
+    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{S} \\
     \ovalue_{\texttt{has}} =
     \begin{cases}
       \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
@@ -56,8 +56,8 @@
 \begin{mathpar}
   \relationRule{LstContains}{
     \ovalue = \osMagic{LstContains} \\
-    \ovalue_1 = \oheap[\omem] = [\omem_1,\omem_2,\ldots] \\
-    \ovalue_2 = \oheap[\omem'] \\
+    \ovalue_1 = \oheap[\omem][\ostarvalue{value}] = [\omem_1,\omem_2,\ldots] \\
+    \ovalue_2 = \oheap[\omem'][\ostarvalue{value}] \\
     \ovalue' = [\oheap[\omem_1],\oheap[\omem_2],\ldots] \\
     \ovalue_{\texttt{has}} =
     \begin{cases}

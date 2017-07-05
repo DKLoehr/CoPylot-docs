@@ -389,7 +389,7 @@
         \begin{mathpar}
           \relationRule{Retrieve \ovariable \, from \ovalue}{
               \omem = \ovalue[\ovariable] \\
-              \omstack' = [omem]
+              \omstack' = [\omem]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Retrieve}}, \ostack, \oheap \osTransition
               \osInStack{\omstack'}, \ostack, \oheap
@@ -811,7 +811,7 @@
             % \gnode_3 = \gsLR{\gleave \olbl', \gtime + 1} \\
             \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
             \gsLR{\olbl'', \omstack'', \gtime' - 1} = \gnode_1' \gsBefore \gnode_0' \\
-            \opscope = \osFunc{GetScope}(\gnode_1') \\
+            \opscope = \osFunc{Scopeof}(\gnode_1') \\
             \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable \gteq \oexpr \\
             \omstack' = [\osMC{Pop}, \opscope, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
         }{
@@ -863,6 +863,7 @@
         \relationRule{Raise (caught)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \osMC{Raise}}, \gtime} \\
+            \opscope = \gsFunc{Scopeof}(\gnode_2) \\
             \oprogram(\olbl) = \olbl:\olbl': \odirective \\
             \oprogram(\olbl') = \olbl':\oglbl'': \okw{catch} \ovariable
         }{
@@ -978,7 +979,8 @@
         \relationRule{Assign}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \gtime} \\
-            \omstack' = [\ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+            \opscope = \gsFunc{Scopeof}(\gnode_2) \\
+            \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -1074,8 +1076,9 @@
 
       \begin{mathpar}
         \relationRule{Attribute Assignment}{
-            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
+            \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} = \gnode' \\
             \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
+            \opscope = \gsFunc{Scopeof}(\gnode') \\
             \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
@@ -1126,6 +1129,9 @@
         \relationRule{Return}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\oglbl': \okw{return} \ovariable \\
+            \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
+            \gsLR{\olbl'', \omstack'', \gtime' - 1} = \gnode_1' \gsBefore \gnode_0' \\
+            \opscope = \osFunc{Scopeof}(\gnode_1') \\
             \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
             \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
         }{
@@ -1204,7 +1210,7 @@
       \begin{definition}[Get Scope]
         Let $\gnode' = \gsFunc{Startof}(\gnode)$ in
         \begin{flalign*}
-          \gsFunc{GetScope}(\gnode) =
+          \gsFunc{Scopeof}(\gnode) =
           \begin{cases}
             \opscope, & \text{if } \gsLR{\olbl, \osInStack{\opscope', \opscope, \osMC{Push}}, \gtime} \gsBefore \gnode' \\
             \osInit{\opscope}, & \text{if } \gsstart \gsBefore \gnode' \\
