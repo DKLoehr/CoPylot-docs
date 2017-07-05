@@ -20,7 +20,7 @@ convert n:v,m1,...,mn  -> v,m1,...,mn,call n        ->
 call:     v,m1,...,mn  -> eta,push l,eta,m1,x1,bind,...,
                           eta,mn,xn,bind            -> ()
                           (type error)
-retrieve: v,x       -> alloc,m,dup,get,wrap,store   -> m
+retrieve: v,x       -> m
                        (attribute error)
 get:      m         -> v
 assign:   v,x       -> eta,alloc,alloc,v,store,v,
@@ -28,4 +28,4 @@ assign:   v,x       -> eta,alloc,alloc,v,store,v,
 eq:       m,m       -> v
 dup:      z         -> z,z
 assert n: v,m1,...,mn  -> v,m2,...,mn
-                       -> ()
+                          (type error)

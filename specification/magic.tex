@@ -1,21 +1,18 @@
 %<*micro>
 \gor    \osMC{Assert} \;n
-\gor    \osMC{IntSum}
-\gor    \osMC{IntNeg}
-\gor    \osMC{StrSum}
+\gor    \osMC{Sum}
+\gor    \osMC{Neg}
+\gor    \osMC{StrConcat}
 \gor    \osMC{StrContains}
-\gline
-\gor    \osMC{LstIter}
-\gor    \osMC{LstContains}
-\gor    \osMC{TplIter}
-\gor    \osMC{TplContains}
+\gor    \osMC{Contains}
 %</micro>
+
 %<*assertions>
 \begin{mathpar}
   \relationRule{Assert Method}{
     \omstack' =
     \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \ogenm \cr
+      [\ovalue], & \text{if}\; \ovalue \in \ogenm \cr
       [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
     \end{cases} \\
   }{
@@ -28,7 +25,7 @@
   \relationRule{Assert Int}{
     \omstack' =
     \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \mathbb{Z} \cr
+      [\ovalue], & \text{if}\; \ovalue \in \mathbb{Z} \cr
       [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
     \end{cases} \\
   }{
@@ -41,7 +38,7 @@
   \relationRule{Assert String}{
     \omstack' =
     \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \mathbb{S} \cr
+      [\ovalue], & \text{if}\; \ovalue \in \mathbb{S} \cr
       [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
     \end{cases} \\
   }{
@@ -54,7 +51,7 @@
   \relationRule{Assert List}{
     \omstack' =
     \begin{cases}
-      [\;], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
+      [\ovalue], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
       [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
     \end{cases} \\
   }{
@@ -67,7 +64,7 @@
   \relationRule{Assert Tuple}{
     \omstack' =
     \begin{cases}
-      [\;], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
+      [\ovalue], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
       [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
     \end{cases} \\
   }{
@@ -84,18 +81,72 @@
     [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
   }
 \end{mathpar}
-
 %</assertions>
+
+%<*binop>
+\begin{mathpar}
+  \relationRule{Sum \ovalue \; \ovalue}{
+    \ovalue = \ovalue_1 + \ovalue_2
+  }{
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{Sum}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Neg \ovalue}{
+    \ovalue' = -(\ovalue)
+  }{
+    \osInStack{\ovalue, \osMC{Neg}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrConcat \ovalue}{
+    \ovalue = \ovalue_1 \strConcat \ovalue_2
+  }{
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{StrConcat}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrContains \ovalue}{
+    \ovalue =
+    \begin{cases}
+      \ostrue, & \text{if } \ovalue_2 \text{ is a substring of } \ovalue_1 \cr
+      \osfalse, & \text{otherwise}
+    \end{cases}
+  }{
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{StrContains}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\tnote{Iters do not exist yet.}
+
+\begin{mathpar}
+  \relationRule{Contains \ovalue}{
+    \ovalue =
+    \begin{cases}
+      \ostrue, & \text{if } \ovalue_2 \in \ovalue_1 \cr
+      \osfalse, & \text{otherwise}
+    \end{cases}
+  }{
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{Contains}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue}, \ostack, \oheap
+  }
+\end{mathpar}
+%</binop>
+
 %<*op>
 \begin{mathpar}
   \relationRule{IntAdd}{
     \ovalue = \osMagic{IntAdd} \\
-    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{Z} \\
-    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{Z} \\
-    \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+    \omstack' = [\omem_1, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{IntType}, \osMC{Assert}, \omem_2, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMem{IntType}, \osMem{FloatType}, \osMC{Assert}, \osMC{Sum}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
@@ -170,6 +221,7 @@
   }
 \end{mathpar}
 %</op>
+
 %<*graph>
 \begin{mathpar}
   \relationRule{IntAdd}{
