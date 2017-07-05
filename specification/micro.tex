@@ -867,7 +867,7 @@
             \oprogram(\olbl) = \olbl:\olbl': \odirective \\
             \oprogram(\olbl') = \olbl':\oglbl'': \okw{catch} \ovariable
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\omem, \ovariable, \osMC{Bind}, \osMC{Advance}}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}, \osMC{Advance}}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -1133,7 +1133,7 @@
             \gsLR{\olbl'', \omstack'', \gtime' - 1} = \gnode_1' \gsBefore \gnode_0' \\
             \opscope = \osFunc{Scopeof}(\gnode_1') \\
             \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable' \gteq \oexpr \\
-            \omstack = [\ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
+            \omstack = [\opscope', \ovariable, \osMC{LookUp}, \osMC{Pop}, \ovariable', \osMC{Bind},\osMC{Advance}]
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
