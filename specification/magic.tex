@@ -10,7 +10,7 @@
 \gor    \osMC{TplIter}
 \gor    \osMC{TplContains}
 %</micro>
-%<*microrules>
+%<*assertions>
 \begin{mathpar}
   \relationRule{Assert Method}{
     \omstack' =
@@ -77,71 +77,15 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Assert Method (base case)}{
-    \omstack' =
-    \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \ogenm \cr
-      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
-    \end{cases} \\
+  \relationRule{Assert (base case)}{
+    \\
   }{
-    \osInStack{\ovalue, \osMem{MetType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
+    \osInStack{\osMC{Assert} \;0}, \ostack, \oheap \osTransition
+    [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
   }
 \end{mathpar}
 
-\begin{mathpar}
-  \relationRule{Assert Int (base case)}{
-    \omstack' =
-    \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \mathbb{Z} \cr
-      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{IntType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
-\end{mathpar}
-
-\begin{mathpar}
-  \relationRule{Assert String (base case)}{
-    \omstack' =
-    \begin{cases}
-      [\;], & \text{if}\; \ovalue \in \mathbb{S} \cr
-      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{StrType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
-\end{mathpar}
-
-\begin{mathpar}
-  \relationRule{Assert List (base case)}{
-    \omstack' =
-    \begin{cases}
-      [\;], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
-      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{LstType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
-\end{mathpar}
-
-\begin{mathpar}
-  \relationRule{Assert Tuple (base case)}{
-    \omstack' =
-    \begin{cases}
-      [\;], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
-      [\osMC{AllocTypeError}, \osMC{Raise}], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{TplType}, \osMC{Assert} \;1}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
-\end{mathpar}
-
-%</microrules>
+%</assertions>
 %<*op>
 \begin{mathpar}
   \relationRule{IntAdd}{
