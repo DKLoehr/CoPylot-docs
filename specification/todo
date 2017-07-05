@@ -9,7 +9,6 @@ update ADVANCE
 === future ===
 rmv mathpar blocks
 define BOOLEAN!!
-2 args for PUSH
 
 === 6.30 ===
 mod attr assign to wrap DONE
@@ -33,3 +32,10 @@ add scope to BIND       DONE
 mod getobj              DONE
   make WRAP a macro     DONE
   fix RAISE             DONE
+
+=== 7.5 ===
+2 args for PUSH         DONE
+mod graph
+add Wrap() to graph
+add getscope func
+Q Advance Pop, Raise, Assign, Attr Assign, Return - no scope to bind to?

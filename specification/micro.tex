@@ -234,9 +234,9 @@
 
         \begin{mathpar}
           \relationRule{Push \olbl}{
-              \oheap' = \oheap[\opscope' \mapsto \{\ostarvalue{parent} \mapsto \opscope\}],  \opscope' \notin \oheap
+              \oheap' = \oheap[\opscope' \mapsto \{\ostarvalue{parent} \mapsto \opscope\}]
           }{
-              \osInStack{\opscope, \osMC{Push} \;\olbl}, \ostack, \oheap \osTransition
+              \osInStack{\opscope', \opscope, \osMC{Push} \;\olbl}, \ostack, \oheap \osTransition
               \osInStack{}, [\osLR{\opscope', \olbl}] \listConcat \ostack, \oheap'
           }
         \end{mathpar}
@@ -369,7 +369,7 @@
         \begin{mathpar}
           \relationRule{Call function \omem}{
             \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
-            \omstack' = [\opscope, \osMC{Push} \;\olbl, \opscope, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope, \omem_n, \ovariable_n, \osMC{Bind}]
+            \omstack' = [\osMC{Alloc}, \opscope, \osMC{Push} \;\olbl, \opscope, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope, \omem_n, \ovariable_n, \osMC{Bind}]
           }{
             \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
             \osInStack{\omstack'}, \ostack, \oheap
@@ -389,7 +389,7 @@
         \begin{mathpar}
           \relationRule{Retrieve \ovariable \, from \ovalue}{
               \omem = \ovalue[\ovariable] \\
-              \omstack' = [\osMC{Alloc}, \omem, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}]
+              \omstack' = [omem]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Retrieve}}, \ostack, \oheap \osTransition
               \osInStack{\omstack'}, \ostack, \oheap
@@ -773,7 +773,7 @@
       \begin{mathpar}
         \relationRule{Push}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \osMC{Push}\;\olbl'}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\opscope', \opscope, \osMC{Push}\;\olbl'}, \gtime} \\
             \gnode_3 = \gsLR{\genter \olbl, \gtime + 1}
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gsLR{\olbl', \osInStack{}, \gtime + 2}}
@@ -786,7 +786,7 @@
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Pop}}, \gtime} \\
             \gnode_3 = \gsLR{\gleave \olbl', \gtime + 1} \\
             \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
-            \gnode_1' = \gsBefore \gnode_0' \\
+            \gnode_1' \gsBefore \gnode_0' \\
             \gnode_4 = \gsLR{\olbl', \osInStack{}, \gtime + 2}
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gnode_4, \gnode_1' \gsSkip \gnode_4}
@@ -810,9 +810,10 @@
             \olbl \osBefore{\oprogram} \osplat \\
             % \gnode_3 = \gsLR{\gleave \olbl', \gtime + 1} \\
             \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
-            \gsLR{\olbl'', \omstack, \gtime' - 1} = \gnode_1' = \gsBefore \gnode_0' \\
+            \gsLR{\olbl'', \omstack'', \gtime' - 1} = \gnode_1' \gsBefore \gnode_0' \\
+            \opscope = \osFunc{GetScope}(\gnode_1') \\
             \oprogram(\olbl'') = \olbl'':\oglbl''': \ovariable \gteq \oexpr \\
-            \omstack' = [\osMC{Pop}, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
+            \omstack' = [\osMC{Pop}, \opscope, \omem_{\osnone}, \ovariable, \osMC{Bind},  \osMC{Advance}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -851,21 +852,21 @@
       \begin{mathpar}
         \relationRule{Raise (no exception label)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Raise}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \osMC{Raise}}, \gtime} \\
             \oprogram(\olbl) = \olbl:\osplat: \odirective \\
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{Pop}, \osMC{Raise}}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{Pop}, \omem, \osMC{Raise}}, \gtime + 1}}
         }
       \end{mathpar}
 
       \begin{mathpar}
         \relationRule{Raise (caught)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Raise}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \osMC{Raise}}, \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl': \odirective \\
             \oprogram(\olbl') = \olbl':\oglbl'': \okw{catch} \ovariable
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\ovariable, \osMC{Bind}, \osMC{Advance}}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl', \osInStack{\omem, \ovariable, \osMC{Bind}, \osMC{Advance}}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -926,7 +927,7 @@
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \gtime} \\
             \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
-            \omstack' = [\opscope, \osMC{Push} \;\olbl, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \omem_n, \ovariable_n, \osMC{Bind}]
+            \omstack' = [\osMC{Alloc}, \opscope, \osMC{Push} \;\olbl, \opscope, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope, \omem_n, \ovariable_n, \osMC{Bind}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -946,9 +947,10 @@
         \relationRule{Retrieve \ovariable}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve}}, \gtime} \\
-            \omem = \ovalue[\ovariable]
+            \omem = \ovalue[\ovariable] \\
+            \omstack' = [\osMC{Alloc}, \omem, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}]
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -1074,7 +1076,7 @@
         \relationRule{Attribute Assignment}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-            \omstack = [\ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+            \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }
@@ -1195,5 +1197,18 @@
             \gnode_1 \gsPrecede \gnode_2 & \iff \gnode_1 \gsBefore \gnode_2 \text{ or } \gnode_1 \gsSkip \gnode_2 \\
             \gsFunc{Startof}(\gnode_n) = \gnode_0 & \iff \gsSet{\gnode_0 \gsPrecede \gnode_1 \gsPrecede \ldots \gsPrecede \gnode_n} \in \ggraph, \text{where } \nexists \; \gnode_i \text{ of form } \gsLR{\genter \olbl', \gtime} \text{ or } \gsLR{\gleave \olbl', \gtime'}
           \end{flalign*}
+      \end{definition}
+      \begin{definition}[Wrap Object]
+          %
+      \end{definition}
+      \begin{definition}[Get Scope]
+        Let $\gnode' = \gsFunc{Startof}(\gnode)$ in
+        \begin{flalign*}
+          \gsFunc{GetScope}(\gnode) =
+          \begin{cases}
+            \opscope, & \text{if } \gsLR{\olbl, \osInStack{\opscope', \opscope, \osMC{Push}}, \gtime} \gsBefore \gnode' \\
+            \osInit{\opscope}, & \text{if } \gsstart \gsBefore \gnode' \\
+          \end{cases}
+        \end{flalign*}
       \end{definition}
 \end{document}
