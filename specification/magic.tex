@@ -4,8 +4,24 @@
 \gor    \osMC{Neg}
 \gor    \osMC{StrConcat}
 \gor    \osMC{StrContains}
-\gor    \osMC{Contains}
+\gor    \osMC{Getitem}
+% \gor    \osMC{Contains}
 %</micro>
+
+%<*grimoire>
+  \gor    \osMagic{IntAdd}
+  \gor    \osMagic{IntNeg}
+  \gor    \osMagic{StrAdd}
+  \gor    \osMagic{StrContains}
+  \gline
+  % \gor    \osMagic{LstIter}
+  % \gor    \osMagic{LstContains}
+  \gor    \osMagic{LstGetitem}
+  % \gor    \osMagic{TplIter}
+  % \gor    \osMagic{TplContains}
+  % \gline
+  \gor    \osMagic{TplGetitem}
+%</grimoire>
 
 %<*assertions>
 \begin{mathpar}
@@ -103,7 +119,7 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{StrConcat \ovalue}{
+  \relationRule{StrConcat \ovalue \; \ovalue}{
     \ovalue = \ovalue_1 \strConcat \ovalue_2
   }{
     \osInStack{\ovalue_1, \ovalue_2, \osMC{StrConcat}}, \ostack, \oheap \osTransition
@@ -126,16 +142,37 @@
 
 \tnote{Iters do not exist yet.}
 
+% \begin{mathpar}
+%   \relationRule{Contains \ovalue}{
+%     \ovalue =
+%     \begin{cases}
+%       \ostrue, & \text{if } \ovalue_2 \in \ovalue_1 \cr
+%       \osfalse, & \text{otherwise}
+%     \end{cases}
+%   }{
+%     \osInStack{\ovalue_1, \ovalue_2, \osMC{Contains}}, \ostack, \oheap \osTransition
+%     \osInStack{\ovalue}, \ostack, \oheap
+%   }
+% \end{mathpar}
+
 \begin{mathpar}
-  \relationRule{Contains \ovalue}{
-    \ovalue =
-    \begin{cases}
-      \ostrue, & \text{if } \ovalue_2 \in \ovalue_1 \cr
-      \osfalse, & \text{otherwise}
-    \end{cases}
+  \relationRule{Getitem \ovalue}{
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] \;|\; (\omem_1, \ldots, \omem_n) \\
+    0 \le \ovalue_2 \le n \\
+    \omstack' = [\omem_{\ovalue_2}, \osMC{Get}]
   }{
-    \osInStack{\ovalue_1, \ovalue_2, \osMC{Contains}}, \ostack, \oheap \osTransition
-    \osInStack{\ovalue}, \ostack, \oheap
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Getitem (out of bound)}{
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] | (\omem_1, \ldots, \omem_n) \\
+    0 > \ovalue_2 \;|\; \ovalue > n
+  }{
+    \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \ostack, \oheap \osTransition
+    [\osMC{AllocIndexError}, osMC{Raise}], \ostack, \oheap
   }
 \end{mathpar}
 %</binop>
@@ -165,13 +202,17 @@
   \osDuoMagic {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {}
 \end{mathpar}
 
-\begin{mathpar}
-  \osDuoMagic {LstContains} {\osMem{LstType}} {} {} {\osMC{Contains}} {}
-\end{mathpar}
+% \begin{mathpar}
+%   \osDuoMagic {LstContains} {\osMem{LstType}} {} {} {\osMC{Contains}} {}
+% \end{mathpar}
 
 \begin{mathpar}
-  \osDuoMagic {TplContains} {\osMem{TplType}} {} {} {\osMC{Contains}} {}
+  \osDuoMagic {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {}
 \end{mathpar}
+
+% \begin{mathpar}
+%   \osDuoMagic {TplContains} {\osMem{TplType}} {} {} {\osMC{Contains}} {}
+% \end{mathpar}
 %</op>
 
 %<*graph>

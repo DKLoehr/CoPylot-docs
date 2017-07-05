@@ -40,6 +40,6 @@ add getscope func       DONE
 fix magics              DONE
 Q Advance Pop, Raise, Assign, Attr Assign, Return - no scope to bind to?
 add bool                DONE
-breakdown magic
-Assert type
+breakdown magic         DONE
+Assert type             DONE
 Sum micro-instructions
