@@ -35,7 +35,7 @@ mod getobj              DONE
 
 === 7.5 ===
 2 args for PUSH         DONE
-mod graph
+mod graph               DONE
 add Wrap() to graph
-add getscope func
+add getscope func       DONE
 Q Advance Pop, Raise, Assign, Attr Assign, Return - no scope to bind to?

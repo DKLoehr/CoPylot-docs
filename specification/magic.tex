@@ -4,6 +4,8 @@
     \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{Z} \\
     \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{Z} \\
     \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
@@ -16,6 +18,8 @@
     \ovalue = \osMagic{IntNeg} \\
     \ovalue' = \oheap[\omem][\ostarvalue{value}] = \mathbb{Z} \\
     \ovalue_{\texttt{neg}} = -(\ovalue') \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\ovalue_{\texttt{neg}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \osMC{Call} \;1}, \ostack, \oheap \osTransition
@@ -29,6 +33,8 @@
     \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{S} \\
     \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{S} \\
     \ovalue_{\texttt{concat}} = \ovalue_1 \strConcat \ovalue_2 \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\ovalue_{\texttt{concat}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
@@ -46,6 +52,8 @@
       \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
       \osfalse, & \text{otherwise}
     \end{cases} \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
@@ -64,6 +72,8 @@
       \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
       \osfalse, & \text{otherwise}
     \end{cases} \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \omem', \osMC{Call} \;2}, \ostack, \oheap \osTransition
