@@ -142,25 +142,15 @@
 
 %<*op>
 \begin{mathpar}
-  \relationRule{IntAdd}{
-    \ovalue = \osMagic{IntAdd} \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\omem_1, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{IntType}, \osMC{Assert}, \omem_2, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMem{IntType}, \osMem{FloatType}, \osMC{Assert}, \osMC{Sum}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-  }{
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osDuoMagic {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {}
 \end{mathpar}
 
 \begin{mathpar}
   \relationRule{IntNeg}{
     \ovalue = \osMagic{IntNeg} \\
-    \ovalue' = \oheap[\omem][\ostarvalue{value}] = \mathbb{Z} \\
-    \ovalue_{\texttt{neg}} = -(\ovalue') \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{neg}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{IntType}, \osMC{Assert} \;1, \osMC{Neg}, \ovariable, \osMC{Assign}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \osMC{Call} \;1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
@@ -168,57 +158,19 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{StrAdd}{
-    \ovalue = \osMagic{StrAdd} \\
-    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{S} \\
-    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{S} \\
-    \ovalue_{\texttt{concat}} = \ovalue_1 \strConcat \ovalue_2 \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{concat}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-  }{
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osDuoMagic {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{StrContains}{
-    \ovalue = \osMagic{StrContains} \\
-    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{S} \\
-    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{S} \\
-    \ovalue_{\texttt{has}} =
-    \begin{cases}
-      \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
-      \osfalse, & \text{otherwise}
-    \end{cases} \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-  }{
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osDuoMagic {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{LstContains}{
-    \ovalue = \osMagic{LstContains} \\
-    \ovalue_1 = \oheap[\omem][\ostarvalue{value}] = [\omem_1,\omem_2,\ldots] \\
-    \ovalue_2 = \oheap[\omem'][\ostarvalue{value}] \\
-    \ovalue' = [\oheap[\omem_1],\oheap[\omem_2],\ldots] \\
-    \ovalue_{\texttt{has}} =
-    \begin{cases}
-      \ostrue, & \text{if}\; \ovalue_2 \in \ovalue_1 \cr
-      \osfalse, & \text{otherwise}
-    \end{cases} \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{has}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
-  }{
-    \osInStack{\ovalue, \omem, \omem', \osMC{Call} \;2}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osDuoMagic {LstContains} {\osMem{LstType}} {} {} {\osMC{Contains}} {}
+\end{mathpar}
+
+\begin{mathpar}
+  \osDuoMagic {TplContains} {\osMem{TplType}} {} {} {\osMC{Contains}} {}
 \end{mathpar}
 %</op>
 
