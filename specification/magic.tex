@@ -148,13 +148,25 @@
 \end{mathpar}
 
 \begin{mathpar}
+  \relationRule{Call}{
+    \ovalue = \osMagic{Call} \\
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Call}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\tnote{magic call to be updated}
+
+\begin{mathpar}
   \relationRule{Type}{
     \ovalue = \osMagic{Type} \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
-    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;n+1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}

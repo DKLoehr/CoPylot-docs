@@ -51,5 +51,5 @@ add type()              DONE
 make macros for magic   DONE
 fix call rules          DONE
 add magic graph rules   DONE
-fix retrieve
+fix retrieve            DONE
 get rid of boolean
