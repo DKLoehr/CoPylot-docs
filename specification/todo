@@ -42,4 +42,9 @@ Q Advance Pop, Raise, Assign, Attr Assign, Return - no scope to bind to?
 add bool                DONE
 breakdown magic         DONE
 Assert type             DONE
-Sum micro-instructions
+Sum micro-instructions  DONE (sort of)
+
+=== 7.6 ===
+fix getitem             DONE
+assert magic arguments
+get rid of boolean

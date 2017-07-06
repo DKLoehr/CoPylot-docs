@@ -172,12 +172,23 @@
     0 > \ovalue_2 \;|\; \ovalue > n
   }{
     \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \ostack, \oheap \osTransition
-    [\osMC{AllocIndexError}, osMC{Raise}], \ostack, \oheap
+    [\osMC{AllocIndexError}, \osMC{Raise}], \ostack, \oheap
   }
 \end{mathpar}
 %</binop>
 
 %<*op>
+\begin{mathpar}
+  \relationRule{Wrong Number of Args}{
+    \ovalue = \omagicm \\
+    \osFunc{CheckArgs}(\ovalue, n) = \osfalse \\
+    \omstack' = [\osMC{AllocTypeError}, \osMC{Raise}]
+  }{
+    \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition%
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
 \begin{mathpar}
   \osDuoMagic {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {}
 \end{mathpar}
@@ -185,6 +196,7 @@
 \begin{mathpar}
   \relationRule{IntNeg}{
     \ovalue = \osMagic{IntNeg} \\
+    \osFunc{CheckArgs}(\ovalue, 1) = \ostrue \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{IntType}, \osMC{Assert} \;1, \osMC{Neg}, \ovariable, \osMC{Assign}, \osMC{Advance}]
@@ -207,13 +219,43 @@
 % \end{mathpar}
 
 \begin{mathpar}
-  \osDuoMagic {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {}
+  \relationRule{LstGetitem}{
+    \ovalue = \osMagic{LstGetitem} \\
+    \osFunc{CheckArgs}(\ovalue, 2) = \ostrue \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
+    \omstack' = [\opscope, \omem_1, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{LstType}, \osMC{Assert} \;1, \omem_2, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMem{IntType}, \osMC{Assert} \;1, \osMC{Getitem}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition%
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
 \end{mathpar}
 
 % \begin{mathpar}
 %   \osDuoMagic {TplContains} {\osMem{TplType}} {} {} {\osMC{Contains}} {}
 % \end{mathpar}
 %</op>
+
+%<*helper>
+\begin{definition}[Magic argument check]
+  \begin{flalign*}
+    \osFunc{CheckArgs}(\ovalue, n) =
+    \begin{cases}
+      \ostrue, & \text{if } (\ovalue, n) =
+        \begin{cases}
+          (\osMagic{IntAdd}, 2) \\
+          (\osMagic{IntNeg}, 1) \\
+          (\osMagic{StrAdd}, 2) \\
+          (\osMagic{StrContains}, 2) \\
+          (\osMagic{LstGetitem}, 2) \\
+          (\osMagic{TplGetitem}, 2) \\
+        \end{cases}
+      \\
+      \osfalse, & \text{otherwise}
+    \end{cases}
+  \end{flalign*}
+\end{definition}
+%</helper>
 
 %<*graph>
 \begin{mathpar}
