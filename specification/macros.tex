@@ -129,6 +129,7 @@
 \defgn{omem}{m}
 \defgn{ogmem}{\overset{\star}{m}}
 \defgn{oexpr}{e}
+\defgn{oq}{\texttt{"}}
 % Function related
 \defgn{ofuncarr}{\rightarrow}
 \defgn{omagicf}{\mathfrak{F}}
@@ -173,7 +174,7 @@
 \newcommand{\osType}[1]{\text{\textsmaller{{\color{type}\sc #1}}}}
 \newcommand{\osMagic}[1]{\text{{\color{magic}\sc $\mathfrak{#1}$}}}
 % -fix
-\newcommand{\ostarvalue}[1]{\star \ovariable_{\texttt{#1}}}
+\newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
 \newcommand{\osInit}[1]{#1_{\text{\textsmaller{{\sc Init}}}}}
 \newcommand{\osMem}[1]{\omem_{\texttt{#1}}}
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
@@ -236,7 +237,7 @@
     %
     \ifthenelse {\equal{#8}{2}} {\omem_1, \omem_2, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
     %
-    \osMC{Call} \;#8], \listConcat \omstack, \ostack, \oheap \osTransition%
+    \opscope, \osMC{Call} \;#8], \listConcat \omstack, \ostack, \oheap \osTransition%
     \osInStack{\omstack'}, \ostack, \oheap%
   }%
 }
@@ -249,10 +250,10 @@
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
     %
     \ifthenelse {\equal{#8}{2}} {%
-      \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \gtime}%
+      \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \gtime}%
     } {%
       \ifthenelse {\equal{#8}{1}} {%
-        \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem \osMC{Call} \;1}, \gtime} %
+        \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} %
       } {}%
     }%
     \\%

@@ -49,5 +49,7 @@ fix getitem             DONE
 assert magic arguments  DONE
 add type()              DONE
 make macros for magic   DONE
-fix call rules
+fix call rules          DONE
+add magic graph rules   DONE
+fix retrieve
 get rid of boolean

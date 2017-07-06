@@ -115,7 +115,7 @@
 
 \begin{mathpar}
   \relationRule{Getitem \ovalue}{
-    \ovalue_1 = [\omem_0, \ldots, \omem_n] \;|\; (\omem_1, \ldots, \omem_n) \\
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] \;|\; (\omem_0, \ldots, \omem_n) \\
     0 \le \ovalue_2 \le n \\
     \omstack' = [\omem_{\ovalue_2}, \osMC{Get}]
   }{
@@ -126,7 +126,7 @@
 
 \begin{mathpar}
   \relationRule{Getitem (out of bound)}{
-    \ovalue_1 = [\omem_0, \ldots, \omem_n] | (\omem_1, \ldots, \omem_n) \\
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] | (\omem_0, \ldots, \omem_n) \\
     0 > \ovalue_2 \;|\; \ovalue > n
   }{
     \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \ostack, \oheap \osTransition
@@ -142,7 +142,7 @@
     \osFunc{CheckArgs}(\ovalue, n) = \osfalse \\
     \omstack' = [\osMC{AllocTypeError}, \osMC{Raise}]
   }{
-    \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition%
+    \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n}, \ostack, \oheap \osTransition%
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
@@ -150,12 +150,11 @@
 \begin{mathpar}
   \relationRule{Type}{
     \ovalue = \osMagic{Type} \\
-    \osFunc{CheckArgs}(\ovalue, 1) = \ostrue \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
     \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
-    \osInStack{\ovalue, \omem, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
@@ -243,7 +242,103 @@
 \end{mathpar}
 %</graph-assertions>
 
+%<*graph-binop>
+\begin{mathpar}
+  \relationRule{Sum \ovalue \; \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue_1, \ovalue_2, \osMC{Sum}}, \gtime} \\
+    \ovalue = \ovalue_1 + \ovalue_2
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Neg \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Neg}}, \gtime} \\
+    \ovalue' = -(\ovalue)
+  }{
+    \osInStack{\ovalue, \osMC{Neg}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrConcat \ovalue \; \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue_1, \ovalue_2, \osMC{StrConcat}}, \gtime} \\
+    \ovalue = \ovalue_1 \strConcat \ovalue_2
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{StrContains \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue_1, \ovalue_2, \osMC{StrContains}}, \gtime} \\
+    \ovalue =
+    \begin{cases}
+      \ostrue, & \text{if } \ovalue_2 \text{ is a substring of } \ovalue_1 \cr
+      \osfalse, & \text{otherwise}
+    \end{cases}
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Getitem \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \gtime} \\
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] \;|\; (\omem_0, \ldots, \omem_n) \\
+    0 \le \ovalue_2 \le n \\
+    \omstack' = [\omem_{\ovalue_2}, \osMC{Get}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Getitem (out of bound)}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue_1, \ovalue_2, \osMC{Getitem}}, \gtime} \\
+    \ovalue_1 = [\omem_0, \ldots, \omem_n] | (\omem_0, \ldots, \omem_n) \\
+    0 > \ovalue_2 \;|\; \ovalue > n
+    \omstack' = [\osMC{AllocIndexError}, \osMC{Raise}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+%</graph-binop>
+
 %<*graph-op>
+\begin{mathpar}
+  \relationRule{Wrong Number of Args}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n}, \gtime} \\
+    \ovalue = \omagicm \;|\; \omagicf \\
+    \osFunc{CheckArgs}(\ovalue, n) = \osfalse \\
+    \omstack' = [\osMC{AllocTypeError}, \osMC{Raise}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Type}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} \\
+    \ovalue = \osMagic{Type} \\
+    \opscope = \gsFunc{Scopeof}(\gnode_2) \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
+    \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
 \begin{mathpar}
   \osCastGraph {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
 \end{mathpar}
