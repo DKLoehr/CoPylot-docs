@@ -58,5 +58,7 @@ add bool()
   micro-instruction     DONE
   helper                DONE
 fix GOTOIFN             DONE
+fix makeobj             DONE
+add getattribute()
 fix get() in graph
 get rid of boolean

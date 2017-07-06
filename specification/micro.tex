@@ -607,10 +607,10 @@
 
       % GetObj
       \begin{definition}
-        Let $ \obinding_{\texttt{obj}} = \{
-            \ostarvalue{value} \mapsto \omem', \text{\osClown{getattribute}} \mapsto \osMem{Getattribute} \}, % the base object
-        $ \\
-        $\Delta = [\omem, \obinding_{\texttt{obj}}, \osMC{Store}], \Gamma = [\omem, \osMC{Get}]$
+        Let $ \obinding_{\texttt{obj}} = \{\;\},$
+        $\Delta = [\omem, \obinding_{\texttt{obj}}, \osMC{Store}, \omem', \ostarvalue{value}, \osMC{Bind}, \omem, \\
+        \osMC{Alloc}, \osLR{\omem, \osMagic{Getattribute}}, \osMC{Store}, \osClown{getattribute}, \osMC{Bind}],
+        \Gamma = [\omem, \osMC{Get}]$
         in
           \begin{equation}
             \osWrap (\omem, \omem', \ovalue) =
@@ -1202,7 +1202,7 @@
 
           \begin{itemize}
             \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
-                      \gnode_1 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Store}}, \gtime},
+                      \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovalue, \osMC{Store}}, \gtime},
                       \omem = \gsFunc{Alloc}(\gnode_1)$,
                   then $\gvset \supseteq \gsSet{\ovalue}$.
           \end{itemize}
