@@ -8,6 +8,7 @@ update ADVANCE
 
 === future ===
 define BOOLEAN!!
+if *value doesn't exist, need to do other things
 
 === 6.30 ===
 mod attr assign to wrap DONE
@@ -51,5 +52,11 @@ make macros for magic   DONE
 fix call rules          DONE
 add magic graph rules   DONE
 fix retrieve            DONE
-add call()
+add call()              DONE
+add bool()
+  magic                 DONE
+  micro-instruction     DONE
+  helper                DONE
+fix GOTOIFN             DONE
+fix get() in graph
 get rid of boolean

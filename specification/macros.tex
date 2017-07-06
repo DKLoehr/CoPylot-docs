@@ -193,7 +193,7 @@
   }%
 }
 
-\newcommand{\osAssertGraph}[3]{
+\newcommand{\gsAssert}[3]{
   % #1: name, #2: value set, #3: type
   \relationRule{Assert #1}{%
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
@@ -242,7 +242,7 @@
   }%
 }
 
-\newcommand{\osCastGraph}[8]{
+\newcommand{\gsCast}[8]{
   % #1: magic name, #2: first type, #3: second type list
   % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack,
   % #7: bind/assign #8: arg number

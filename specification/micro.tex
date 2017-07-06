@@ -49,7 +49,7 @@
               \gor    \obinding % B
               \gor    \ogenf
               \gor    \ogenm
-              % \gor    \osnone
+              \gor    \osnone
               \gor    \osplat
           }
 
@@ -443,6 +443,7 @@
       \end{mathpar}
 
       \ExecuteMetaData [magic]{assertions}
+      \ExecuteMetaData [magic]{unop}
       \ExecuteMetaData [magic]{binop}
 
       \subsection{Rules}
@@ -578,7 +579,7 @@
         \begin{mathpar}
           \relationRule{GotoIfNot}{
               \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-              \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
+              \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -1013,6 +1014,7 @@
       \end{mathpar}
 
       \ExecuteMetaData [magic]{graph-assertions}
+      \ExecuteMetaData [magic]{graph-unop}
       \ExecuteMetaData [magic]{graph-binop}
 
       \subsection{Rules}
@@ -1158,7 +1160,7 @@
         \relationRule{GotoIfNot}{
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} \\
             \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-            \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
+            \omstack = [\ovariable, \osMC{Lookup}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Gotoifn} \;\olbl'']
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }

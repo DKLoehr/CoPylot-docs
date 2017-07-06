@@ -57,6 +57,19 @@
 \end{mathpar}
 %</assertions>
 
+%<*unop>
+\begin{mathpar}
+  \relationRule{Bool \ovalue}{
+    \ovalue' = \osFunc{Bool}(\ovalue)
+  }{
+    \osInStack{\ovalue, \osMC{Bool}}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\tnote{All those related to Bool should be handled in simplification, not here.}
+%</unop>
+
 %<*binop>
 \begin{mathpar}
   \relationRule{Sum \ovalue \; \ovalue}{
@@ -173,6 +186,16 @@
 \end{mathpar}
 
 \begin{mathpar}
+  \relationRule{Bool}{
+    \ovalue = \osMagic{Bool} \\
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Bool}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
   \osCast {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
 \end{mathpar}
 
@@ -221,27 +244,37 @@
     \end{cases}
   \end{flalign*}
 \end{definition}
+
+\begin{definition}[Bool Evaluation]
+  \begin{flalign*}
+    \osFunc{Bool}(\ovalue) =
+    \begin{cases}
+      \osfalse, & \text{if } \ovalue \in \{0,\texttt{"\;"},\osfalse,{[\;]},(\;),\osnone\} \\
+      \ostrue, & \text{otherwise}
+    \end{cases}
+  \end{flalign*}
+\end{definition}
 %</helper>
 
 %<*graph-assertions>
 \begin{mathpar}
-  \osAssertGraph {Method} {\in \ogenm} {MetType}
+  \gsAssert {Method} {\in \ogenm} {MetType}
 \end{mathpar}
 
 \begin{mathpar}
-  \osAssertGraph {Int} {\in \mathbb{Z}} {IntType}
+  \gsAssert {Int} {\in \mathbb{Z}} {IntType}
 \end{mathpar}
 
 \begin{mathpar}
-  \osAssertGraph {String} {\in \mathbb{S}} {StrType}
+  \gsAssert {String} {\in \mathbb{S}} {StrType}
 \end{mathpar}
 
 \begin{mathpar}
-  \osAssertGraph {List} {\text{ is of form } [\omem, \ldots]} {LstType}
+  \gsAssert {List} {\text{ is of form } [\omem, \ldots]} {LstType}
 \end{mathpar}
 
 \begin{mathpar}
-  \osAssertGraph {Tuple} {\text{ is of form } (\omem, \ldots)} {TplType}
+  \gsAssert {Tuple} {\text{ is of form } (\omem, \ldots)} {TplType}
 \end{mathpar}
 
 \begin{mathpar}
@@ -254,6 +287,18 @@
   }
 \end{mathpar}
 %</graph-assertions>
+
+%<*graph-unop>
+\begin{mathpar}
+  \relationRule{Bool \ovalue}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMC{Bool}}, \gtime} \\
+    \ovalue' = \osFunc{Bool}(\ovalue)
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\ovalue'}, \gtime + 1}}
+  }
+\end{mathpar}
+%</graph-unop>
 
 %<*graph-binop>
 \begin{mathpar}
@@ -340,6 +385,18 @@
 \end{mathpar}
 
 \begin{mathpar}
+  \relationRule{Call}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \gtime} \\
+    \ovalue = \osMagic{Call} \\
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
+    % For now, it calls its object's value field.
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
   \relationRule{Type}{
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
     \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} \\
@@ -353,35 +410,34 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Call}{
+  \relationRule{Bool}{
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \gtime} \\
-    \ovalue = \osMagic{Call} \\
-    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
-    % For now, it calls its object's value field.
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} \\
+    \ovalue = \osMagic{Bool} \\
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Bool}, \osMC{Advance}]
   }{
     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
   }
 \end{mathpar}
 
 \begin{mathpar}
-  \osCastGraph {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
+  \gsCast {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
 \end{mathpar}
 
 \begin{mathpar}
-  \osCastGraph {IntNeg} {\osMem{IntType}} {} {} {\osMC{Neg}} {} {a} {1}
+  \gsCast {IntNeg} {\osMem{IntType}} {} {} {\osMC{Neg}} {} {a} {1}
 \end{mathpar}
 
 \begin{mathpar}
-  \osCastGraph {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {} {a} {2}
+  \gsCast {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {} {a} {2}
 \end{mathpar}
 
 \begin{mathpar}
-  \osCastGraph {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {} {a} {2}
+  \gsCast {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {} {a} {2}
 \end{mathpar}
 
 \begin{mathpar}
-  \osCastGraph {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {} {b} {2}
+  \gsCast {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {} {b} {2}
 \end{mathpar}
 
 %</graph-op>
