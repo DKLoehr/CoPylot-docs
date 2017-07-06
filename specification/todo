@@ -7,7 +7,6 @@ split rule/language grammar
 update ADVANCE
 
 === future ===
-rmv mathpar blocks
 define BOOLEAN!!
 
 === 6.30 ===
@@ -52,4 +51,5 @@ make macros for magic   DONE
 fix call rules          DONE
 add magic graph rules   DONE
 fix retrieve            DONE
+add call()
 get rid of boolean

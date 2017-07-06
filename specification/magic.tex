@@ -150,9 +150,10 @@
 \begin{mathpar}
   \relationRule{Call}{
     \ovalue = \osMagic{Call} \\
-    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Call}, \osMC{Advance}]
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
+    % For now, it calls its object's value field.
   }{
-    \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
@@ -164,9 +165,9 @@
     \ovalue = \osMagic{Type} \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+    \omstack' = [\opscope, \omem, \osMC{Get}, \oq \osClown{class} \oq, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
-    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;n+1}, \ostack, \oheap \osTransition
+    \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
@@ -345,7 +346,19 @@
     \ovalue = \osMagic{Type} \\
     \opscope = \gsFunc{Scopeof}(\gnode_2) \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+    \omstack' = [\opscope, \omem, \osMC{Get}, \oq \osClown{class} \oq, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Call}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \gtime} \\
+    \ovalue = \osMagic{Call} \\
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
+    % For now, it calls its object's value field.
   }{
     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
   }
