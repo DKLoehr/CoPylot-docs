@@ -178,7 +178,7 @@
   \relationRule{Type}{
     \ovalue = \osMagic{Type} \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
+    \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
     \omstack' = [\opscope, \omem, \osMC{Get}, \oq \osClown{class} \oq, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
@@ -192,6 +192,18 @@
     \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Bool}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \ostack, \oheap \osTransition
+    \osInStack{\omstack'}, \ostack, \oheap
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Getattribute}{
+    \ovalue = \osMagic{Getattribute} \\
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
+    \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
+    \omstack' = [\opscope, \omem_1, \osMC{Get}, \omem_2, \osMC{Get}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+  }{
+    \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
   }
 \end{mathpar}
@@ -416,6 +428,19 @@
     \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} \\
     \ovalue = \osMagic{Bool} \\
     \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMC{Bool}, \osMC{Advance}]
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Getattribute}{
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \gtime} \\
+    \ovalue = \osMagic{Getattribute} \\
+    \opscope = \gsFunc{Scopeof}(\gnode_2) \\
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
+    \omstack' = [\opscope, \omem_1, \osMC{Get}, \omem_2, \osMC{Get}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
   }
