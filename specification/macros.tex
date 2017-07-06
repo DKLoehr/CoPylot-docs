@@ -178,20 +178,110 @@
 \newcommand{\osMem}[1]{\omem_{\texttt{#1}}}
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
 % Magic
-\newcommand{\osDuoMagic}[6]{
+\newcommand{\osAssert}[3]{
+  % #1: name, #2: value set, #3: type
+  \relationRule{Assert #1}{%
+    \omstack' =%
+    \begin{cases}%
+      [\ovalue], & \text{if}\; \ovalue #2 \cr%
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}%
+    \end{cases} %
+  }{%
+    \osInStack{\ovalue, \osMem{#3}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition%
+    \osInStack{\omstack'}, \ostack, \oheap%
+  }%
+}
+
+\newcommand{\osAssertGraph}[3]{
+  % #1: name, #2: value set, #3: type
+  \relationRule{Assert #1}{%
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMem{#3}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \gtime} \\%
+    \omstack' =%
+    \begin{cases}%
+      [\ovalue], & \text{if}\; \ovalue #2 \cr%
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}%
+    \end{cases} %
+  }{%
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}%
+  }%
+}
+
+\newcommand{\osCast}[8]{
   % #1: magic name, #2: first type, #3: second type list
-  % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack
+  % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack,
+  % #7: bind/assign #8: arg number
   \relationRule{#1}{%
     \ovalue = \osMagic{#1} \\%
-    \osFunc{CheckArgs}(\ovalue, 2) = \ostrue \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\%
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\%
     #6%
-    \omstack' = [\omem_1, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, #2, \osMC{Assert} \;1, \omem_2, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \ifthenelse {\equal{#3}{}} {} {#3, \osMC{Assert} \;#4, }\osMC{#5}, \ovariable, \osMC{Assign}, \osMC{Advance}]%
+    \omstack' = [%
+    \ifthenelse {\equal{#7}{b}} {\opscope, } {}%
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, #2, \\\\
+    \osMC{Assert} \;1, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_2, \osMC{Get}, } {}%
+    \ifthenelse {\equal{#8}{2}} {\ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ifthenelse {\equal{#3}{}} {} {#3, \osMC{Assert} \;#4, }} {}%
+    %
+    \osMC{#5}, \ovariable,%
+    %
+    \ifthenelse {\equal{#7}{b}} {\osMC{Bind}, } {\ifthenelse {\equal{#7}{a}} {\osMC{Assign}, } {}}%
+    \osMC{Advance}]%
   }{%
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition%
+    \olstack \listConcat [\ovalue, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, \omem_2, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \osMC{Call} \;#8], \listConcat \omstack, \ostack, \oheap \osTransition%
     \osInStack{\omstack'}, \ostack, \oheap%
   }%
+}
+
+\newcommand{\osCastGraph}[8]{
+  % #1: magic name, #2: first type, #3: second type list
+  % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack,
+  % #7: bind/assign #8: arg number
+  \relationRule{#1}{%
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
+    %
+    \ifthenelse {\equal{#8}{2}} {%
+      \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \gtime}%
+    } {%
+      \ifthenelse {\equal{#8}{1}} {%
+        \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem \osMC{Call} \;1}, \gtime} %
+      } {}%
+    }%
+    \\%
+    \ovalue = \osMagic{#1} \\
+    %
+    \ifthenelse {\equal{#7}{b}} {\opscope = \gsFunc{Scopeof}(\gnode_2)} {}%
+    \\
+    \gsLR{\olbl', \omstack, \gtime'} = \gsFunc{Startof}(\gnode_2) \\
+    \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
+    #6%
+    \omstack' = [%
+    \ifthenelse {\equal{#7}{b}} {\opscope, } {}%
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, #2, \\\\
+    \osMC{Assert} \;1, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_2, \osMC{Get}, } {}%
+    \ifthenelse {\equal{#8}{2}} {\ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ifthenelse {\equal{#3}{}} {} {#3, \osMC{Assert} \;#4, }} {}%
+    %
+    \osMC{#5}, \ovariable,%
+    %
+    \ifthenelse {\equal{#7}{b}} {\osMC{Bind}, } {\ifthenelse {\equal{#7}{a}} {\osMC{Assign}, } {}}%
+    \osMC{Advance}]%
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+
 }
 
 % Used in main

@@ -46,5 +46,8 @@ Sum micro-instructions  DONE (sort of)
 
 === 7.6 ===
 fix getitem             DONE
-assert magic arguments
+assert magic arguments  DONE
+add type()              DONE
+make macros for magic   DONE
+fix call rules
 get rid of boolean

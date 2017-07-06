@@ -125,8 +125,6 @@
                       \osLR{ \omem, \ogenf } % < m, F >
           }
           \grule[magic functions]{\omagicf, \omagicm}{
-                      \osMagic{Call}
-              \gor    \osMagic{Type}
               \ExecuteMetaData [magic]{grimoire}
           }
           \grule[integers]{n}{}
@@ -350,8 +348,8 @@
           \relationRule{Convert Function \ovalue}{
               \ovalue = \ogenf \\
           }{
-              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n}, \ostack, \oheap \osTransition
-              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap
+              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope, \osMC{Convert} \;n}, \ostack, \oheap \osTransition
+              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n}, \ostack, \oheap
           }
         \end{mathpar}
 
@@ -360,26 +358,26 @@
               \ovalue = \osLR{ \omem_0, \ogenf } \\
               \ovalue' = \ogenf \\
           }{
-              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Convert} \;n}, \ostack, \oheap \osTransition
-              \osInStack{\ovalue', \omem_0, \omem_1, \ldots, \omem_n, \osMC{Call} \;n+1}, \ostack, \oheap
+              \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope, \osMC{Convert} \;n}, \ostack, \oheap \osTransition
+              \osInStack{\ovalue', \omem_0, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \ostack, \oheap
           }
         \end{mathpar}
 
         \begin{mathpar}
           \relationRule{Call function \omem}{
-            \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
-            \omstack' = [\osMC{Alloc}, \opscope, \osMC{Push} \;\olbl, \opscope, \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope, \omem_n, \ovariable_n, \osMC{Bind}]
+            \ovalue = \osLR{\opscope, \okw{def}(\ovariable_1, \ldots, \ovariable_n) \ofuncarr \olbl } \\
+            \omstack' = [\opscope', \opscope, \osMC{Push} \;\olbl, \opscope', \omem_1, \ovariable_1, \osMC{Bind}, \ldots, \opscope', \omem_n, \ovariable_n, \osMC{Bind}]
           }{
-            \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
+            \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope', \osMC{Call} \;n}, \ostack, \oheap \osTransition
             \osInStack{\omstack'}, \ostack, \oheap
           }
         \end{mathpar}
 
         \begin{mathpar}
           \relationRule{Call function (wrong args)}{
-            \ovalue = \osLR{ \opscope,\okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \olbl }, q \neq n
+            \ovalue = \osLR{\opscope, \okw{def}(\ovariable_1, \ldots, \ovariable_q) \ofuncarr \olbl }, q \neq n
           }{
-            \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \osMC{Call} \;n}, \ostack, \oheap \osTransition
+            \osInStack{\ovalue, \omem_1, \ldots, \omem_n, \opscope', \osMC{Call} \;n}, \ostack, \oheap \osTransition
             [\osMC{AllocTypeError}, \osMC{Raise}], \ostack, \oheap
           }
         \end{mathpar}
@@ -518,7 +516,7 @@
         \begin{mathpar}
           \relationRule{Call Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_0(\ovariable_1,\ldots,\ovariable_n) \\
-              \omstack = [\ovariable_0, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Convert} \;n]
+              \omstack = [\ovariable_0, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ovariable_1, \osMC{LookUp}, \ldots, \ovariable_n, \osMC{LookUp}, \osMC{Alloc}, \osMC{Convert} \;n]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -1014,6 +1012,8 @@
         }
       \end{mathpar}
 
+      \ExecuteMetaData [magic]{graph-assertions}
+
       \subsection{Rules}
 
       \begin{mathpar}
@@ -1164,7 +1164,7 @@
       \end{mathpar}
 
       \subsection{Magic}
-          \ExecuteMetaData [magic]{graph}
+          \ExecuteMetaData [magic]{graph-op}
 
       \subsection{Helper Functions}
 

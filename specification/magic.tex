@@ -9,6 +9,9 @@
 %</micro>
 
 %<*grimoire>
+          \osMagic{Call}
+  \gor    \osMagic{Type}
+  \gor    \osMagic{Bool}
   \gor    \osMagic{IntAdd}
   \gor    \osMagic{IntNeg}
   \gor    \osMagic{StrAdd}
@@ -25,68 +28,23 @@
 
 %<*assertions>
 \begin{mathpar}
-  \relationRule{Assert Method}{
-    \omstack' =
-    \begin{cases}
-      [\ovalue], & \text{if}\; \ovalue \in \ogenm \cr
-      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{MetType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osAssert {Method} {\in \ogenm} {MetType}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Assert Int}{
-    \omstack' =
-    \begin{cases}
-      [\ovalue], & \text{if}\; \ovalue \in \mathbb{Z} \cr
-      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{IntType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osAssert {Int} {\in \mathbb{Z}} {IntType}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Assert String}{
-    \omstack' =
-    \begin{cases}
-      [\ovalue], & \text{if}\; \ovalue \in \mathbb{S} \cr
-      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{StrType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osAssert {String} {\in \mathbb{S}} {StrType}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Assert List}{
-    \omstack' =
-    \begin{cases}
-      [\ovalue], & \text{if}\; \ovalue \text{ is of form } [\omem, \ldots] \cr
-      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{LstType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osAssert {List} {\text{ is of form } [\omem, \ldots]} {LstType}
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Assert Tuple}{
-    \omstack' =
-    \begin{cases}
-      [\ovalue], & \text{if}\; \ovalue \text{ is of form } (\omem, \ldots) \cr
-      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}
-    \end{cases} \\
-  }{
-    \osInStack{\ovalue, \osMem{TplType}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osAssert {Tuple} {\text{ is of form } (\omem, \ldots)} {TplType}
 \end{mathpar}
 
 \begin{mathpar}
@@ -180,7 +138,7 @@
 %<*op>
 \begin{mathpar}
   \relationRule{Wrong Number of Args}{
-    \ovalue = \omagicm \\
+    \ovalue = \omagicm \;|\; \omagicf \\
     \osFunc{CheckArgs}(\ovalue, n) = \osfalse \\
     \omstack' = [\osMC{AllocTypeError}, \osMC{Raise}]
   }{
@@ -190,16 +148,12 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \osDuoMagic {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {}
-\end{mathpar}
-
-\begin{mathpar}
-  \relationRule{IntNeg}{
-    \ovalue = \osMagic{IntNeg} \\
+  \relationRule{Type}{
+    \ovalue = \osMagic{Type} \\
     \osFunc{CheckArgs}(\ovalue, 1) = \ostrue \\
     \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
     \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{IntType}, \osMC{Assert} \;1, \osMC{Neg}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+    \omstack' = [\opscope, \omem, \osMC{Get}, \ostarvalue{class}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem, \osMC{Call} \;1}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
@@ -207,11 +161,19 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \osDuoMagic {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {}
+  \osCast {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
 \end{mathpar}
 
 \begin{mathpar}
-  \osDuoMagic {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {}
+  \osCast {IntNeg} {\osMem{IntType}} {} {} {\osMC{Neg}} {} {a} {1}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCast {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {} {a} {2}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCast {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {} {a} {2}
 \end{mathpar}
 
 % \begin{mathpar}
@@ -219,16 +181,7 @@
 % \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{LstGetitem}{
-    \ovalue = \osMagic{LstGetitem} \\
-    \osFunc{CheckArgs}(\ovalue, 2) = \ostrue \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\opscope, \omem_1, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \osMem{LstType}, \osMC{Assert} \;1, \omem_2, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMem{IntType}, \osMC{Assert} \;1, \osMC{Getitem}, \ovariable, \osMC{Bind}, \osMC{Advance}]
-  }{
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition%
-    \osInStack{\omstack'}, \ostack, \oheap
-  }
+  \osCast {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {} {b} {2}
 \end{mathpar}
 
 % \begin{mathpar}
@@ -243,6 +196,7 @@
     \begin{cases}
       \ostrue, & \text{if } (\ovalue, n) =
         \begin{cases}
+          (\osMagic{Type}, 1) \\
           (\osMagic{IntAdd}, 2) \\
           (\osMagic{IntNeg}, 1) \\
           (\osMagic{StrAdd}, 2) \\
@@ -257,20 +211,57 @@
 \end{definition}
 %</helper>
 
-%<*graph>
+%<*graph-assertions>
 \begin{mathpar}
-  \relationRule{IntAdd}{
+  \osAssertGraph {Method} {\in \ogenm} {MetType}
+\end{mathpar}
+
+\begin{mathpar}
+  \osAssertGraph {Int} {\in \mathbb{Z}} {IntType}
+\end{mathpar}
+
+\begin{mathpar}
+  \osAssertGraph {String} {\in \mathbb{S}} {StrType}
+\end{mathpar}
+
+\begin{mathpar}
+  \osAssertGraph {List} {\text{ is of form } [\omem, \ldots]} {LstType}
+\end{mathpar}
+
+\begin{mathpar}
+  \osAssertGraph {Tuple} {\text{ is of form } (\omem, \ldots)} {TplType}
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Assert (base case)}{
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-    \ovalue = \osMagic{IntAdd} \\
-    \ovalue_1 = \oheap[\omem_1][\ostarvalue{value}] = \mathbb{Z} \\
-    \ovalue_2 = \oheap[\omem_2][\ostarvalue{value}] = \mathbb{Z} \\
-    \ovalue_{\texttt{sum}} = \ovalue_1 + \ovalue_2 \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\ovalue_{\texttt{sum}}, \ovariable, \osMC{Assign}, \osMC{Advance}]
+    \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Assert} \;0}, \gtime} \\
+    \omstack' = [\osMC{AllocTypeError}, \osMC{Raise}]
   }{
-    \osInStack{\ovalue, \omem_1, \omem_2, \osMC{Call} \;2}, \ostack, \oheap \osTransition
-    \osInStack{\omstack'}, \ostack, \oheap
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
   }
 \end{mathpar}
-%</graph>
+%</graph-assertions>
+
+%<*graph-op>
+\begin{mathpar}
+  \osCastGraph {IntAdd} {\osMem{IntType}} {\osMem{IntType}, \osMem{FloatType}} {2} {\osMC{Sum}} {} {a} {2}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCastGraph {IntNeg} {\osMem{IntType}} {} {} {\osMC{Neg}} {} {a} {1}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCastGraph {StrAdd} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrConcat}} {} {a} {2}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCastGraph {StrContains} {\osMem{StrType}} {\osMem{StrType}} {1} {\osMC{StrContains}} {} {a} {2}
+\end{mathpar}
+
+\begin{mathpar}
+  \osCastGraph {LstGetitem} {\osMem{LstType}} {\osMem{IntType}} {1} {\osMC{Getitem}} {} {b} {2}
+\end{mathpar}
+
+%</graph-op>
