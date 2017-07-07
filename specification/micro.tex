@@ -50,7 +50,6 @@
               \gor    \ogenf
               \gor    \ogenm
               \gor    \osnone
-              \gor    \osplat
           }
 
           % expressions
@@ -211,21 +210,21 @@
           }
         \end{mathpar}
 
-        \begin{mathpar}
-          \relationRule{Look up \ovariable \,(bound)}{
-              \osLookup(\oheap, \opscope, \ovariable) = \omem
-          }{
-              \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-              \osInStack{\omem}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
-          }
-        \end{mathpar}
+        % \begin{mathpar}
+        %   \relationRule{Look up \ovariable \,(bound)}{
+        %       \osLookup(\oheap, \opscope, \ovariable) = \omem
+        %   }{
+        %       \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+        %       \osInStack{\omem}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+        %   }
+        % \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Look up \ovariable \,(NameError)}{
-              \osLookup(\oheap, \opscope, \ovariable) = \osplat
+          \relationRule{Look up \ovariable}{
+              \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{Retrieve'}]
           }{
               \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-              [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+              \osInStack{\omstack'}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
 
@@ -385,7 +384,8 @@
 
         \begin{mathpar}
           \relationRule{Retrieve \ovalue \, from \ovalue}{
-              \omem = \ovalue[\ovalue'] \\
+              \ovariable = \osFunc{Id}(\ovalue') \\
+              \omem = \ovalue[\ovariable] \\
               \omstack' = [\omem]
           }{
               \osInStack{\ovalue, \ovalue', \osMC{Retrieve}}, \ostack, \oheap \osTransition
@@ -395,10 +395,41 @@
 
         \begin{mathpar}
           \relationRule{Retrieve \ovariable \,(AttributeError)}{
-              \osplat = \ovalue[\ovalue']
+              \ovariable = \osFunc{Id}(\ovalue') \\
+              \osplat = \ovalue[\ovariable]
           }{
               \osInStack{\ovalue, \ovalue', \osMC{Retrieve}}, \ostack, \oheap \osTransition
               [\osMC{AllocAttrError}, \osMC{Raise}], \ostack, \oheap
+          }
+        \end{mathpar}
+
+        \begin{mathpar}
+          \relationRule{Retrieve' from \obinding \,(locally bound)}{
+              \omem = \ovalue[\ovariable] \\
+          }{
+              \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              [\omem], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+          }
+        \end{mathpar}
+
+        \begin{mathpar}
+          \relationRule{Retrieve' from \obinding \,(goto parent)}{
+              \osplat = \ovalue[\ovariable] \\
+              \opscope' = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
+          }{
+              \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              [\opscope', \osMC{Get}, \ovariable, \osMC{Retrieve'}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+          }
+        \end{mathpar}
+
+        \begin{mathpar}
+          \relationRule{Retrieve' from \obinding \,(NameError)}{
+              \obinding = \oheap[\opscope] \\
+              \osplat = \obinding[\ovariable] \\
+              \osplat = \obinding[\osFunc{Id}(\ostarvalue{parent})] \\
+          }{
+              \osInStack{\opscope, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
 
@@ -592,16 +623,23 @@
 
   \subsection{Helper Functions}
 
-      % Lookup
+      % % Lookup
+      % \begin{definition}
+      %   Let $ \obinding = \oheap[\opscope] $ in
+      %   \begin{equation}
+      %     \osLookup(\oheap,\opscope,\ovariable) =
+      %       \begin{cases}
+      %         \omem, & \text{if}\; \omem = \obinding[\ovariable] \\
+      %         \osLookup(\oheap,\opscope',\ovariable), & \text{if}\; \osplat = \obinding[\ovariable], \opscope' = \obinding[\ostarvalue{parent}] \\
+      %         \osplat, & \text{if}\; \osplat = \obinding[\ovariable], \osplat = \obinding[\ostarvalue{parent}]
+      %       \end{cases}
+      %     \end{equation}
+      % \end{definition}
+
+      % Id
       \begin{definition}
-        Let $ \obinding = \oheap[\opscope] $ in
         \begin{equation}
-          \osLookup(\oheap,\opscope,\ovariable) =
-            \begin{cases}
-              \omem, & \text{if}\; \omem = \obinding[\ovariable] \\
-              \osLookup(\oheap,\opscope',\ovariable), & \text{if}\; \osplat = \obinding[\ovariable], \opscope' = \obinding[\ostarvalue{parent}] \\
-              \osplat, & \text{if}\; \osplat = \obinding[\ovariable], \osplat = \obinding[\ostarvalue{parent}]
-            \end{cases}
+          \osFunc{Id}(\ovalue) = \text{string of } \ovalue
           \end{equation}
       \end{definition}
 
@@ -757,19 +795,9 @@
         \relationRule{Lookup}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovariable, \osMC{LookUp}}, \gtime} \\
-            \gsFunc{Lookup}(\ggraph, \gnode_2, \ovariable) \ni \omem
+            \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{Retrieve'}]
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
-        }
-      \end{mathpar}
-
-      \begin{mathpar}
-        \relationRule{Lookup (NameError)}{
-            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\ovariable, \osMC{LookUp}}, \gtime} \\
-            \gsFunc{Lookup}(\ggraph, \gnode_2, \ovariable) \niton \omem
-        }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{AllocNameError}, \osMC{Raise}}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -787,8 +815,8 @@
         \relationRule{Pop}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\osMC{Pop}}, \gtime} \\
-            \gnode_3 = \gsLR{\gleave \olbl', \gtime + 1} \\
             \gsLR{\genter \olbl', \gtime'} = \gnode_0' = \gsFunc{Startof}(\gnode_2) \\
+            \gnode_3 = \gsLR{\gleave \olbl', \gtime + 1} \\
             \gnode_1' \gsBefore \gnode_0' \\
             \gnode_4 = \gsLR{\olbl', \osInStack{}, \gtime + 2}
         }{
@@ -965,6 +993,40 @@
             \osplat = \ovalue[\ovalue']
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\osMC{AllocAttrError}, \osMC{Raise}}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Retrieve' from \obinding \,(locally bound)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \omem = \obinding[\ovariable] \\
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Retrieve' from \obinding \,(goto parent)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \osplat = \ovalue[\ovariable] \\
+            \opscope' = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
+            \omstack' = [\opscope', \osMC{Get}, \ovariable, \osMC{Retrieve'}]
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Retrieve' from \obinding \,(NameError)}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \osplat = \ovalue[\ovariable] \\
+            \osplat = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
+            \omstack' = [\osMC{AllocNameError}, \osMC{Raise}]
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -1175,27 +1237,27 @@
           Let $\gsFunc{Alloc}(\gsLR{\olbl,\omstack,\chi})$ be an injective map $M: \gsSet{\olbl, \ldots} \mapsto \gsSet{\omem, \ldots}$.
       \end{definition}
 
-      \begin{definition}[Lookup Variable]
-          Let $ \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable) = \gsSet{\ogmem, \ldots} = \gresult $ be the function returning the least set satisfying the following rules:
-
-          \begin{itemize}
-            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
-                      \gnode_1 = \gstart$,
-                  then $ \gresult \supseteq \gsSet{\osplat}$.
-            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
-                      \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable, \osMC{Bind}}, \gtime}$,
-                  then $\gresult \supseteq \gsSet{\omem}$.
-            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
-                      \gnode_1 = \gsLR{\olbl, \osInStack{}, \gtime},
-                      \omstack = [\omcode_0, \ldots],
-                      \omcode_0 \in \gsSet{\osMC{Store}, \osMC{Wrap}, \osMC{LookUp}, \osMC{Advance}}$,
-                  then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
-            \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
-                      \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable', \osMC{Bind}}, \gtime},
-                      \ovariable \neq \ovariable'$,
-                  then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
-          \end{itemize}
-      \end{definition}
+      % \begin{definition}[Lookup Variable]
+      %     Let $ \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable) = \gsSet{\ogmem, \ldots} = \gresult $ be the function returning the least set satisfying the following rules:
+      %
+      %     \begin{itemize}
+      %       \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
+      %                 \gnode_1 = \gstart$,
+      %             then $ \gresult \supseteq \gsSet{\osplat}$.
+      %       \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
+      %                 \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable, \osMC{Bind}}, \gtime}$,
+      %             then $\gresult \supseteq \gsSet{\omem}$.
+      %       \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
+      %                 \gnode_1 = \gsLR{\olbl, \osInStack{}, \gtime},
+      %                 \omstack = [\omcode_0, \ldots],
+      %                 \omcode_0 \in \gsSet{\osMC{Store}, \osMC{Wrap}, \osMC{LookUp}, \osMC{Advance}}$,
+      %             then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
+      %       \item If $\gnode_1 \gsBefore \gnode_0 \in \ggraph,
+      %                 \gnode_1 = \gsLR{\olbl, \osInStack{\omem, \ovariable', \osMC{Bind}}, \gtime},
+      %                 \ovariable \neq \ovariable'$,
+      %             then $\gresult \supseteq \gsFunc{Lookup}(\ggraph, \gnode_0, \ovariable)$.
+      %     \end{itemize}
+      % \end{definition}
 
       \begin{definition}[Get Value]
           Let $ \gsFunc{Get}(\ggraph, \gnode_0, \omem) = \gsSet{\ovalue, \ldots} = \gvset $ be the function returning the least set satisfying the following rules:

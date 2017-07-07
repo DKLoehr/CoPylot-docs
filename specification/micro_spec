@@ -1,30 +1,31 @@
 alloc:    ()        -> m
 store:    m,v       -> m
-wrap:     m,m,v     -> m,v
+wrap:     m,m,v     -> wrap()                   -> m,v
 bind:     eta,m,x   -> ()
-lookup:   x         -> m
-                       (name error)
-push l:   eta       -> ()
+lookup:   x         -> lookup()                 -> m
+                                                   (name error)
+push l:   eta,eta   -> ()
 pop:      ()        -> ()
-advance:  ()        -> eta,pop,m,x,bind,advance     -> ()
+advance:  ()        -> eta,pop,m,x,bind,advance -> ()
                        pop
                        ()
 mklst n:  m1,...,mn -> v
 mktpl n:  m1,...,mn -> v
-raise:    m         -> m,pop,raise                  -> ()
+raise:    m         -> pop,m,raise              -> ()
                        eta,m,x,bind,advance
 goto l:   ()        -> ()
-gotoifn l:v         -> goto l                       -> ()
+gotoifn l:v         -> goto l                   -> ()
                        advance
-convert n:v,m1,...,eta,mn  -> v,m1,...,mn,call n        ->
-call:     v,m1,...,eta,mn  -> eta,eta,push l,eta,m1,x1,bind,...,
-                          eta,mn,xn,bind            -> ()
-                          (type error)
+convert n:v,m1,...,mn,eta   -> v,m1,...,mn,call n
+call:     v,m1,...,mn,eta   -> eta,eta,push l,
+                               eta,m1,x1,bind,...,
+                               eta,mn,xn,bind   -> ()
+                               (type error)
 retrieve: v,v       -> m
                        (attribute error)
 get:      m         -> v
 assign:   v,x       -> eta,alloc,alloc,v,store,v,
-                       wrap,store,x,bind            -> ()
+                       wrap,store,x,bind        -> ()
 eq:       m,m       -> v
 dup:      z         -> z,z
 assert n: v,m1,...,mn      -> v,m2,...,mn

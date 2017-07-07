@@ -59,8 +59,12 @@ add bool()
   helper                DONE
 fix GOTOIFN             DONE
 fix makeobj             DONE
-add getattribute()
+add getattribute()      DONE
 fix get() in graph
 get rid of boolean
 
 === 7.7 ===
+mod LOOKUP
+  add RETRIEVE'
+define set of strings
+value to id func
