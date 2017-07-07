@@ -204,9 +204,6 @@
 
         \begin{mathpar}
           \relationRule{Bind \omem \, to \ovariable \, in \opscope}{
-              % \obinding = \oheap[\opscope] \\
-              % \obinding' = \obinding[\ovariable \mapsto \omem] \\
-              % \oheap' = \oheap[\opscope \mapsto \obinding'] \\
               \omstack' = [\opscope, \osMC{Dup}, \osMC{Get}, \omem, \ovariable, \osMC{Update}, \osMC{Store}]
           }{
               \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \ostack, \oheap \osTransition
@@ -798,8 +795,9 @@
         \relationRule{Bind}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \gtime} \\
+            \omstack' = [\opscope, \osMC{Dup}, \osMC{Get}, \omem, \ovariable, \osMC{Update}, \osMC{Store}]
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
