@@ -62,3 +62,5 @@ fix makeobj             DONE
 add getattribute()
 fix get() in graph
 get rid of boolean
+
+=== 7.7 ===

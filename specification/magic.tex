@@ -164,7 +164,7 @@
 \begin{mathpar}
   \relationRule{Call}{
     \ovalue = \osMagic{Call} \\
-    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
     % For now, it calls its object's value field.
   }{
     \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \ostack, \oheap \osTransition
@@ -199,9 +199,7 @@
 \begin{mathpar}
   \relationRule{Getattribute}{
     \ovalue = \osMagic{Getattribute} \\
-    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\
-    \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
-    \omstack' = [\opscope, \omem_1, \osMC{Get}, \omem_2, \osMC{Get}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+    \omstack' = [\osMem{Getattribute}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \omem_1, \omem_2, \osMC{Alloc}, \osMC{Convert} \;2, \osMC{Advance}]
   }{
     \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \ostack, \oheap \osTransition
     \osInStack{\omstack'}, \ostack, \oheap
@@ -402,7 +400,7 @@
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
     \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \omem_1, \ldots, \omem_n, \opscope, \osMC{Call} \;n+1}, \gtime} \\
     \ovalue = \osMagic{Call} \\
-    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
+    \omstack' = [\omem, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \omem_1, \ldots, \omem_n, \osMC{Alloc}, \osMC{Convert} \;n, \osMC{Advance}]
     % For now, it calls its object's value field.
   }{
     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
@@ -438,9 +436,7 @@
     \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
     \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \gtime} \\
     \ovalue = \osMagic{Getattribute} \\
-    \opscope = \gsFunc{Scopeof}(\gnode_2) \\
-    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\
-    \omstack' = [\opscope, \omem_1, \osMC{Get}, \omem_2, \osMC{Get}, \osMC{Retrieve}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+    \omstack' = [\osMem{Getattribute}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \omem_1, \omem_2, \osMC{Alloc}, \osMC{Convert} \;2, \osMC{Advance}]
   }{
     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
   }
