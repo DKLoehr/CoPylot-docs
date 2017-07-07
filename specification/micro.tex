@@ -66,6 +66,7 @@
               \gor    (\ovariable, \ldots) % (x, ...)
               \gor    \ovariable \okw{is} \ovariable
           }
+          \grule[strings]{\mathbb{S}}{}
           \grule[booleans]{\mathbb{B}}{
                       \ostrue
               \gor    \osfalse
@@ -91,16 +92,18 @@
               \gor    \osMC{Call} \;n
               \gor    \osMC{Convert} \;n
               \gor    \osMC{Retrieve}
+              \gor    \osMC{ScopeRetrieve}
               \gor    \osMC{Get}
+              \gline
               \gor    \osMC{Assign}
               \gor    \osMC{Eq}
               \gor    \osMC{Dup}
-              \gline
               \ExecuteMetaData [magic]{micro}
-              \gline
               \gor    \osMC{AllocNameError}
               \gor    \osMC{AllocTypeError}
+              \gline
               \gor    \osMC{AllocAttrError}
+              \gor    \osMC{AllocIndexError}
           }
           \grule[microcode literals]{\olcode}{
                       \ovariable
@@ -221,7 +224,7 @@
 
         \begin{mathpar}
           \relationRule{Look up \ovariable}{
-              \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{Retrieve'}]
+              \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{ScopeRetrieve}]
           }{
               \osInStack{\ovariable, \osMC{LookUp}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \osInStack{\omstack'}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -404,31 +407,31 @@
         \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Retrieve' from \obinding \,(locally bound)}{
+          \relationRule{ScopeRetrieve from \obinding \,(locally bound)}{
               \omem = \ovalue[\ovariable] \\
           }{
-              \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               [\omem], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Retrieve' from \obinding \,(goto parent)}{
+          \relationRule{ScopeRetrieve from \obinding \,(goto parent)}{
               \osplat = \ovalue[\ovariable] \\
               \opscope' = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
           }{
-              \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
-              [\opscope', \osMC{Get}, \ovariable, \osMC{Retrieve'}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
+              \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              [\opscope', \osMC{Get}, \ovariable, \osMC{ScopeRetrieve}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
 
         \begin{mathpar}
-          \relationRule{Retrieve' from \obinding \,(NameError)}{
+          \relationRule{ScopeRetrieve from \obinding \,(NameError)}{
               \obinding = \oheap[\opscope] \\
               \osplat = \obinding[\ovariable] \\
               \osplat = \obinding[\osFunc{Id}(\ostarvalue{parent})] \\
           }{
-              \osInStack{\opscope, \ovariable, \osMC{Retrieve'}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              \osInStack{\opscope, \ovariable, \osMC{ScopeRetrieve}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
@@ -795,7 +798,7 @@
         \relationRule{Lookup}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovariable, \osMC{LookUp}}, \gtime} \\
-            \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{Retrieve'}]
+            \omstack' = [\opscope, \osMC{Get}, \ovariable, \osMC{ScopeRetrieve}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -997,9 +1000,9 @@
       \end{mathpar}
 
       \begin{mathpar}
-        \relationRule{Retrieve' from \obinding \,(locally bound)}{
+        \relationRule{ScopeRetrieve from \obinding \,(locally bound)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, \gtime} \\
             \omem = \obinding[\ovariable] \\
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
@@ -1007,21 +1010,21 @@
       \end{mathpar}
 
       \begin{mathpar}
-        \relationRule{Retrieve' from \obinding \,(goto parent)}{
+        \relationRule{ScopeRetrieve from \obinding \,(goto parent)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, \gtime} \\
             \osplat = \ovalue[\ovariable] \\
             \opscope' = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
-            \omstack' = [\opscope', \osMC{Get}, \ovariable, \osMC{Retrieve'}]
+            \omstack' = [\opscope', \osMC{Get}, \ovariable, \osMC{ScopeRetrieve}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
       \end{mathpar}
 
       \begin{mathpar}
-        \relationRule{Retrieve' from \obinding \,(NameError)}{
+        \relationRule{ScopeRetrieve from \obinding \,(NameError)}{
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
-            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Retrieve'}}, \gtime} \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, \gtime} \\
             \osplat = \ovalue[\ovariable] \\
             \osplat = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
             \omstack' = [\osMC{AllocNameError}, \osMC{Raise}]
