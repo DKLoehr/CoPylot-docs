@@ -427,11 +427,10 @@
 
         \begin{mathpar}
           \relationRule{ScopeRetrieve from \obinding \,(NameError)}{
-              \obinding = \oheap[\opscope] \\
-              \osplat = \obinding[\ovariable] \\
-              \osplat = \obinding[\osFunc{Id}(\ostarvalue{parent})] \\
+              \osplat = \ovalue[\ovariable] \\
+              \osplat = \ovalue[\osFunc{Id}(\ostarvalue{parent})] \\
           }{
-              \osInStack{\opscope, \ovariable, \osMC{ScopeRetrieve}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
+              \osInStack{\ovalue, \ovariable, \osMC{ScopeRetrieve}}, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               [\osMC{AllocNameError}, \osMC{Raise}], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
           }
         \end{mathpar}
