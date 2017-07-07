@@ -1,7 +1,9 @@
 alloc:    ()        -> m
-store:    m,v       -> m
-wrap:     m,m,v     -> wrap()                   -> m,v
-bind:     eta,m,x   -> ()
+store:    m,v       -> ()
+wrap:     m,m,v     -> wrap()                   -> m
+bind:     eta,m,x   -> eta,dup,get,m,x,         -> ()
+                       update,store
+update:   v,m,x     -> v
 lookup:   x         -> lookup()                 -> m
                                                    (name error)
 push l:   eta,eta   -> ()
@@ -23,6 +25,8 @@ call:     v,m1,...,mn,eta   -> eta,eta,push l,
                                (type error)
 retrieve: v,v       -> m
                        (attribute error)
+scope-    v,x       -> m
+-retrieve:
 get:      m         -> v
 assign:   v,x       -> eta,alloc,alloc,v,store,v,
                        wrap,store,x,bind        -> ()

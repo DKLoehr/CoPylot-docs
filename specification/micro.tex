@@ -189,7 +189,7 @@
               \oheap' = \oheap[\omem \mapsto \ovalue]
           }{
               \osInStack{\omem, \ovalue, \osMC{Store}}, \ostack, \oheap \osTransition
-              \osInStack{\omem}, \ostack, \oheap'
+              \osInStack{}, \ostack, \oheap'
           }
         \end{mathpar}
 
@@ -204,12 +204,22 @@
 
         \begin{mathpar}
           \relationRule{Bind \omem \, to \ovariable \, in \opscope}{
-              \obinding = \oheap[\opscope] \\
-              \obinding' = \obinding[\ovariable \mapsto \omem] \\
-              \oheap' = \oheap[\opscope \mapsto \obinding']
+              % \obinding = \oheap[\opscope] \\
+              % \obinding' = \obinding[\ovariable \mapsto \omem] \\
+              % \oheap' = \oheap[\opscope \mapsto \obinding'] \\
+              \omstack' = [\opscope, \osMC{Dup}, \osMC{Get}, \omem, \ovariable, \osMC{Update}, \osMC{Store}]
           }{
               \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \ostack, \oheap \osTransition
-              \osInStack{}, \ostack, \oheap'
+              \osInStack{\omstack'}, \ostack, \oheap'
+          }
+        \end{mathpar}
+
+        \begin{mathpar}
+          \relationRule{Update \obinding}{
+              \obinding' = \obinding[\ovariable \mapsto \omem] \\
+          }{
+              \osInStack{\obinding, \omem, \ovariable, \osMC{Update}}, \ostack, \oheap \osTransition
+              \osInStack{\obinding'}, \ostack, \oheap'
           }
         \end{mathpar}
 
@@ -446,7 +456,7 @@
 
         \begin{mathpar}
           \relationRule{Assign \ovalue \! to \ovariable}{
-              \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+              \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \osMC{Dup}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \ovariable, \osMC{Bind}]
           }{
               \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap \osTransition
               \olstack \listConcat \omstack' \listConcat \omstack, \osLR{\opscope, \olbl} \listConcat \ostack, \oheap
@@ -540,7 +550,7 @@
         \begin{mathpar}
           \relationRule{Attribute Assignment}{
               \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
-              \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+              \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
           }{
               [\;], [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap \osTransition
               \omstack, [\osLR{\opscope, \olbl}] \listConcat \ostack, \oheap
@@ -645,12 +655,12 @@
           \end{equation}
       \end{definition}
 
-      % GetObj
+      % Wrap
       \begin{definition}
         Let $ \obinding_{\texttt{obj}} = \{\;\},$
-        $\Delta = [\omem, \obinding_{\texttt{obj}}, \osMC{Store}, \omem', \ostarvalue{value}, \osMC{Bind}, \omem, \\
-        \osMC{Alloc}, \osLR{\omem, \osMagic{Getattribute}}, \osMC{Store}, \osClown{getattribute}, \osMC{Bind}],
-        \Gamma = [\omem, \osMC{Get}]$
+        $\Delta = [\omem, \osMC{Dup}, \obinding_{\texttt{obj}}, \osMC{Store}, \omem', \ostarvalue{value}, \osMC{Bind}, \omem, \\
+        \osMC{Dup}, \osMC{Alloc}, \osLR{\omem, \osMagic{Getattribute}}, \osMC{Store}, \osClown{getattribute}, \osMC{Bind}],
+        \Gamma = [\omem]$
         in
           \begin{equation}
             \osWrap (\omem, \omem', \ovalue) =
@@ -669,7 +679,7 @@
                 & \osFunc{FillMet}(\omem) = \\
                 & [
                 \omem, \osMem{MetType}, \osClown{class}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{Call}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{Call}}, \osMC{Store}, \\
                 & \osClown{call}, \osMC{Bind}
                 ]
             \end{flalign*}
@@ -677,9 +687,9 @@
                 & \osFunc{FillInt}(\omem) = \\
                 & [
                 \omem, \osMem{IntType}, \osClown{class}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{IntAdd}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{IntAdd}}, \osMC{Store}, \\
                 & \osClown{add}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{IntNeg}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{IntNeg}}, \osMC{Store}, \\
                 & \osClown{neg}, \osMC{Bind}
                 ]
             \end{flalign*}
@@ -687,9 +697,9 @@
                 & \osFunc{FillStr}(\omem) = \\
                 & [
                 \omem, \osMem{StrType}, \osClown{class}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{StrAdd}}, \osMC{Store}, \\
                 & \osClown{add}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{StrContains}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{StrContains}}, \osMC{Store}, \\
                 & \osClown{contains}, \osMC{Bind}
                 ]
             \end{flalign*}
@@ -697,9 +707,9 @@
                 & \osFunc{FillLst}(\omem) = \\
                 & [
                 \omem, \osMem{LstType}, \osClown{class}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{LstIter}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{LstIter}}, \osMC{Store}, \\
                 & \osClown{iter}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{LstContains}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{LstContains}}, \osMC{Store}, \\
                 & \osClown{contains}, \osMC{Bind}
                 ]
             \end{flalign*}
@@ -707,9 +717,9 @@
                 & \osFunc{FillTpl}(\omem) = \\
                 & [
                 \omem, \osMem{TplType}, \osClown{class}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{TplIter}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{TplIter}}, \osMC{Store}, \\
                 & \osClown{iter}, \osMC{Bind}, \\
-                & \omem, \osMC{Alloc}, \osLR{\omem, \osMagic{TplContains}}, \osMC{Store}, \\
+                & \omem, \osMC{Alloc}, \osMC{Dup}, \osLR{\omem, \osMagic{TplContains}}, \osMC{Store}, \\
                 & \osClown{contains}, \osMC{Bind}
                 ]
             \end{flalign*}
@@ -770,7 +780,7 @@
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\omem, \ovalue, \osMC{Store}}, \gtime}
         }{
-            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omem}, \gtime + 1}}
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -790,6 +800,16 @@
             \gnode_2 = \gsLR{\olbl, \osInStack{\opscope, \omem, \ovariable, \osMC{Bind}}, \gtime} \\
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{}, \gtime + 1}}
+        }
+      \end{mathpar}
+
+      \begin{mathpar}
+        \relationRule{Update \obinding}{
+            \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
+            \gnode_2 = \gsLR{\olbl, \osInStack{\obinding, \omem, \ovariable, \osMC{Update}}, \gtime} \\
+            \obinding' = \obinding[\ovariable \mapsto \omem] \\
+        }{
+            \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\obinding'}, \gtime + 1}}
         }
       \end{mathpar}
 
@@ -982,7 +1002,7 @@
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovalue', \osMC{Retrieve}}, \gtime} \\
             \omem = \ovalue[\ovalue'] \\
-            \omstack' = [\osMC{Alloc}, \omem, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}]
+            \omstack' = [\omem]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -1047,7 +1067,7 @@
             \gnode_1 \gsBefore \gnode_2 \in \ggraph \\
             \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \ovariable, \osMC{Assign}}, \gtime} \\
             \opscope = \gsFunc{Scopeof}(\gnode_2) \\
-            \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}]
+            \omstack' = [\opscope, \osMC{Alloc}, \osMC{Alloc}, \osMC{Dup}, \ovalue, \osMC{Store}, \ovalue, \osMC{Wrap}, \ovariable, \osMC{Bind}]
         }{
             \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
         }
@@ -1150,7 +1170,7 @@
             \gnode \gsBefore \gsLR{\olbl, [\;], \gtime} = \gnode' \\
             \oprogram(\olbl) = \olbl:\olbl':\ovariable \gteq \ovariable_1.\ovariable_2 \\
             \opscope = \gsFunc{Scopeof}(\gnode') \\
-            \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \osMC{Store}, \ovariable, \osMC{Bind}, \osMC{Advance}]
+            \omstack = [\opscope, \osMC{Alloc}, \ovariable_1, \osMC{LookUp}, \osMC{Get}, \ovariable_2, \osMC{LookUp}, \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \\ \osMC{Get}, \osMC{Retrieve}, \osMC{Dup}, \osMC{Get}, \osMC{Wrap}, \ovariable, \osMC{Bind}, \osMC{Advance}]
         }{
             \gsAddEdge{\gnode \gsBefore \gsLR{\olbl, \omstack, \gtime + 1}}
         }

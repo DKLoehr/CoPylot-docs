@@ -64,7 +64,10 @@ fix get() in graph
 get rid of boolean
 
 === 7.7 ===
-mod LOOKUP
-  add RETRIEVE'
-define set of strings
-value to id func
+mod LOOKUP              DONE
+  add RETRIEVE'         DONE
+define set of strings   DONE
+value to id func        DONE (sort of)
+mod STORE return ()     DONE
+mod BIND                DONE
+  add UPDATE            DONE
