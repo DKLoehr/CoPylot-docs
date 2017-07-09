@@ -1,0 +1,372 @@
+\input{colors}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{xifthen}
+\usepackage{relsize}
+\usepackage{mathtools}
+\usepackage{yfonts}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{catchfilebetweentags}
+\usepackage[usenames,dvipsnames]{xcolor}
+
+% Better TT font
+\let\oldrmdefault\rmdefault
+\let\oldsfdefault\sfdefault
+\usepackage{lmodern}
+\let\rmdefault\oldrmdefault
+\let\sfdefault\oldsfdefault
+
+%%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Produces the contents of the second argument only if the first argument is
+% empty.
+\newcommand{\ifnotempty}[2]{\ifthenelse{\isempty{#1}}{}{#2}}
+
+\newcommand{\znote}[1]{\textit{\color{ForestGreen}(#1 -- ZP)}}
+\newcommand{\tnote}[1]{\textit{\color{gothamorange}(#1 -- TC)}}
+
+%%% General algebraic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\listConcat}{\ensuremath{\mathop{||}}}
+\newcommand{\strConcat}{\ensuremath{\mathop{|}}}
+
+%%% General logic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Create a relational rule
+% [#1] - Additional mathpartir arguments
+% {#2} - Name of the rule
+% {#3} - Premises for the rule
+% {#4} - Conclusions for the rule
+\newcommand{\relationRule}[4][]{\inferrule*[lab={\sc #2},#1]{#3}{#4}}
+
+\declaretheorem[within=section]{lemma}
+\declaretheorem[name=Definition,numberlike=lemma]{definition}
+\declaretheorem[name=Notation,numberlike=lemma]{notation}
+\declaretheorem[name=Theorem,numberlike=lemma]{theorem}
+
+%%% Grammar definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Defines a grammar terminal.
+% [#1] - The name of the command to define.  Defaults to "\gt#2".
+% {#2} - The text of the grammar terminal.
+\newcommand{\defgt}[2][]{%
+    \ifthenelse{\isempty{#1}}{\defgt[\defgtname{#2}]{#2}}{%
+        \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgtstyle{#2}}
+    }%
+}
+\newcommand{\defgtstyle}[1]{\mathinner{\texttt{#1}}}
+\newcommand{\defgtname}[1]{gt#1}
+
+% Defines a grammar non-terminal.
+% {#1} - The name of the command to define.
+% {#2} - The math-mode text of the command.
+\newcommand{\defgn}[2]{%
+    \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgnstyle{#2}}%
+}
+\newcommand{\defgnstyle}[1]{\ensuremath{#1}}
+
+% Defines an environment, {grammar}, for displaying language grammars.
+% Within this environment, some commands are defined:
+%   \grule[description]{non-terminal}{productions}
+%   \gor (a symbol for separating productions)
+%   \gline (a symbol for breaking a line of productions if more space is needed)
+%   \setGrammarVertAdjustment{length} (which sets the vertical adjustment for
+%                                      the next grammar newline)
+\newcommand{\grammarNoteSpace}{\hspace{4mm}}
+\newcounter{grammarnote}
+\setcounter{grammarnote}{0}
+\newcommand{\grammarDefs}{%
+    \global\def\grammarVertAdjustment{0mm}%
+    \newcommand{\gcomment}[1]{\hfill%
+        \ifnum\value{grammarnote}=0
+            \stepcounter{grammarnote}
+            \grammarNoteSpace \textrm{\textsmaller{\itshape ##1}}
+        \fi
+    }%
+    \newcommand{\grule}[3][]{%
+        \setcounter{grammarnote}{0}
+        ##2 & \ifnotempty{##3}{::=} & \newcommand{\gcommenttext}{##1} ##3 \hfill \gcomment{##1} \endgrule
+    }%
+    \newcommand{\gskip}{&&\endgrule}%
+    \def\endgrule{\\[\grammarVertAdjustment]}%
+    \newcommand{\gor}{\mathrel{\vert}}%
+    \newcommand{\gline}{%
+        \hfill \gcomment{\gcommenttext} \\[\grammarVertAdjustment] &&
+    }%
+}
+\def\grammarColPad{\quad}%
+\newenvironment{grammar}{%
+    \begingroup%
+    \grammarDefs%
+    \begin{math}\begin{array}{@{}r@{\grammarColPad}c@{\grammarColPad}l@{}}%
+}{%
+    \end{array}\end{math}%
+    \endgroup%
+}
+
+%%% CoPylot grammars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Operational semantics
+
+\defgn{olbl}{\ell}
+\defgn{oglbl}{\overset{\star}{\ell}}
+\defgn{ovalue}{v}
+\defgn{ovariable}{x}
+\defgn{odirective}{d}
+\defgn{ostmt}{s}
+\defgn{oprogram}{S}
+\defgn{ostack}{T}
+\defgn{ostackframe}{t}
+\defgn{obinding}{B}
+\defgn{oheap}{H}
+\defgn{opscope}{\eta}
+\defgn{oparent}{P}
+\defgn{omem}{m}
+\defgn{ogmem}{\overset{\star}{m}}
+\defgn{oexpr}{e}
+\defgn{oq}{\texttt{"}}
+% Function related
+\defgn{ofuncarr}{\rightarrow}
+\defgn{omagicf}{\mathfrak{F}}
+\defgn{omagicm}{\mathfrak{M}}
+\defgn{ogenf}{F}
+\defgn{ogenm}{M}
+\defgn{osplat}{\ast}
+% Code stack related
+\defgn{omstack}{Y}
+\defgn{omcode}{y}
+\defgn{olstack}{Z}
+\defgn{olcode}{z}
+
+% These are wrong and should not emerge.
+% \defgn{oenv}{E}
+% \defgn{ofunc}{fun}
+% \newcommand{\opscope}{{\color{red}\eta}}
+\newcommand{\oenv}{{\color{red}E}}
+
+\newlength\dunder
+\settowidth{\dunder}{\_}
+
+% Special
+\newcommand{\osnone}{\texttt{None}}
+\newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
+\newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
+% Relations
+\newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\osBefore}[1]{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{#1}}}{\lexicallyBefore}}}
+% Helpers
+\newcommand{\osWrap}{\text{\textsmaller{{\color{func}\sc Wrap}}}}
+\newcommand{\osGetCall}{\text{\textsmaller{{\color{func}\sc GetCall}}}}
+% Format
+\newcommand{\osLR}[1]{\langle #1 \rangle}
+\newcommand{\osI}[2]{#1 &= #2}
+\newcommand{\osInStack}[1]{\olstack \ifthenelse {\equal{#1}{}} {\listConcat} {\ifthenelse {\equal{#1}{\omstack'}}{\listConcat #1 \listConcat}{\listConcat [#1] \listConcat}} \omstack}
+% Stylize
+\newcommand{\okw}[1]{\;\text{\texttt{{\color{kw}#1}}}\;}
+\newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
+\newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+\newcommand{\osType}[1]{\text{\textsmaller{{\color{type}\sc #1}}}}
+\newcommand{\osMagic}[1]{\text{{\color{magic}\sc $\mathfrak{#1}$}}}
+% -fix
+\newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
+\newcommand{\osInit}[1]{#1_{\text{\textsmaller{{\sc Init}}}}}
+\newcommand{\osMem}[1]{\omem_{\texttt{#1}}}
+\newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
+% Magic
+\newcommand{\osAssert}[3]{
+  % #1: name, #2: value set, #3: type
+  \relationRule{Assert #1}{%
+    \omstack' =%
+    \begin{cases}%
+      [\ovalue], & \text{if}\; \ovalue #2 \cr%
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}%
+    \end{cases} %
+  }{%
+    \osInStack{\ovalue, \osMem{#3}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \ostack, \oheap \osTransition%
+    \osInStack{\omstack'}, \ostack, \oheap%
+  }%
+}
+
+\newcommand{\gsAssert}[3]{
+  % #1: name, #2: value set, #3: type
+  \relationRule{Assert #1}{%
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
+    \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \osMem{#3}, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n}, \gtime} \\%
+    \omstack' =%
+    \begin{cases}%
+      [\ovalue], & \text{if}\; \ovalue #2 \cr%
+      [\ovalue, \olcode_2, \ldots, \olcode_n, \osMC{Assert} \;n-1], & \text{otherwise}%
+    \end{cases} %
+  }{%
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}%
+  }%
+}
+
+\newcommand{\osCast}[8]{
+  % #1: magic name, #2: first type, #3: second type list
+  % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack,
+  % #7: bind/assign #8: arg number
+  \relationRule{#1}{%
+    \ovalue = \osMagic{#1} \\%
+    \ostack = [\osLR{\opscope, \olbl}] \listConcat \ostack' \\%
+    \oprogram(\olbl) = \olbl:\oglbl': \ovariable \gteq \oexpr \\%
+    #6%
+    \omstack' = [%
+    \ifthenelse {\equal{#7}{b}} {\opscope, } {}%
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, #2, \\\\
+    \osMC{Assert} \;1, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_2, \osMC{Get}, } {}%
+    \ifthenelse {\equal{#8}{2}} {\ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ifthenelse {\equal{#3}{}} {} {#3, \osMC{Assert} \;#4, }} {}%
+    %
+    \osMC{#5}, \ovariable,%
+    %
+    \ifthenelse {\equal{#7}{b}} {\osMC{Bind}, } {\ifthenelse {\equal{#7}{a}} {\osMC{Assign}, } {}}%
+    \osMC{Advance}]%
+  }{%
+    \olstack \listConcat [\ovalue, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, \omem_2, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \opscope, \osMC{Call} \;#8], \listConcat \omstack, \ostack, \oheap \osTransition%
+    \osInStack{\omstack'}, \ostack, \oheap%
+  }%
+}
+
+\newcommand{\gsCast}[8]{
+  % #1: magic name, #2: first type, #3: second type list
+  % #4: len(list), #5: MI to call, #6: other things to put before the micro-stack,
+  % #7: bind/assign #8: arg number
+  \relationRule{#1}{%
+    \gnode_1 \gsBefore \gnode_2 \in \ggraph \\%
+    %
+    \ifthenelse {\equal{#8}{2}} {%
+      \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem_1, \omem_2, \opscope, \osMC{Call} \;2}, \gtime}%
+    } {%
+      \ifthenelse {\equal{#8}{1}} {%
+        \gnode_2 = \gsLR{\olbl, \osInStack{\ovalue, \omem, \opscope, \osMC{Call} \;1}, \gtime} %
+      } {}%
+    }%
+    \\%
+    \ovalue = \osMagic{#1} \\
+    %
+    \ifthenelse {\equal{#7}{b}} {\opscope = \gsFunc{Scopeof}(\gnode_2)} {}%
+    \\
+    \gsLR{\olbl', \omstack, \gtime'} = \gsFunc{Startof}(\gnode_2) \\
+    \oprogram(\olbl') = \olbl':\oglbl'': \ovariable \gteq \oexpr \\
+    #6%
+    \omstack' = [%
+    \ifthenelse {\equal{#7}{b}} {\opscope, } {}%
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_1, } {\ifthenelse {\equal{#8}{1}} {\omem, } {}}%
+    %
+    \osMC{Get}, \ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, #2, \\\\
+    \osMC{Assert} \;1, %
+    %
+    \ifthenelse {\equal{#8}{2}} {\omem_2, \osMC{Get}, } {}%
+    \ifthenelse {\equal{#8}{2}} {\ostarvalue{value}, \osMC{Retrieve}, \osMC{Get}, \ifthenelse {\equal{#3}{}} {} {#3, \osMC{Assert} \;#4, }} {}%
+    %
+    \osMC{#5}, \ovariable,%
+    %
+    \ifthenelse {\equal{#7}{b}} {\osMC{Bind}, } {\ifthenelse {\equal{#7}{a}} {\osMC{Assign}, } {}}%
+    \osMC{Advance}]%
+  }{
+    \gsAddEdge{\gnode_2 \gsBefore \gsLR{\olbl, \osInStack{\omstack'}, \gtime + 1}}
+  }
+
+}
+
+% Used in main
+\newcommand{\osend}{\text{\textsmaller{{\color{func}\sc End}}}}
+\newcommand{\osBind}{\text{\textsmaller{{\color{func}\sc Bind}}}}
+\newcommand{\osMakeObj}{\text{\textsmaller{{\color{func}\sc MakeObj}}}}
+\newcommand{\osCatch}{\text{\textsmaller{{\color{func}\sc Catch}}}}
+\newcommand{\osLookup}{\text{\textsmaller{{\color{func}\sc Lookup}}}}
+
+%%% Graph semantics
+
+\defgn{ggraph}{G}
+\defgn{gedge}{g}
+\defgn{gnode}{a}
+\defgn{gtime}{\chi}
+\defgn{genter}{\llparenthesis}
+\defgn{gleave}{\rrparenthesis}
+\defgn{gresult}{R}
+\defgn{gvset}{V}
+
+\newcommand{\niton}{\not\owns}
+
+% Special
+\newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
+\newcommand{\gsend}{\text{\textsmaller{{\color{func}\sc End}}}}
+% Relations
+\newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\gsBefore}{\ll}
+\newcommand{\gsSkip}{\lll}
+\newcommand{\gsPrecede}{\ll \kern -4pt \ll}
+% Format
+\newcommand{\gsLR}[1]{\langle #1 \rangle}
+\newcommand{\gsSet}[1]{\{ #1 \}}
+%Stylize
+\newcommand{\gsFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+
+\newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
+
+
+
+%%% Abstract language grammar
+
+\defgt[gtcolon]{:}
+\defgt[gteq]{=}
+
+\defgt[gtintplus]{int\ensuremath{{}^{\texttt{+}}}}
+\defgt[gtintminus]{int\ensuremath{{}^{\texttt{-}}}}
+\defgt[gtintzero]{int\ensuremath{{}^{\texttt{0}}}}
+
+\newcommand{\xstmt}[3]{#1\gtcolon#2\gtcolon#3}
+
+%%% Analysis grammar
+
+\defgn{albl}{\hat{\ell}}
+\defgn{avalue}{\hat{v}}
+\defgn{avariable}{\hat{x}}
+\defgn{adirective}{\hat{d}}
+\defgn{astmt}{\hat{s}}
+\defgn{aprogram}{\hat{S}}
+
+% this will likely be replaced later when we move to a different kind of answer
+\defgn{avalues}{\hat{V}}
+
+\defgn{cfgnode}{\hat{o}}
+\defgn{cfgedge}{\hat{g}}
+\defgn{cfg}{\hat{G}}
+
+\newcommand{\gstart}{\text{\textsmaller{\sc Start}}}
+\newcommand{\gend}{\text{\textsmaller{\sc End}}}
+
+\newcommand{\before}{\mathrel{\mathrlap{<}{\ <}}}
+\newcommand{\lexicallyBefore}{\blacktriangleleft}
+
+\defgn{astackelement}{\hat{k}}
+\defgn{astack}{\hat{K}}
+
+\newcommand{\kcapture}[1]{\text{\textsmaller{\textsc{Capture}}}(#1)}
+\newcommand{\kjump}[1]{\text{\textsmaller{\textsc{Jump}}}(#1)}
+
+%%% CoPylot functions and relations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\isbefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{?}}}{\before}}}
+\newcommand{\islexicallyBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{?}}}{\lexicallyBefore}}}
+
+\newcommand{\valueLookup}[3][\cfg]{#1(#2,#3)}
+
+\newcommand{\cfgClosureStep}{\mathrel{\longrightarrow^1}}
+\newcommand{\cfgClosureSteps}{\mathrel{\longrightarrow^*}}

@@ -4,598 +4,86 @@
 \usepackage{enumitem}
 \usepackage{caption}
 
-
 \begin{document}
-    \section{CoPylot}
+  \section{Operational Semantics}
 
-    \subsection{Grammar}
+  \subsection{Lamia Lanugage Grammar}
 
+  \begin{grammar}
+    \grule[labels]{\olbl}{}
+    \grule[value variables]{\ovalvariable}{}
+    \grule[memory variables]{\omemvariable}{}
+    \grule[blocks]{\ostmts}{
+                \ostmt \gtsemi \ldots
+    }
+    \grule[statements]{\ostmt}{
+                \olbl \gtcolon \odirective
+    }
+    \grule[odirective]{\odirective}{
+                \gtlet \ovalvariable \gteq \oexpr
+        \gor    \gtlet \omemvariable \gteq \gtalloc
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable
+        \gor    \gtlet \omemvariable \gteq \omemvariable
+        \gor
+        \gline  \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc
+        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc
+        \gor    \ovalvariable \gtopar \omemvariable \gtcomma \ldots \gtcpar
+        \gor    \gtstore \omemvariable\ \ovalvariable
+        \gor
+        \gline  \gtlet \ovalvariable \gteq \gtget \omemvariable
+        \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable
+        \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable
+        \gor
+        \gline  \gtreturn \omemvariable
+        \gor    \gtraise \omemvariable
+        \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \ovalvariable \gtobrc \ostmts \gtcbrc
+        \gor
+        \gline  \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
+        \gor    \gtwhile \ovalvariable \gtdo \gtobrc \ostmts \gtcbrc
+    }
+    \grule[unary operators]{\ounop}{
+                \gtnot
+        \gor    \gthaskey
+    }
+    \grule[binary operators]{\obinop}{
+                \gtintplus
+        \gor    \gtintminus
+        \gor    \gtand
+        \gor    \gtor
+    }
+    \grule[value expressions]{\oexpr}{
+                \mathbb{Z}
+        \gor    \mathbb{S}
+        \gor    \mathbb{B}
+        \gor    \gtdef \gtopar \omemvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
+        \gor    \osnone
+    }
+    \grule[strings]{\mathbb{S}}{}
+    \grule[booleans]{\mathbb{B}}{
+                \ostrue
+        \gor    \osfalse
+    }
+  \end{grammar}
 
+  \subsection{Lamia Evaluation Grammar}
 
-        \begin{figure}\center
-              \begin{grammar}
-                \grule[variables]{\ovariable}{\osalphanumeric \gor \star \osalphanumeric}
-                \grule[labels]{\oglbl}{\olbl \gor \osend}
-                \grule[stack]{\ostack}{
-                            [\ostackframe,\ldots]
-                }
-                \grule[stack frames]{\ostackframe}{\oglbl \times \oprogram}
-                \grule[programs]{\oprogram}{
-                            [\ostmt,\ldots]
-                }
-                \grule[clauses]{\olbl:\oglbl:\odirective}
-                % statements
-                \grule[directives]{\odirective}{
-                            \ovariable \gteq \oexpr % x = e
-                    \gor    \okw{return} \ovariable % return x
-                    \gor    \okw{goto} \olbl % goto x
-                    \gor    \okw{goto} \olbl \okw{if not} \ovariable % goto x if not v
-                    \gline
-                    \gor    \okw{raise} \ovariable % raise x
-                    \gor    \okw{catch} \ovariable % catch x
-                }
-                \grule[bindings]{\obinding}{\{\ovariable \mapsto \omem, \ldots\}}
-                \grule[heap]{\oheap}{\{\omem \mapsto \ovalue, \ldots\}}
-                % value types
-                \grule[values]{\ovalue}{
-                            \mathbb{Z}
-                    % \gor    \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
-                    % \gor    \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
-                    \gor    [\omem, \ldots] % [m, ...]
-                    \gor    (\omem, \ldots) % (m, ...)
-                    \gor    \obinding % B
-                    % \gor    \omagicf
-                    % \gor    \osLR{ \omem, \omagicm }
-                    \gor    \ogenf
-                    \gor    \ogenm
-                    \gor    \okw{undefined}
-                    \gor    \osnone
-                }
-                % expressions
-                \grule[expressions]{\oexpr}{
-                            \ovalue
-                    \gor    \ovariable % x
-                    \gor    \okw{def} \ovariable(\ovariable,\ldots) \gteq \{ \oprogram \}
-                            % def x(x, ...) = {S}
-                    \gor    \ovariable(\ovariable, \ldots) % x(x, ...)
-                    \gor    [\ovariable, \ldots] % [x, ...]
-                    \gor    (\ovariable, \ldots) % (x, ...)
-                }
-                \grule[parental map]{\oparent}{\omem \mapsto \omem}
-                \grule[memory locations]{\omem}{}
-                \grule[general functions]{\ogenf}{
-                            \osLR{ \omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, def (x) -> S >
-                    \gor    \omagicf
-                }
-                \grule[general methods]{\ogenm}{
-                            \osLR{ \omem,\omem,\okw{def}(\ovariable) \ofuncarr \oprogram } % < scope, obj, def (x) -> S >
-                    \gor    \osLR{ \omem, \omagicm }
-                }
-                \grule[magic functions]{\omagicf}{}
-                \grule[magic methods]{\omagicm}{}
+  \begin{grammar}
+    \grule[memory addresses]{\omem,\opscope}{}
+    \grule[values]{\ovalue}{
+                \mathbb{Z}
+        \gor    \mathbb{S}
+        \gor    \mathbb{B}
+        \gor    [\omem, \ldots] % [m, ...]
+        \gor    (\omem, \ldots) % (m, ...)
+        \gor    \obinding % B
+        \gor    \ogenf
+        \gor    \ogenm
+        \gor    \osnone
+    }
+    \grule[binding records]{\obinding}{
+                \{ \mathbb{S} \mapsto \omem, \ldots \}
+    }
 
-              \end{grammar}
-
-              \begin{definition}
-                $$
-                  \osBind (\oheap,\omem_0,\ovariable,\omem) = \oheap' \text{ such that } \obinding = \oheap[\omem_0], \obinding' = \obinding[\ovariable \mapsto \omem], \oheap' = \oheap[\omem_0 \mapsto \obinding']
-                $$
-              \end{definition}
-
-              \begin{definition}
-                \begin{flalign*}
-                  \osBind (\oheap,\omem_0,\ovariable_1,\omem_1,\ldots,\ovariable_n,\omem_n) \\
-                  &= \osBind (\ldots ((\osBind ((\osBind (\oheap, \omem_0, \ovariable_1, \omem_1)), \omem_0, \ovariable_2, \omem_2), \ldots), \omem_0, \ovariable_n, \omem_n)
-                \end{flalign*}
-              \end{definition}
-
-              % TODO: add lookup rule
-              \begin{definition}
-                $$
-                  \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) =
-                $$
-              \end{definition}
-
-              \begin{definition}
-                $\olbl:\olbl':\odirective \in \oprogram
-                , \olbl':\olbl'':\odirective' \in \oprogram
-                , \omem' = \oparent[\omem]$
-                  \begin{equation}
-                      \osCatch (\osLR{\oparent,\olbl,\oprogram,\omem}) =
-                      \begin{cases}
-                        \olbl', \ovariable, \omem' & \text{if}\ \odirective' = \okw{catch} \ovariable \\
-                        \okw{undefined}, \omem' & \text{otherwise}
-                      \end{cases}
-                    \end{equation}
-              \end{definition}
-
-              \begin{definition}
-                  \begin{equation}
-                    \osGetObj (\oheap, \omem) =
-                      \begin{cases}
-                        \obinding, & \text{if}\ \ovalue = \obinding \\
-                        \obinding = {\ostarvalue{value} \mapsto \ovalue}, & \text{otherwise}
-                      \end{cases}
-                      , \oheap[\omem] = \ovalue
-                    \end{equation}
-              \end{definition}
-
-              \begin{definition}
-                $\oheap[\omem][\text{\_\_call\_\_}] = \omem'
-                , \oheap[\omem'] = \ovalue$
-                  \begin{equation}
-                    % \begin{aligned}
-                    \osGetCall (\oheap, \omem) =
-                      \begin{cases}
-                        \osGetCall (\oheap, \omem'), & \text{if }\ \ovalue = \obinding \\
-                        \omem',
-                        % & \parbox[t]{.4\textwidth}
-                        % {$\text{if } \ovalue = \osLR{\omem_0,\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
-                        % \osLR{\omem_0,\omem_{\texttt{obj}},\okw{def}(\ovariable_1,\ldots,\ovariable_n) \ofuncarr \oprogram} \; | \;
-                        % \osLR{\omagicf} \; | \;
-                        % \osLR{\omem_{\texttt{obj}},\omagicm}$}
-                        & \text{if } \ovalue = \ogenf \;|\; \ogenm
-                      \end{cases}
-                    % \end{aligned}
-                    \end{equation}
-              \end{definition}
-
-            \caption{Operational Semantics}
-            \label{fig_languageOS}
-            \end{figure}
-
-            \begin{figure}\center
-              \ContinuedFloat
-
-              \begin{mathpar}
-              \relationRule{Literal Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable = \ovalue \\
-                  \obinding_{\texttt{obj}} = \{\ostarvalue{value} \mapsto \omem\} \\
-                  \oheap' = \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem,\omem' \notin \oheap \\
-                  \osBind (\oheap',\omem_0,\ovariable,\omem') = \oheap'' \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \relationRule{Name Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovariable_2 \\
-                  \omem = \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
-                  % \obinding = \oenv(\omem_0) \\
-                  % \obinding' = \obinding[\ovariable_1 \mapsto \omem] \\
-                  % \oenv' = \oenv[\omem_0 \mapsto \obinding'] \\
-                  \osBind (\oheap,\omem_0,\ovariable_1,\omem) = \oheap' \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap',\oparent,\omem_0
-              }
-
-              \relationRule{List Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable = [\ovariable_1,\ldots,\ovariable_n] \\
-                  \forall i \in \{1,\ldots,n\}, \omem_i = \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  \ovalue = [\omem_1,\ldots,\omem_n] \\
-                  \obinding_{\texttt{obj}} = \{\ostarvalue{value} \mapsto \omem\} \\
-                  \oheap' = \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem,\omem' \notin \oheap \\
-                  % \obinding = \oenv(\omem_0) \\
-                  % \obinding' = \obinding[\ovariable \mapsto \omem'] \\
-                  % \oenv' = \oenv[\omem_0 \mapsto \obinding'] \\
-                  \osBind (\oheap',\omem_0,\ovariable,\omem') = \oheap'' \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  \osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \relationRule{Tuple Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable = (\ovariable_1,\ldots,\ovariable_n) \\
-                  \forall i \in \{1,\ldots,n\}, \omem_i = \osLookup(\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  \ovalue = (\omem_1,\ldots,\omem_n) \\
-                  \obinding_{\texttt{obj}} = \{\ostarvalue{value} \mapsto \omem\} \\
-                  \oheap' = \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem,\omem' \notin \oheap \\
-                  % \obinding = \oenv(\omem_0) \\
-                  % \obinding' = \obinding[\ovariable \mapsto \omem'] \\
-                  % \oenv' = \oenv[\omem_0 \mapsto \obinding'] \\
-                  \osBind (\oheap',\omem_0,\ovariable,\omem') = \oheap'' \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  \osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \relationRule{Function Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl': \ovariable_1 = \okw{def} (\ovariable_2, \ldots, \ovariable_n) = \{\oprogram'\} \\
-                  \ovalue = \osLR{ \omem_0, \okw{def}(\ovariable_2, \ldots, \ovariable_n) \ofuncarr \oprogram' } \\
-                  \obinding_{\texttt{obj}} = \{\ostarvalue{value} \mapsto \omem, \text{\_\_call\_\_} \mapsto \osLR{\omem', \omagicm_{\texttt{call}}} \} \\
-                  \oheap' = \oheap[\omem \mapsto \ovalue, \omem' \mapsto \obinding_{\texttt{obj}}] \\
-                  \omem,\omem' \notin \oheap \\
-                  % \obinding = \oenv(\omem_0) \\
-                  % \obinding' = \obinding[\ovariable_1 \mapsto \omem] \\
-                  % \oenv' = \oenv[\omem_0 \mapsto \obinding'] \\
-                  \osBind (\oheap',\omem_0,\ovariable_1,\omem') = \oheap'' \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \relationRule{Function Call Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovariable_2(\ovariable_3,\ldots,\ovariable_n) \\
-                  \omem_{\texttt{raw}} = \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
-                  \omem = \osGetCall(\oheap,\omem_{\texttt{raw}}) \\
-                  \oheap[\omem][\ostarvalue{obj}] = \osLR{ \omem_0',\okw{def}(\ovariable_3',\ldots,\ovariable_n') \ofuncarr \oprogram' } \\
-                  \omem_0'' \notin \oheap \\
-                  \oheap' = \oheap[\omem_0'' \mapsto \{\;\}] \\
-                  \forall i, 3 \leq i \leq n, \omem_i' = \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  % \obinding' = \obinding [\ovariable_4 \mapsto \omem'] \\
-                  % \oenv' = \oenv[\omem_0'' \mapsto \obinding'] \\
-                  \osBind (\oheap',\omem_0'',\ovariable_1',\omem_1',\ldots,\ovariable_n',\omem_n') = \oheap'' \\
-                  \oparent' = \oparent \cup \{\omem_0'' \mapsto \omem_0'\} \\
-                  \oprogram' = [\olbl'':\olbl''':\odirective, \ldots]
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
-              }
-
-              \tnote{Real python functions don't work as above. They just run the code. Fix it later.}
-
-            \end{mathpar}
-            \caption{Operational Semantics (cont.)}
-            \label{fig_languageOS}
-        \end{figure}
-
-        \begin{figure}\center
-          \ContinuedFloat
-            \begin{mathpar}
-
-              \relationRule{Method Call Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovariable_2(\ovariable_3,\ldots,\ovariable_n) \\
-                  \omem_{\texttt{raw}} = \osLookup (\omem_0,\oparent,\oheap,\ovariable_2)\\
-                  \omem = \osGetCall(\oheap,\omem_{\texttt{raw}}) \\
-                  \oheap[\omem][\ostarvalue{obj}] = \osLR{ \omem_0',\omem_{\texttt{obj}}, \okw{def}(\ovariable_3',\ldots,\ovariable_n') \ofuncarr \oprogram' } \\
-                  \omem_0'' \notin \oheap \\
-                  \oheap' = \oheap[\omem_0'' \mapsto \{\ovariable_{\texttt{self}} \mapsto \omem_\texttt{obj}\}] \\
-                  \forall i, 3 \leq i \leq n, \omem_i' = \osLookup (\omem_0,\oparent,\oheap,\ovariable_i) \\
-                  \osBind  (\oheap', \omem_0'', \ovariable_1', \omem_1', \ldots, \ovariable_n', \omem_n') = \oheap'' \\
-                  \oparent' = \oparent \cup \{\omem_0'' \mapsto \omem_0'\} \\
-                  \oprogram' = [\olbl'':\olbl''':\odirective, \ldots]
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat  \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \olbl'',\oprogram' },\osLR{ l,S }] \listConcat \ostack,\oheap'',\oparent',\omem_0''
-              }
-
-              \relationRule{Attribute Assignment}{
-                  \oprogram(\olbl) = \olbl:\olbl':\ovariable_1 = \ovariable_2.\ovariable_3 \\
-                  \omem = \osLookup(\omem_0,\oparent,\oheap,\ovariable_2) \\
-                  \oheap[\omem] = \obinding \\
-                  \obinding[\ovariable_3] = \omem' \\
-                  % \omem' \notin \oheap \\
-                  % \oheap[\omem'] = \ovalue \\
-                  % TODO: determine whether is object, wrap accordingly
-                  \obinding_{\texttt{obj}} = \osGetObj (\oheap, \omem') \\
-                  \omem'' \notin \oheap \\
-                  \oheap' = \oheap[\omem'' \mapsto \obinding_{\texttt{obj}}] \\
-                  \osBind (\oheap',\omem_0,\ovariable_1,\omem'') = \oheap'' \\
-                  \olbl \osBefore{S} \oglbl'
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl',\oprogram }] \listConcat \ostack,\oheap'',\oparent,\omem_0
-              }
-
-              \tnote{Gets values wrapped in objects.}
-
-              \relationRule{Raise Exception Caught}{
-                  \oprogram(\olbl) = \olbl:\olbl': \okw{raise} \ovariable \\
-                  \ostack = [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
-                  % \olbl_1 = \olbl' \\
-                  \omem_0^0 = \omem_0 \\
-                  \forall i, 1 \leq i \leq k, k < n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) = \osLR{\okw{undefined}, \okw{undefined}, \omem_0^i} \\
-                  \osCatch(\osLR{\oparent,\olbl_{k+1},\oprogram_{k+1},\omem_0^k}) = \osLR{\olbl', \ovariable', \omem_0'} \\
-                  \omem = \osLookup(\omem_0',\oparent,\oheap,\ovariable) \\
-                  \osBind(\oheap,\omem_0,\ovariable',\omem) = \oheap' \\
-                  \olbl_{s}' \osBefore{S_{k+1}} \oglbl''
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram_{k+1} }] \listConcat \ostack,\oheap',\oparent,\omem_0'
-              }
-
-              \relationRule{Raise Exception Escaped}{
-                  \oprogram(\olbl) = \olbl:\olbl': \okw{raise} \ovariable \\
-                  \ostack = [\osLR{\olbl_1,\oprogram_1},\ldots,\osLR{\olbl_n,\oprogram_n}] \\
-                  \olbl_1 = \olbl' \\
-                  \forall i, 1 \leq i \leq n, \osCatch (\osLR{\oparent,\olbl_i,\oprogram_i,\omem_0^{i-1}}) = \osLR{\okw{undefined}, \okw{undefined}, \omem_0^i} \\
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\;],\oheap,\oparent,\omem_0
-              }
-
-              \relationRule{Pass}{
-                  \oprogram(\olbl) = \olbl:\olbl': \okw{pass} \\
-                  \olbl \osBefore{S} \oglbl''
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
-              }
-
-              % \relationRule{Return}{
-              %     \oprogram(\olbl) = \olbl:\olbl' : \okw{return}  \\
-              %     \ostack = [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
-              %     \omem_0' = \oparent[\omem_0] \\
-              %     \olbl'' \osBefore{S'} \oglbl''' \\
-              % }{
-              %     [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-              %     [\osLR{ \oglbl''',\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0'
-              % }
-
-              % Used to be "return with arguments"
-              \relationRule{Return}{
-                  \oprogram(\olbl) = \olbl:\olbl' : \okw{return}  \ovariable \\
-                  \ostack = [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack' \\
-                  \omem = \osLookup(\omem_0,\oparent,\oheap,\ovariable) \\
-%
-                  \omem_0' = \oparent[\omem_0] \\
-                  % \obinding = \oenv(\omem_0') \\
-                  % \obinding' = \obinding[\ovariable_1 \mapsto \omem] \\
-                  % \oenv' = \oenv[\omem_0' \mapsto \obinding'] \\
-                  \oprogram'(\olbl'') = \olbl'':\olbl''':\ovariable_1 = \oexpr \\
-                  \osBind (\oheap,\omem_0',\ovariable_1,\omem) = \oheap' \\
-%
-                  \olbl'' \osBefore{S'} \oglbl'''' \\
-              }{
-                  [\ostackframe,\osLR{ \olbl'',\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \oglbl'''',\oprogram' }] \listConcat \ostack',\oheap',\oparent,\omem_0'
-              }
-
-        \end{mathpar}
-        \caption{Operational Semantics (cont.)}
-        \label{fig_languageOS}
-    \end{figure}
-
-    \begin{figure}\center
-      \ContinuedFloat
-        \begin{mathpar}
-
-              \relationRule{Goto}{
-                  \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \\
-                  (\olbl'':\olbl''':\odirective) \in \oprogram
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \olbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
-              }
-
-              \relationRule{GotoIfNot}{
-                  \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-                  \omem = \osLookup(\omem_0,\oparent,\oheap,\ovariable) \\
-                  \oheap[\omem][\ostarvalue{value}] = \osfalse \\
-                  (\olbl'':\olbl''':\odirective) \in \oprogram
-              }{
-                  [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                  [\osLR{ \olbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
-              }
-
-            \relationRule{GotoIfNot Failed}{
-                \oprogram(\olbl) = \olbl:\olbl' : \okw{goto} \olbl'' \okw{if not} \ovariable \\
-                \omem = \osLookup(\omem_0,\oparent,\oheap,\ovariable) \\
-                \oheap[\omem][\ostarvalue{value}] = \ostrue \\
-                \olbl \osBefore{S'} \oglbl'' \\
-            }{
-                [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
-            }
-
-            \relationRule{Name Statement}{
-                \oprogram(\olbl) = \olbl:\olbl' : \oexpr \\
-                \obinding = \oheap[\omem_0] \\
-                \forall \ovariable \in \oexpr, \exists \obinding[\ovariable] \\
-                %%% \ovariable | \ovalue | \ovariable(\ovariable_1,\ldots,\ovariable_n) | \ovariable.\ovariable' | [\ovariable_1,\ldots,\ovariable_n] | (\ovariable_1,\ldots,\ovariable_n)
-                \olbl \osBefore{S'} \oglbl'' \\
-            }{
-                [\osLR{ \olbl,\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0 \osTransition
-                [\osLR{ \oglbl'',\oprogram }] \listConcat \ostack,\oheap,\oparent,\omem_0
-            }
-
-            \relationRule{End of Function}{
-                \ostack = [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }]\listConcat \ostack' \\
-                \omem_0' = \oparent[\omem_0] \\
-                \oprogram'(\olbl) = \olbl:\olbl'': \ovariable = \oexpr \\
-                \omem \notin \oheap \\
-                \oheap' = \oheap [\omem \mapsto \osnone] \\
-                \osBind (\oheap',\omem_0',\ovariable,\omem) = \oheap'' \\
-                \olbl \osBefore{S'} \oglbl' \\
-            }{
-                [\osLR{ \osend,\oprogram },\osLR{ \olbl,\oprogram' }] \listConcat \ostack',\oheap,\oparent,\omem_0 \osTransition
-                [\osLR{ \oglbl',\oprogram' }] \listConcat \ostack',\oheap'',\oparent,\omem_0'
-            }
-
-            \relationRule{End of Program}{
-                \ostack = [\osLR{\osend,\oprogram}] \\
-            }{
-                \ostack,\oheap,\oparent,\omem_0 \osTransition
-                [\;],\oheap,\oparent,\omem_0
-            }
-        \end{mathpar}
-        \caption{Operational Semantics (cont.)}
-        \label{fig_languageOS}
-    \end{figure}
-
-    \begin{figure}\center
-        \begin{grammar}
-            \grule[abstract programs]{\aprogram}{
-                        [\astmt,\ldots]
-            }
-            \grule[abstract statements]{\astmt}{
-                        \xstmt{\albl}{\albl}{\adirective}
-            }
-            \grule[abstract directives]{\adirective}{
-                        \avariable \gteq \avalue
-                \gor    \avariable \gteq \avariable
-            }
-            \grule[abstract values]{\avalue}{
-                        \gtintplus
-                \gor    \gtintminus
-                \gor    \gtintzero
-            }
-            \grule[abstract variables]{\avariable}{}
-            \grule[abstract labels]{\albl}{}
-
-        \end{grammar}
-        \caption{Normalized Python Language Grammar}
-        \label{fig_languageGrammar}
-    \end{figure}
-
-    The grammar of the language to be analyzed appears in Figure~\ref{fig_languageGrammar}.
-
-    We assume throughout the rest of this document that a fixed program $\aprogram$ is under analysis.  \znote{TODO: describe here the idea of a bijection between labels and statements in this fixed program.}
-
-    \subsection{Control Flow}
-
-    The grammar of control flow graphs appears in Figure~\ref{fig_cfgGrammar}.  \znote{Discuss construction of initial graph.}
-
-    \begin{figure}\center
-        \begin{grammar}
-            \grule[control flow graphs]{\cfg}{
-                        \{\cfgedge, \ldots\}
-            }
-            \grule[control flow graph edge]{\cfgedge}{
-                        \cfgnode \lexicallyBefore \cfgnode
-                \gor    \cfgnode \before \cfgnode
-            }
-            \grule[control flow graph nodes]{\cfgnode}{
-                        \gstart
-                \gor    \gend
-                \gor    \astmt
-            }
-        \end{grammar}
-        \caption{Control Flow Graph Grammar}
-        \label{fig_cfgGrammar}
-    \end{figure}
-
-
-
-    We write $\cfgnode \islexicallyBefore \cfgnode'$ to denote $(\cfgnode \lexicallyBefore \cfgnode' \in \cfg$ when $\cfg$ is understood from context.  Likewise, we write $\cfgnode \isbefore \cfgnode'$ to denote $(\cfgnode \before \cfgnode' \in \cfg$ when $\cfg$ is understood from context.
-
-    We define a relation $\cfgClosureStep$ to perform control flow graph closure.
-
-    \begin{definition}
-        Let $\cfg \cfgClosureStep \cfg'$ be the least relation satisfying the rules appearing in Figure~\ref{fig_cfgClosure}.  Throughout these rules, the predicates $\isbefore$ and $\islexicallyBefore$ refer to graph $\cfg$.
-    \end{definition}
-
-    \begin{figure}
-        \begin{mathpar}
-            \relationRule{Lexical Start}{
-                \gstart \islexicallyBefore \cfgnode
-            }{
-                \cfg \cfgClosureStep \cfg \cup \{\gstart \before \cfgnode\}
-            }
-
-            \relationRule{Literal Assignment}{
-                \cfgnode_1 = (\avariable \gteq \avalue) \\
-                \cfgnode_1 \islexicallyBefore \cfgnode_2
-            }{
-                \cfg \cfgClosureStep \cfg \cup \{\cfgnode_1 \before \cfgnode_2\}
-            }
-
-            \relationRule{Variable Accessible}{
-                \cfgnode_1 = (\avariable \gteq \avariable') \\
-                \cfgnode_1 \islexicallyBefore \cfgnode_2 \\
-                \avalue \in \valueLookup{\cfgnode_1}{[\avariable']} \\
-                \avalue \neq {\text{\textsmaller{\sc Undefined}}}
-            }{
-                \cfg \cfgClosureStep \cfg \cup \{\cfgnode_1 \before \cfgnode_2\}
-            }
-        \end{mathpar}
-        \caption{Control Flow Graph Closure}
-        \label{fig_cfgClosure}
-    \end{figure}
-
-    \subsection{Value Lookup}
-
-    The value lookup function uses the additional grammar in Figure~\ref{fig_valueLookupGrammar}.
-
-    \begin{figure}
-        \begin{grammar}
-            \grule[lookup stacks]{\astack}{
-                        [\astackelement, \ldots]
-            }
-            \grule[lookup stack elements]{\astackelement}{
-                        \avariable
-                \gor    \avalue % subject to change to e.g. heap fragments
-                \gor    \kcapture{\mathbb{N}}
-                \gor    \kjump{\cfgnode}
-            }
-        \end{grammar}
-        \caption{Value Lookup Grammar}
-        \label{fig_valueLookupGrammar}
-    \end{figure}
-
-    \begingroup
-        \newenvironment{enumerateClauses}%
-            {\begin{enumerate}[label=(\alph*),ref=\arabic{enumi}\alph*]}%
-            {\end{enumerate}}
-        \newenvironment{enumerateSubclauses}%
-            {\begin{enumerate}[label=\roman*.,ref=\arabic{enumi}\alph{enumii}(\roman*)]}%
-            {\end{enumerate}}
-        \newcommand{\clauseSectionTitle}[1]{\textbf{#1}}
-        \newcommand{\clauseSubsectionTitle}[1]{\underline{\smash{#1}}}
-        \newcommand{\rulename}[1]{%
-            \begingroup%
-                \setlength{\fboxsep}{1.5pt}%
-                \fcolorbox{black}{gray!15!white}{%
-                    \textsc{\textsmaller{#1}}%
-                }%
-                \vspace*{1pt}%
-            \endgroup%
-            \\%
-        }
-        \begin{definition}
-            Given a control-flow graph $\cfg$, let $\valueLookup[\cfg]{\cfgnode_0}{\astack}$ be the function returning the least set $\avalues$ which satisfies the following conditions:
-
-            \begin{enumerate}
-                \item \clauseSectionTitle{Value Manipulation}
-                \begin{enumerateClauses}
-                    \item \rulename{Result}
-                        If
-                            $\astack = [\avalue]$,
-                        then
-                            $\avalue \in \avalues$.
-                \end{enumerateClauses}
-
-                \item \clauseSectionTitle{Variable Lookup}
-                \begin{enumerateClauses}
-                    \item \rulename{Value Discovery}
-                        If
-                            $\cfgnode_1 \isbefore \cfgnode_0$,
-                            $\cfgnode_1 =
-                                \xstmt{\albl_1}{\albl_2}{\avariable \gteq \avalue}$, and
-                            $\astack = [\avariable] \listConcat \astack'$,
-                        then
-                            $\valueLookup{\cfgnode_1}{[\avalue] \listConcat \astack'} \subseteq \avalues$.
-
-                    \item \rulename{Value Skip}
-                        If
-                            $\cfgnode_1 \isbefore \cfgnode_0$,
-                            $\cfgnode_1 =
-                                \xstmt{\albl_1}{\albl_2}{\avariable' \gteq \avalue}$,
-                            $\astack = [\avariable] \listConcat \astack'$, and
-                            $\avariable \neq \avariable'$,
-                        then
-                            $\valueLookup{\cfgnode_1}{\astack} \subseteq \avalues$.
-                    \item \rulename{Value Aliasing}
-                        If
-                            $\cfgnode_1 \isbefore \cfgnode_0$,
-                            $\cfgnode_1 =
-                                \xstmt{\albl_1}{\albl_2}{\avariable \gteq \avariable'}$, and
-                            $\astack = [\avariable] \listConcat \astack'$,
-                        then
-                            $\valueLookup{\cfgnode_1}{[\avariable'] \listConcat \astack} \subseteq \avalues$.
-                \end{enumerateClauses}
-
-
-            \end{enumerate}
-        \end{definition}
-        \endgroup
+  \end{grammar}
 \end{document}
