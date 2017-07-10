@@ -59,7 +59,7 @@
         \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgtstyle{#2}}
     }%
 }
-\newcommand{\defgtstyle}[1]{\mathinner{\texttt{#1}}}
+\newcommand{\defgtstyle}[1]{\mathinner{\texttt{\,#1\,}}}
 \newcommand{\defgtname}[1]{gt#1}
 
 % Defines a grammar keyword terminal.
@@ -70,7 +70,7 @@
         \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defkwstyle{#2}}
     }%
 }
-\newcommand{\defkwstyle}[1]{\mathinner{\texttt{\color{kw}#1}}}
+\newcommand{\defkwstyle}[1]{\mathinner{\texttt{\color{kw}\,#1\,}}}
 \newcommand{\defkwname}[1]{gt#1}
 
 % Defines a grammar non-terminal.
@@ -133,6 +133,9 @@
 \defgn{oexpr}{e}
 \defgn{obinop}{\oplus}
 \defgn{ounop}{\otimes}
+\defgn{oheap}{H}
+\defgn{otstmts}{T}
+\defgn{otstmt}{t}
 
 \defgt[gtcolon]{:}
 \defgt{let}
@@ -140,11 +143,14 @@
 \defgt{alloc}
 \defgt[gtopar]{(}
 \defgt[gtcpar]{)}
+\defgt[gtobrk]{[}
+\defgt[gtcbrk]{]}
 \defgt[gtobrc]{\char123} % {
 \defgt[gtcbrc]{\char125} % }
 \defgt[gtsemi]{;}
 \defgt[gtarrow]{->}
 \defgt[gtcomma]{,}
+\defgt{fun}
 
 \defkw{def}
 \defkw{store}
@@ -183,7 +189,10 @@
 \newcommand{\osnone}{\texttt{None}}
 \newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
 \newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
-
+% Relations
+\newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+% Format
+\newcommand{\osLR}[1]{\langle #1 \rangle}
 % Stylize
 \newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
 \newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
@@ -192,3 +201,4 @@
 % -fix
 \newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
+\newcommand{\osBlock}[2][]{{\otstmts #1}_{\texttt{#2}}}

@@ -71,3 +71,10 @@ value to id func        DONE (sort of)
 mod STORE return ()     DONE
 mod BIND                DONE
   add UPDATE            DONE
+
+=== 7.10 ===
+update lamia spec       DONE
+add alloc               DONE
+add bind,ret,store,get  DONE
+add if,fun,while        DONE (sort of)
+add raise

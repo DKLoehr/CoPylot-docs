@@ -7,7 +7,7 @@
 \begin{document}
   \section{Operational Semantics}
 
-  \subsection{Lamia Lanugage Grammar}
+  \subsection{Lamia Language Grammar}
 
   \begin{grammar}
     \grule[labels]{\olbl}{}
@@ -19,50 +19,70 @@
     \grule[statements]{\ostmt}{
                 \olbl \gtcolon \odirective
     }
+    \grule[blocks]{\otstmts}{
+                \otstmt \gtsemi \ldots
+    }
+    \grule[statements]{\otstmt}{
+                \odirective \text{ such that all \ostmts \, are replaced with \otstmts}
+        \gor    \gtobrc \osBlock{while} \gtcbrc
+        \gor    \gtobrc \osBlock{try} \gtcbrc
+        \gline
+        \gor    \gtobrc \osBlock{if} \gtcbrc
+        \gor    \gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc
+    }
     \grule[directive]{\odirective}{
                 \gtlet \ovalvariable \gteq \oexpr
         \gor    \gtlet \omemvariable \gteq \gtalloc
         \gor    \gtlet \ovalvariable \gteq \ovalvariable
         \gor    \gtlet \omemvariable \gteq \omemvariable
-        \gor
-        \gline  \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc
+        \gline
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc
         \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc
-        \gor    \ovalvariable \gtopar \omemvariable \gtcomma \ldots \gtcpar
+        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar
+        \gline
         \gor    \gtstore \omemvariable\ \ovalvariable
-        \gor
-        \gline  \gtlet \ovalvariable \gteq \gtget \omemvariable
+        \gor    \gtlet \ovalvariable \gteq \gtget \omemvariable
         \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable
         \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable
+        \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable
-        \gor
-        \gline  \gtreturn \omemvariable
+        \gor    \gtreturn \ovalvariable
+        \gor    \gtreturn \omemvariable
         \gor    \gtraise \omemvariable
-        \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \ovalvariable \gtobrc \ostmts \gtcbrc
-        \gor
-        \gline  \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
+        \gline
+        \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc
+        \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
+        \gline
         \gor    \gtwhile \ovalvariable \gtdo \gtobrc \ostmts \gtcbrc
     }
     \grule[unary operators]{\ounop}{
                 \gtnot
-        \gor    \gthaskey
     }
     \grule[binary operators]{\obinop}{
                 \gtintplus
         \gor    \gtintminus
         \gor    \gtand
         \gor    \gtor
+        \gor    \gthaskey
     }
     \grule[value expressions]{\oexpr}{
                 \mathbb{Z}
         \gor    \mathbb{S}
         \gor    \mathbb{B}
         \gor    \gtdef \gtopar \omemvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
+        \gor    \gtobrk \omemvariable, \ldots \gtcbrk
+        \gor    \gtopar \omemvariable, \ldots \gtcpar
         \gor    \osnone
     }
     \grule[strings]{\mathbb{S}}{}
     \grule[booleans]{\mathbb{B}}{
                 \ostrue
         \gor    \osfalse
+    }
+    \grule[heap]{\oheap}{
+                \gtobrc \ovalvariable \mapsto \ovalue, \ldots \gtcbrc
+        \cup    \gtobrc \omemvariable \mapsto \omem, \ldots \gtcbrc
+        \cup    \gtobrc \omem \mapsto \ovalue, \ldots \gtcbrc
     }
   \end{grammar}
 
@@ -86,4 +106,230 @@
     }
 
   \end{grammar}
+
+  \subsection{Lamia Language Rules}
+
+  \begin{mathpar}
+    \relationRule{Value Assignment}{
+      \ovalue = \osFunc{Valueof}(\oexpr) \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \oexpr \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Memory Alloc}{
+      \omem = \osFunc{Alloc}() \\
+      \oheap' = \oheap[\omemvariable \mapsto \omem]
+    }{
+      [\gtlet \omemvariable \gteq \gtalloc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Value Alias}{
+      \oheap' = \oheap[\ovalvariable_2 \mapsto \oheap[\ovalvariable_1]]
+    }{
+      [\gtlet \ovalvariable_1 \gteq \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Memory Alias}{
+      \oheap' = \oheap[\omemvariable_2 \mapsto \oheap[\omemvariable_1]]
+    }{
+      [\gtlet \omemvariable_1 \gteq \omemvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Bind}{
+      \obinding = \oheap[\ovalvariable_1] \\
+      \obinding' = \obinding[\ovalvariable_2 \gtarrow \omemvariable] \\
+      \oheap' = \oheap[\ovalvariable_1 \mapsto \obinding']
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtarrow \omemvariable \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Retrieve}{
+      \obinding = \oheap[\ovalvariable_1] \\
+      \omem = \obinding[\ovalvariable_2] \\
+      \oheap' = \oheap[\omemvariable \mapsto \omem]
+    }{
+      [\gtlet \omemvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Store}{
+      \omem = \oheap[\omemvariable] \\
+      \ovalue = \oheap[\ovalvariable] \\
+      \oheap' = \oheap[\omem \mapsto \ovalue]
+    }{
+      [\gtstore \omemvariable\ \ovalvariable \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Get}{
+      \omem = \oheap[\omemvariable] \\
+      \ovalue = \oheap[\omem] \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \gtget \omemvariable \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Is}{
+      \omem_1 = \oheap[\omemvariable_1] \\
+      \omem_2 = \oheap[\omemvariable_2] \\
+      \ovalue =
+      \begin{cases}
+        \ostrue, & \text{if } \omem_1 = \omem_2 \cr
+        \osfalse, & \text{if } \omem_1 \neq \omem_2
+      \end{cases} \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \omemvariable_1 \gtis \omemvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{While Block}{
+      \otstmts, \oheap \osTransition \otstmts'', \oheap'
+    }{
+      [\gtobrc \osBlock{while} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtobrc \osBlock['']{while} \gtcbrc] \listConcat \otstmts', \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{While False}{
+      \oheap[\omemvariable] = \omem \\
+      \oheap[\omem] = \osfalse
+    }{
+      [\gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{While True}{
+      \oheap[\omemvariable] = \omem \\
+      \oheap[\omem] = \ostrue
+    }{
+      [\gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtobrc \osBlock{while} \gtcbrc \gtsemi, \gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Block}{
+      \otstmts, \oheap \osTransition \otstmts'', \oheap'
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock['']{fun} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Call}{
+      \oheap[\ovalvariable_0] = \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1 \\
+      \otstmts'_2 = [\gtlet \ovalvariable'_1 \gteq \ovalvariable_1, \ldots, \gtlet \ovalvariable'_n \gteq \ovalvariable_n] \listConcat \otstmts'_1 \\
+      \otstmts'_3 = \osFunc{$\alpha$}(\otstmts'_2)
+    }{
+      [\gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock['_3]{fun} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Method Call}{
+      \oheap[\ovalvariable_0] = \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}\\
+      \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_n] \\
+      \otstmts'_2 = [\gtlet \ovalvariable'_1 \gteq [\omem_0, \omem_1, \ldots, \omem_n], \gtlet \ovalvariable'_2 \gteq \ovalvariable_2, \ldots, \gtlet \ovalvariable'_n \gteq \ovalvariable_n] \listConcat \otstmts'_1 \\
+      \otstmts'_3 = \osFunc{$\alpha$}(\otstmts'_2)
+    }{
+      [\gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock['_3]{fun} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Return}{
+      \\
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \omemvariable' \gtsemi] \listConcat \osBlock{fun} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If Block}{
+      \otstmts, \oheap \osTransition \otstmts'', \oheap'
+    }{
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock['']{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If False}{
+      \oheap[\ovalvariable'] = \ovalue \\
+      \ovalue = \osfalse
+    }{
+      [\gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If True}{
+      \oheap[\ovalvariable'] = \ovalue \\
+      \ovalue = \ostrue
+    }{
+      [\gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If Return}{
+      \\
+    }{
+      [\gtlet \ovalvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \ovalvariable'] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Try Block}{
+      \otstmts_1, \oheap \osTransition \otstmts'_1, \oheap'
+    }{
+      [\gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc] \listConcat \otstmts, \oheap \osTransition
+      [\gttry \gtobrc \otstmts_1' \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc] \listConcat \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise}{
+    }{
+      [\gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc] \listConcat \otstmts, \oheap \osTransition
+      [\gttry \gtobrc \otstmts_1' \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc] \listConcat \otstmts, \oheap'
+    }
+  \end{mathpar}
+
 \end{document}
