@@ -77,4 +77,6 @@ update lamia spec       DONE
 add alloc               DONE
 add bind,ret,store,get  DONE
 add if,fun,while        DONE (sort of)
-add raise
+add raise               DONE
+
+=== 7.11 ===
