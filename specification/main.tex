@@ -214,8 +214,8 @@
     \relationRule{While Block}{
       \otstmts, \oheap \osTransition \otstmts'', \oheap'
     }{
-      [\gtobrc \osBlock{while} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
-      [\gtobrc \osBlock['']{while} \gtcbrc] \listConcat \otstmts', \oheap'
+      [\gtobrc \osBlock{while} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtobrc \osBlock['']{while} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap'
     }
   \end{mathpar}
 
@@ -277,7 +277,7 @@
     \relationRule{Function Return}{
       \\
     }{
-      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \omemvariable' \gtsemi] \listConcat \osBlock{fun} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \omemvariable' \gtsemi] \listConcat \osBlock{fun} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \omemvariable \gteq \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -317,7 +317,7 @@
     \relationRule{If Return (\ovalvariable)}{
       \\
     }{
-      [\gtlet \ovalvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc [\gtifreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \ovalvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -355,7 +355,7 @@
     \relationRule{If Return (\omemvariable)}{
       \\
     }{
-      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \omemvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -384,7 +384,7 @@
     \relationRule{Raise Pop}{
       \otstmts = [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts''
     }{
-      [\gtlet \omemvariable \gteq \osBlock{fun} \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -393,7 +393,25 @@
     \relationRule{Raise in If (\ovalvariable)}{
       \otstmts = [\gtraise \omemvariable \gtsemi] \listConcat \otstmts''
     }{
-      [\gtlet \ovalvariable \gteq \osBlock{if} \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtraise \omemvariable \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise in If (\omemvariable)}{
+      \otstmts = [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts''
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise in While}{
+      \otstmts = [\gtraise \omemvariable \gtsemi] \listConcat \otstmts''
+    }{
+      [\gtobrc \osBlock{while} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtraise \omemvariable \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
