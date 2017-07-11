@@ -54,7 +54,7 @@
         \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
         \gline
         \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
-        \gor    \gtwhile \ovalvariable \gtdo \gtobrc \ostmts \gtcbrc
+        \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc
     }
     \grule[unary operators]{\ounop}{
                 \gtnot
@@ -208,6 +208,8 @@
     }
   \end{mathpar}
 
+  \subsubsection{While}
+
   \begin{mathpar}
     \relationRule{While Block}{
       \otstmts, \oheap \osTransition \otstmts'', \oheap'
@@ -236,6 +238,8 @@
       [\gtobrc \osBlock{while} \gtcbrc \gtsemi, \gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
+
+  \subsubsection{Function and Method}
 
   \begin{mathpar}
     \relationRule{Function Block}{
@@ -278,8 +282,10 @@
     }
   \end{mathpar}
 
+  \subsubsection{If}
+
   \begin{mathpar}
-    \relationRule{If Block}{
+    \relationRule{If Block (\ovalvariable)}{
       \otstmts, \oheap \osTransition \otstmts'', \oheap'
     }{
       [\gtlet \ovalvariable \gteq \gtobrc \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
@@ -288,7 +294,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{If False}{
+    \relationRule{If False (\ovalvariable)}{
       \oheap[\ovalvariable'] = \ovalue \\
       \ovalue = \osfalse
     }{
@@ -298,7 +304,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{If True}{
+    \relationRule{If True (\ovalvariable)}{
       \oheap[\ovalvariable'] = \ovalue \\
       \ovalue = \ostrue
     }{
@@ -308,13 +314,53 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{If Return}{
+    \relationRule{If Return (\ovalvariable)}{
       \\
     }{
       [\gtlet \ovalvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \ovalvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If Block (\omemvariable)}{
+      \otstmts, \oheap \osTransition \otstmts'', \oheap'
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock['']{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If False (\omemvariable)}{
+      \oheap[\omemvariable'] = \ovalue \\
+      \ovalue = \osfalse
+    }{
+      [\gtlet \omemvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If True (\omemvariable)}{
+      \oheap[\omemvariable'] = \ovalue \\
+      \ovalue = \ostrue
+    }{
+      [\gtlet \omemvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If Return (\omemvariable)}{
+      \\
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \subsubsection{Exceptions}
 
   \begin{mathpar}
     \relationRule{Try Block}{
@@ -344,11 +390,92 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Not}{
-      \otstmts = [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts''
+    \relationRule{Raise in If (\ovalvariable)}{
+      \otstmts = [\gtraise \omemvariable \gtsemi] \listConcat \otstmts''
     }{
-      [\gtlet \ovalvariable \gteq \gtnot \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap \osTransition
-      [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
+      [\gtlet \ovalvariable \gteq \osBlock{if} \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtraise \omemvariable \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \subsubsection{Unops and Binops}
+
+  \begin{mathpar}
+    \relationRule{Not}{
+      \ovalue = \oheap[\ovalvariable'] \\
+      \ovalue' =
+      \begin{cases}
+        \ostrue, & \text{if } \ovalue = \osfalse \cr
+        \osfalse, & \text{if } \ovalue = \ostrue
+      \end{cases} \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+    }{
+      [\gtlet \ovalvariable \gteq \gtnot \ovalvariable' \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Int+}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue = \text{the sum of }\ovalue_1 \text{ and } \ovalue_2 \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtintplus \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Int-}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue = \ovalue_2 \text{ subtracted from } \ovalue_1 \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtintminus \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{And}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue = \ovalue_1 \land \ovalue_2 \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtand \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Or}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue = \ovalue_1 \lor \ovalue_2 \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtor \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Haskey}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue =
+      \begin{cases}
+        \ostrue, & \text{if } \ovalue_1[\ovalue_2] = \omem \cr
+        \osfalse, & \text{otherwise}
+      \end{cases} \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gthaskey \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
     }
   \end{mathpar}
 

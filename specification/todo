@@ -80,3 +80,6 @@ add if,fun,while        DONE (sort of)
 add raise               DONE
 
 === 7.11 ===
+update if while         DONE
+add -ops                DONE
+mod raise
