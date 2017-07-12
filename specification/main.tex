@@ -46,7 +46,8 @@
         \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable
         \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable
-        \gor    \gtifreturn \ovalvariable
+        \gor    \gtifresult \ovalvariable
+        \gor    \gtifresult \omemvariable
         \gor    \gtreturn \omemvariable
         \gor    \gtraise \omemvariable
         \gline
@@ -104,6 +105,9 @@
     }
     \grule[binding records]{\obinding}{
                 \{ \mathbb{S} \mapsto \omem, \ldots \}
+    }
+    \grule[functions]{\ogenf}{
+                \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}
     }
 
   \end{grammar}
@@ -282,6 +286,42 @@
     }
   \end{mathpar}
 
+  \begin{mathpar}
+    \relationRule{Function Return from While}{
+      \\
+    }{
+      [\gtobrc [\gtreturn \omemvariable \gtsemi] \listConcat \osBlock{while} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtreturn \omemvariable \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Return from If (\ovalvariable)}{
+      \\
+    }{
+      [\gtlet \ovalvariable \gteq \gtobrc [\gtreturn \omemvariable \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtreturn \omemvariable \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Return from If (\omemvariable)}{
+      \\
+    }{
+      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \omemvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtreturn \omemvariable' \gtsemi] \listConcat \otstmts', \oheap
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Return from Try}{
+      \\
+    }{
+      [\gttry \gtobrc [\gtreturn \omemvariable \gtsemi] \listConcat \otstmts_1 \gtcbrc \gtexcept \omemvariable' \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      [\gtreturn \omemvariable \gtsemi] \listConcat \otstmts, \oheap'
+    }
+  \end{mathpar}
+
   \subsubsection{If}
 
   \begin{mathpar}
@@ -314,10 +354,10 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{If Return (\ovalvariable)}{
+    \relationRule{If Result (\ovalvariable)}{
       \\
     }{
-      [\gtlet \ovalvariable \gteq \gtobrc [\gtifreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \ovalvariable \gteq \gtobrc [\gtifresult \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \ovalvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -352,10 +392,10 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{If Return (\omemvariable)}{
+    \relationRule{If Result (\omemvariable)}{
       \\
     }{
-      [\gtlet \omemvariable \gteq \gtobrc [\gtreturn \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
+      [\gtlet \omemvariable \gteq \gtobrc [\gtifresult \ovalvariable' \gtsemi] \listConcat \osBlock{if} \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
       [\gtlet \omemvariable \gteq \ovalvariable' \gtsemi] \listConcat \otstmts', \oheap
     }
   \end{mathpar}
@@ -483,18 +523,49 @@
 
   \begin{mathpar}
     \relationRule{Haskey}{
-      \ovalue_1 = \oheap[\ovalvariable_1] \\
-      \ovalue_2 = \oheap[\ovalvariable_2] \\
-      \ovalue =
+      \obinding= \oheap[\ovalvariable_1] \\
+      \ovalue = \oheap[\ovalvariable_2] \\
+      \ovalue' =
       \begin{cases}
-        \ostrue, & \text{if } \ovalue_1[\ovalue_2] = \omem \cr
+        \ostrue, & \text{if } \ovalue \mapsto \omem \in \obinding \cr
         \osfalse, & \text{otherwise}
       \end{cases} \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable_1 \gthaskey \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
     }
   \end{mathpar}
+
+  \subsection{Helper Functions}
+
+  \begin{definition}[Value of]
+    \begin{align*}
+      \osFunc{Valueof}(\oexpr) =
+    \end{align*}
+  \end{definition}
+
+  \begin{definition}[Alloc]
+    \begin{align*}
+      \osFunc{Alloc}() =
+    \end{align*}
+  \end{definition}
+
+  \begin{definition}[Alpha Rename]
+    \begin{align*}
+      \osFunc{$\alpha$}(\ogenf) =
+    \end{align*}
+  \end{definition}
+
+  \section{Graph Based Semantics}
+
+  \subsection{Graph Grammar}
+
+  \begin{grammar}
+
+  \end{grammar}
+
+  \subsection{G}
+
 
 \end{document}

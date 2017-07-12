@@ -83,4 +83,7 @@ add raise               DONE
 update if while         DONE
 add -ops                DONE
 mod raise
-Q while\if block alpha-renamed?
+Q while/if block alpha-renamed? N
+Q haskey helper function? N
+q raise from if/while blocks? Y
+add more return         DONE

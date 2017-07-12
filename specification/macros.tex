@@ -157,7 +157,7 @@
 \defkw{get}
 \defkw{is}
 \defkw{return}
-\defkw{ifreturn}
+\defkw{ifresult}
 \defkw{raise}
 \defkw{try}
 \defkw{except}
@@ -203,3 +203,30 @@
 \newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
 \newcommand{\osBlock}[2][]{{\otstmts #1}_{\texttt{#2}}}
+
+
+\defgn{ggraph}{G}
+\defgn{gedge}{g}
+\defgn{gnode}{a}
+\defgn{gtime}{\chi}
+\defgn{genter}{\llparenthesis}
+\defgn{gleave}{\rrparenthesis}
+\defgn{gresult}{R}
+\defgn{gvset}{V}
+\defgn{gstmt}{\overset{\star}{s}}
+
+% Special
+\newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
+\newcommand{\gsend}{\text{\textsmaller{{\color{func}\sc End}}}}
+% Relations
+\newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\gsBefore}{\ll}
+\newcommand{\gsSkip}{\lll}
+\newcommand{\gsPrecede}{\ll \kern -4pt \ll}
+% Format
+\newcommand{\gsLR}[1]{\langle #1 \rangle}
+\newcommand{\gsSet}[1]{\{ #1 \}}
+%Stylize
+\newcommand{\gsFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+
+\newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
