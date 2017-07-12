@@ -95,4 +95,6 @@ add binding constructor DONE
 add start, alias        DONE
 add if, advance         DONE
 add func call,return    DONE
-add method bind
+add method bind         DONE
+Q Params of functions?
+fix RETURN stuff        DONE

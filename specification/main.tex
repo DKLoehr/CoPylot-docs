@@ -644,7 +644,7 @@
       \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts_1 = [\ostmt_1, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance_1, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime + 1}}
     }
   \end{mathpar}
 
@@ -655,7 +655,7 @@
       \ostmt = \olbl \gtcolon \gtifresult \ovalvariable \gtsemi \\
       \ostmt \osUnder \ostmt'
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[_1], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -667,25 +667,24 @@
       \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts' = [\ostmt', \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
     }
   \end{mathpar}
+
+  \tnote{We don't need param list here. This is done in lookup.}
 
   \begin{mathpar}
     \relationRule{Function Return}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
-      \ostmt = \olbl \gtcolon \gtreturn \omemvariable \gtsemi \\
-      \ostmt' \osStartof \ostmt \\
-      \gsLR{\ostmt'', \gtime''} \gsBefore \gsLR{\ostmt', \gtime'} \\
-      \ostmt'' \text{ is a function call}
+      \ostmt = \olbl \gtcolon \gtreturn \omemvariable \gtsemi
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[''], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Advance \ostmt}{
+    \relationRule{Advance to \ostmt}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\gsadvance, \gtime}\\
       \ostmt \osBefore \ostmt'
@@ -693,5 +692,45 @@
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
     }
   \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Advance EOF}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \ostmt \osBefore \osplat \\
+      \ostmt \osUnder \osplat
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsend, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Return to \ostmt}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \ostmt \osBefore \osplat \\
+      \ostmt \osUnder \ostmt'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+    }
+  \end{mathpar}
+
+
+  \subsection{Helper Functions}
+
+  \begin{definition}[Start of]
+    \begin{align*}
+      \osFunc{Startof}(\ggraph, \gnode) =
+    \end{align*}
+  \end{definition}
+
+  \begin{definition}[Lookup]
+    \begin{align*}
+      \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable) =
+    \end{align*}
+    \begin{align*}
+      \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable) =
+    \end{align*}
+  \end{definition}
 
 \end{document}
