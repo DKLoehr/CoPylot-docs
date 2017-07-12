@@ -89,6 +89,7 @@ q raise from if/while blocks? Y
 add more return         DONE
 
 === 7.12 ===
-add graph grammar
+add graph grammar       DONE
 add list index          DONE
 add binding constructor DONE
+add start, alias

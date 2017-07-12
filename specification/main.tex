@@ -103,8 +103,11 @@
     \grule[binding records]{\obinding}{
                 \{ \mathbb{S} \mapsto \omem, \ldots \}
     }
-    \grule[functions]{\ogenm}{
-                \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}
+    \grule[functions]{\ogenf}{
+                \gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts
+    }
+    \grule[methods]{\ogenm}{
+                \osLR{\gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts, \omem_0}
     }
 
   \end{grammar}
@@ -567,18 +570,57 @@
     \end{align*}
   \end{definition}
 
-  \section{Graph Based Semantics}
+  \section{Graph-Based Semantics}
 
   \subsection{Graph Grammar}
 
   \begin{grammar}
     \grule[graph]{\ggraph}{\gsSet{\gedge, \ldots}}
-    \grule[edges]{\gedge}{\gnode }
-
+    \grule[edges]{\gedge}{\gnode \gsBefore \gnode}
+    \grule[nodes]{\gnode}{\gsLR{\gstate, \gtime}}
+    \grule[states]{\gstate}{
+                \gsstart
+        \gor    \gsend
+        \gor    \ostmt
+        \gor    \gsadvance
+        \gor    \gsreturn
+        \gor    \gsraise
+    }
+    \grule[general statements]{\gstmt}{
+                \ostmt
+        \gor    \osplat
+    }
 
   \end{grammar}
 
-  \subsection{G}
+  \subsection{Graph Rules}
 
+  \begin{mathpar}
+    \relationRule{Start}{
+      \ostmts = [\ostmt, \ldots]
+    }{
+      \gsAddEdge{\gsLR{\gsstart, 0} \gsBefore \gsLR{\ostmt, 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{\ovalvariable \, Alias}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \ovalvariable \gteq \ovalvariable'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{\omemvariable \, Alias}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \omemvariable \gteq \omemvariable'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+    }
+  \end{mathpar}
 
 \end{document}

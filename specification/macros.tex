@@ -182,6 +182,7 @@
 \defgn{obinding}{B}
 \defgn{ogenf}{F}
 \defgn{ogenm}{M}
+\defgn{osplat}{\ast}
 
 \newlength\dunder
 \settowidth{\dunder}{\_}
@@ -204,10 +205,12 @@
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
 \newcommand{\osBlock}[2][]{{\otstmts #1}_{\texttt{#2}}}
 
+%%% Lamia Graph Grammar
 
 \defgn{ggraph}{G}
 \defgn{gedge}{g}
 \defgn{gnode}{o}
+\defgn{gstate}{a}
 \defgn{gtime}{\chi}
 \defgn{genter}{\llparenthesis}
 \defgn{gleave}{\rrparenthesis}
@@ -218,15 +221,27 @@
 % Special
 \newcommand{\gsstart}{\text{\textsmaller{{\color{func}\sc Start}}}}
 \newcommand{\gsend}{\text{\textsmaller{{\color{func}\sc End}}}}
+\newcommand{\gsadvance}[1][]{\text{\textsmaller{{\color{func}\sc Advance }}}\ostmt #1}
+\newcommand{\gsreturn}[1][]{\text{\textsmaller{{\color{func}\sc Return }}}\ostmt #1}
+\newcommand{\gsraise}[1][]{\text{\textsmaller{{\color{func}\sc Raise }}}\ostmt #1}
 % Relations
 \newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
-\newcommand{\gsBefore}{\ll}
+\newcommand{\gsBefore}{\rightarrowtriangle}
 \newcommand{\gsSkip}{\lll}
 \newcommand{\gsPrecede}{\ll \kern -4pt \ll}
 % Format
 \newcommand{\gsLR}[1]{\langle #1 \rangle}
 \newcommand{\gsSet}[1]{\{ #1 \}}
-%Stylize
+% Stylize
 \newcommand{\gsFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+% Predicates
+\newcommand{\gsBeforeIn}[1][]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \overset{?}{\underset{\ggraph}{\gsBefore}}%
+  }{%
+    \overset{?}{\underset{#1}{\gsBefore}}%
+  }%
+}
+% [\ifthenelse{\equal{#1}{}}{\ggraph}{#1}]
 
 \newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
