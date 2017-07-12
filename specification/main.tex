@@ -31,30 +31,26 @@
         \gor    \gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc
     }
     \grule[directive]{\odirective}{
-                \gtlet \ovalvariable \gteq \oexpr
-        \gor    \gtlet \omemvariable \gteq \gtalloc
-        \gor    \gtlet \ovalvariable \gteq \ovalvariable
-        \gor    \gtlet \omemvariable \gteq \omemvariable
-        \gline
-        \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc
-        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc
-        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar
-        \gline
-        \gor    \gtstore \omemvariable\ \ovalvariable
-        \gor    \gtlet \ovalvariable \gteq \gtget \omemvariable
-        \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable
-        \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable
-        \gline
-        \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable
-        \gor    \gtifresult \ovalvariable
-        \gor    \gtifresult \omemvariable
-        \gor    \gtreturn \omemvariable
-        \gor    \gtraise \omemvariable
-        \gline
-        \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc
-        \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
-        \gline
-        \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
+                \gtlet \ovalvariable \gteq \oexpr \gline
+        \gor    \gtlet \omemvariable \gteq \gtalloc \gline
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \gline
+        \gor    \gtlet \omemvariable \gteq \omemvariable \gline
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc \gline
+        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc \gline
+        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar \gline
+        \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk \gline
+        \gor    \gtstore \omemvariable\ \ovalvariable \gline
+        \gor    \gtlet \ovalvariable \gteq \gtget \omemvariable \gline
+        \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable \gline
+        \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable \gline
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable \gline
+        \gor    \gtifresult \ovalvariable \gline
+        \gor    \gtifresult \omemvariable \gline
+        \gor    \gtreturn \omemvariable \gline
+        \gor    \gtraise \omemvariable \gline
+        \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gline
+        \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
+        \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
         \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc
     }
     \grule[unary operators]{\ounop}{
@@ -63,8 +59,8 @@
     \grule[binary operators]{\obinop}{
                 \gtintplus
         \gor    \gtintminus
-        \gor    \gtand
-        \gor    \gtor
+        % \gor    \gtand
+        % \gor    \gtor
         \gor    \gthaskey
     }
     \grule[value expressions]{\oexpr}{
@@ -74,6 +70,7 @@
         \gor    \gtdef \gtopar \omemvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
         \gor    \gtobrk \omemvariable, \ldots \gtcbrk
         \gor    \gtopar \omemvariable, \ldots \gtcpar
+        \gor    \gtobrc \gtcbrc
         \gor    \osnone
     }
     \grule[strings]{\mathbb{S}}{}
@@ -106,7 +103,7 @@
     \grule[binding records]{\obinding}{
                 \{ \mathbb{S} \mapsto \omem, \ldots \}
     }
-    \grule[functions]{\ogenf}{
+    \grule[functions]{\ogenm}{
                 \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}
     }
 
@@ -175,6 +172,18 @@
   \end{mathpar}
 
   \begin{mathpar}
+    \relationRule{Index}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] = i \in \mathbb{Z^+} \\
+      \omem = \text{the memloc stored in the $i^{th}$ position of $\ovalue_1$} \\
+      \oheap' = \oheap[\omemvariable \mapsto \omem]
+    }{
+      [\gtlet \omemvariable \gteq \ovalvariable_1 \gtobrk \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
     \relationRule{Store}{
       \omem = \oheap[\omemvariable] \\
       \ovalue = \oheap[\ovalvariable] \\
@@ -195,6 +204,7 @@
       \otstmts, \oheap'
     }
   \end{mathpar}
+
 
   \begin{mathpar}
     \relationRule{Is}{
@@ -497,29 +507,29 @@
     }
   \end{mathpar}
 
-  \begin{mathpar}
-    \relationRule{And}{
-      \ovalue_1 = \oheap[\ovalvariable_1] \\
-      \ovalue_2 = \oheap[\ovalvariable_2] \\
-      \ovalue = \ovalue_1 \land \ovalue_2 \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
-    }{
-      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtand \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      \otstmts, \oheap'
-    }
-  \end{mathpar}
-
-  \begin{mathpar}
-    \relationRule{Or}{
-      \ovalue_1 = \oheap[\ovalvariable_1] \\
-      \ovalue_2 = \oheap[\ovalvariable_2] \\
-      \ovalue = \ovalue_1 \lor \ovalue_2 \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
-    }{
-      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtor \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      \otstmts, \oheap'
-    }
-  \end{mathpar}
+  % \begin{mathpar}
+  %   \relationRule{And}{
+  %     \ovalue_1 = \oheap[\ovalvariable_1] \\
+  %     \ovalue_2 = \oheap[\ovalvariable_2] \\
+  %     \ovalue = \ovalue_1 \land \ovalue_2 \\
+  %     \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+  %   }{
+  %     [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtand \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+  %     \otstmts, \oheap'
+  %   }
+  % \end{mathpar}
+  %
+  % \begin{mathpar}
+  %   \relationRule{Or}{
+  %     \ovalue_1 = \oheap[\ovalvariable_1] \\
+  %     \ovalue_2 = \oheap[\ovalvariable_2] \\
+  %     \ovalue = \ovalue_1 \lor \ovalue_2 \\
+  %     \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+  %   }{
+  %     [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtor \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+  %     \otstmts, \oheap'
+  %   }
+  % \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Haskey}{
@@ -562,6 +572,9 @@
   \subsection{Graph Grammar}
 
   \begin{grammar}
+    \grule[graph]{\ggraph}{\gsSet{\gedge, \ldots}}
+    \grule[edges]{\gedge}{\gnode }
+
 
   \end{grammar}
 

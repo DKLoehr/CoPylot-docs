@@ -87,3 +87,8 @@ Q while/if block alpha-renamed? N
 Q haskey helper function? N
 q raise from if/while blocks? Y
 add more return         DONE
+
+=== 7.12 ===
+add graph grammar
+add list index          DONE
+add binding constructor DONE
