@@ -92,4 +92,7 @@ add more return         DONE
 add graph grammar       DONE
 add list index          DONE
 add binding constructor DONE
-add start, alias
+add start, alias        DONE
+add if, advance         DONE
+add func call,return    DONE
+add method bind

@@ -166,6 +166,7 @@
 \defkw{if}
 \defkw{then}
 \defkw{else}
+\defkw{methodbind}
 
 \defkw{not}
 \defkw{haskey}
@@ -193,6 +194,9 @@
 \newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
 % Relations
 \newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\osBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangleleft}}}
+\newcommand{\osUnder}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangledown}}}
+\newcommand{\osStartof}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangleleft \kern -4pt \blacktriangleleft}}}
 % Format
 \newcommand{\osLR}[1]{\langle #1 \rangle}
 % Stylize
@@ -237,7 +241,7 @@
 % Predicates
 \newcommand{\gsBeforeIn}[1][]{%
   \ifthenelse{\equal{#1}{}}{%
-    \overset{?}{\underset{\ggraph}{\gsBefore}}%
+    \overset{?}{\gsBefore}%
   }{%
     \overset{?}{\underset{#1}{\gsBefore}}%
   }%

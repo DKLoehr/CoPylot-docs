@@ -33,6 +33,7 @@
     \grule[directive]{\odirective}{
                 \gtlet \ovalvariable \gteq \oexpr \gline
         \gor    \gtlet \omemvariable \gteq \gtalloc \gline
+        \gor    \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \gline
         \gor    \gtlet \omemvariable \gteq \omemvariable \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc \gline
@@ -67,9 +68,9 @@
                 \mathbb{Z}
         \gor    \mathbb{S}
         \gor    \mathbb{B}
-        \gor    \gtdef \gtopar \omemvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
+        \gor    \gtdef \gtopar \ovalvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
         \gor    \gtobrk \omemvariable, \ldots \gtcbrk
-        \gor    \gtopar \omemvariable, \ldots \gtcpar
+        % \gor    \gtopar \omemvariable, \ldots \gtcpar
         \gor    \gtobrc \gtcbrc
         \gor    \osnone
     }
@@ -94,7 +95,7 @@
         \gor    \mathbb{S}
         \gor    \mathbb{B}
         \gor    [\omem, \ldots] % [m, ...]
-        \gor    (\omem, \ldots) % (m, ...)
+        % \gor    (\omem, \ldots) % (m, ...)
         \gor    \obinding % B
         \gor    \ogenf
         \gor    \ogenm
@@ -130,6 +131,18 @@
       \oheap' = \oheap[\omemvariable \mapsto \omem]
     }{
       [\gtlet \omemvariable \gteq \gtalloc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Method Assignment}{
+      \omem = \oheap[\omemvariable] \\
+      \ovalue = \oheap[\ovalvariable'] = \ogenf \\
+      \ovalue' = \osLR{\ovalue, \omem} \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+    }{
+      [\gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable'] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
     }
   \end{mathpar}
@@ -620,6 +633,64 @@
       \ostmt = \olbl \gtcolon \omemvariable \gteq \omemvariable'
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If-True Start (\ovalvariable)}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \gtsemi \\
+      \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
+      \ostmts_1 = [\ostmt_1, \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance_1, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{If Result (\ovalvariable)}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtifresult \ovalvariable \gtsemi \\
+      \ostmt \osUnder \ostmt'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[_1], \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Call}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtsemi \\
+      \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
+      \ostmts' = [\ostmt', \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Function Return}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtreturn \omemvariable \gtsemi \\
+      \ostmt' \osStartof \ostmt \\
+      \gsLR{\ostmt'', \gtime''} \gsBefore \gsLR{\ostmt', \gtime'} \\
+      \ostmt'' \text{ is a function call}
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[''], \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Advance \ostmt}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \ostmt \osBefore \ostmt'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
     }
   \end{mathpar}
 
