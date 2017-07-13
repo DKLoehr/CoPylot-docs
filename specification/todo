@@ -103,3 +103,13 @@ fix RETURN stuff
 
 add RAISE s             DONE
 add while, try          DONE
+Q while True: ifresult x allowed? Y
+add IFRESULT s          DONE
+add more skip           DONE
+add notation def        DONE (sort of)
+Q What arguments does Lookup take?
+Q How to track alloc()?
+add LOOKUP()
+  def arguments
+add memory def          DONE
+mod RETURN s
