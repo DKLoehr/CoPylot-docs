@@ -375,7 +375,7 @@
       \ovalue = \ostrue
     }{
       [\gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      [\gtlet \ovalvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+      [\gtlet \ovalvariable \gteq \gtobrc \osBlock[_1]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
     }
   \end{mathpar}
 
@@ -413,7 +413,7 @@
       \ovalue = \ostrue
     }{
       [\gtlet \omemvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \otstmts_1 \gtcbrc \gtelse \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      [\gtlet \omemvariable \gteq \gtobrc \osBlock[_2]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+      [\gtlet \omemvariable \gteq \gtobrc \osBlock[_1]{if} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
     }
   \end{mathpar}
 
@@ -636,6 +636,33 @@
     }
   \end{mathpar}
 
+  \subsubsection{While}
+
+  \begin{mathpar}
+    \relationRule{While-True Start}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
+      \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable) \\
+      \ostmts = [\ostmt', \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{While-False}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
+      \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable)
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \subsubsection{If}
+
   \begin{mathpar}
     \relationRule{If-True Start (\ovalvariable)}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
@@ -649,6 +676,18 @@
   \end{mathpar}
 
   \begin{mathpar}
+    \relationRule{If-False Start (\ovalvariable)}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \gtsemi \\
+      \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
+      \ostmts_2 = [\ostmt_2, \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
     \relationRule{If Result (\ovalvariable)}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
@@ -658,6 +697,8 @@
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
     }
   \end{mathpar}
+
+  \subsubsection{Function and Method}
 
   \begin{mathpar}
     \relationRule{Function Call}{
@@ -679,15 +720,52 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtreturn \omemvariable \gtsemi
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[''], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \subsubsection{Exceptions}
+
+  \begin{mathpar}
+    \relationRule{Try}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\\\
+      \ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtsemi \\
+      \ostmts_1 = [\ostmt_1, \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Advance to \ostmt}{
+    \relationRule{Raise Exception}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\ostmt, \gtime}\\
+      \ostmt = \olbl \gtcolon \gtraise \omemvariable \gtsemi
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \subsubsection{Flow}
+
+  \begin{mathpar}
+    \relationRule{Advance}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\gsadvance, \gtime}\\
       \ostmt \osBefore \ostmt'
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Advance While Loop}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \ostmt \osBefore \osplat \\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is a while statement}
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
     }
@@ -705,16 +783,65 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Return to \ostmt}{
+    \relationRule{Return}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
-      \ostmt \osBefore \osplat \\
-      \ostmt \osUnder \ostmt'
+      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is a funcdef} \\
+      \ostmt_1 \osStartof \ostmt' \\
+      \gsLR{\ostmt_0, \gtime''} \gsBefore \gsLR{\ostmt_1.\gtime'} \\
+      \ostmt_0 \osBefore \ostmt'_1 \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt'_1, \gtime + 1}}
     }
   \end{mathpar}
 
+  \begin{mathpar}
+    \relationRule{Return Through Blocks}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is not a funcdef}
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn['], \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtsemi \\
+      \ostmts_2 = [\ostmt_2, \ldots]
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise Pop}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is a funcdef} \\
+      \ostmt_1 \osStartof \ostmt' \\
+      \gsLR{\ostmt_0, \gtime''} \gsBefore \gsLR{\ostmt_1.\gtime'}
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[_0], \gtime + 1}}
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Raise Through Blocks}{
+      \gnode_1 \gsBeforeIn \gnode_2 \\
+      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is an if or while statement}
+    }{
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise['], \gtime + 1}}
+    }
+  \end{mathpar}
 
   \subsection{Helper Functions}
 
