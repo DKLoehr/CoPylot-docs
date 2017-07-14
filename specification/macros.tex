@@ -11,6 +11,7 @@
 \usepackage{yfonts}
 \usepackage{multicol}
 \usepackage{hyperref}
+\usepackage{twoopt}
 \usepackage{catchfilebetweentags}
 \usepackage[usenames,dvipsnames]{xcolor}
 
@@ -169,6 +170,7 @@
 \defkw{methodbind}
 
 \defkw{not}
+\defkw{isfunc}
 \defkw{haskey}
 \defkw[gtintplus]{int+}
 \defkw[gtintminus]{int-}
@@ -236,10 +238,10 @@
 % Special
 \newcommand{\gsstart}{\text{\textsmaller{{\color{node}\sc Start}}}}
 \newcommand{\gsend}{\text{\textsmaller{{\color{node}\sc End}}}}
-\newcommand{\gsadvance}[1][]{\text{\textsmaller{{\color{node}\sc Advance }}} #1}
-\newcommand{\gsreturn}[1][]{\text{\textsmaller{{\color{node}\sc Return }}} #1}
-\newcommand{\gsraise}[1][]{\text{\textsmaller{{\color{node}\sc Raise }}} #1}
-\newcommand{\gsifresult}[1][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} #1}
+\newcommandtwoopt{\gsadvance}[2][][]{\text{\textsmaller{{\color{node}\sc Advance }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsreturn}[2][][]{\text{\textsmaller{{\color{node}\sc Return }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsraise}[2][][]{\text{\textsmaller{{\color{node}\sc Raise }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsifresult}[2][][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} \osLR{#1, \gtime#2}}
 % Relations
 \newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
 \newcommand{\gsBefore}{\rightarrowtriangle}

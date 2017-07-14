@@ -120,4 +120,9 @@ rmv methods             DONE
 add lookup rules
   ones on the board     DONE
   alias, bind           DONE
-mod flow node
+  index, is             DONE
+  return, try
+mod flow node (s,chi)   DONE (sort of)
+add end of except
+add isfunc
+add eq, gt, lt
