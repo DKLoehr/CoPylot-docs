@@ -40,6 +40,7 @@
         \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc \gline
         \gor    \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar \gline
         \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk \gline
+        \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk \gline
         \gor    \gtstore \omemvariable\ \ovalvariable \gline
         \gor    \gtlet \ovalvariable \gteq \gtget \omemvariable \gline
         \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable \gline
@@ -199,6 +200,29 @@
       \oheap' = \oheap[\omemvariable \mapsto \omem]
     }{
       [\gtlet \omemvariable \gteq \ovalvariable_1 \gtobrk \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
+    \relationRule{Slice}{
+      \ovalue = \oheap[\ovalvariable'] = [\omem_0, \ldots, \omem_n] \\
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      p =
+      \begin{cases}
+        \ovalue_1, & \text{if } \ovalue_1 \in \mathbb{Z} \cr
+        0, & \text{if } \ovalue_1 = \osnone
+      \end{cases} \\
+      q =
+      \begin{cases}
+        \ovalue_2 - 1, & \text{if } \ovalue_2 \in \mathbb{Z} \cr
+        n, & \text{if } \ovalue_2 = \osnone
+      \end{cases} \\
+      \ovalue' = [\omem_p, \ldots, \omem_q] \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
     }
   \end{mathpar}
@@ -620,6 +644,7 @@
                 \ostmt
         \gor    \osplat
     }
+    \grule[time stack]{\gtime}{[n, \ldots]}
     \grule[memory addresses]{\omem, \opscope}{\gsLR{\ostmt, \gtime}}
   \end{grammar}
 
@@ -628,7 +653,8 @@
     \begin{flalign*}
       \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
       & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
-      & \gtstore \omemvariable\ \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
+      & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable\ \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \\
+      & \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
     \end{flalign*}
   \end{definition}
 
@@ -675,7 +701,7 @@
     \relationRule{Start}{
       \ostmts = [\ostmt, \ldots]
     }{
-      \gsAddEdge{\gsLR{\gsstart, 0} \gsBefore \gsLR{\ostmt, 1}}
+      \gsAddEdge{\gsLR{\gsstart, [0]} \gsBefore \gsLR{\ostmt, [1]}}
     }
   \end{mathpar}
 
@@ -886,13 +912,12 @@
   \begin{mathpar}
     \relationRule{Advance End of Exception}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance[\ostmt]['], \gtime}\\
+      \gnode_2 = \gsLR{\gsadvance[\ostmt][_s], \gtime}\\
       \ostmt \osBefore \osplat \\
       \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
-      \ostmt_0 \text{ is a try statement}
+      \gsLR{\gsraise[\ostmt']['], \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\gsraise[\ostmt'][']][_0], \gtime + 1}}
     }
   \end{mathpar}
 

@@ -123,6 +123,9 @@ add lookup rules
   index, is             DONE
   return, try
 mod flow node (s,chi)   DONE (sort of)
-add end of except
+fix all the raise rules
+add timestack
+  define time funcs
+add list slice
 add isfunc
 add eq, gt, lt
