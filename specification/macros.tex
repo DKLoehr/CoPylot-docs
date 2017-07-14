@@ -174,6 +174,7 @@
 \defkw[gtintminus]{int-}
 \defkw{and}
 \defkw{or}
+\defkw{lstconcat}
 
 %%% Lamia Evaluation Grammar
 
@@ -235,10 +236,10 @@
 % Special
 \newcommand{\gsstart}{\text{\textsmaller{{\color{node}\sc Start}}}}
 \newcommand{\gsend}{\text{\textsmaller{{\color{node}\sc End}}}}
-\newcommand{\gsadvance}[1][]{\text{\textsmaller{{\color{node}\sc Advance }}}\ostmt #1}
-\newcommand{\gsreturn}[1][]{\text{\textsmaller{{\color{node}\sc Return }}}\ostmt #1}
-\newcommand{\gsraise}[1][]{\text{\textsmaller{{\color{node}\sc Raise }}}\ostmt #1}
-\newcommand{\gsifresult}[1][]{\text{\textsmaller{{\color{node}\sc Ifresult }}}\ostmt #1}
+\newcommand{\gsadvance}[1][]{\text{\textsmaller{{\color{node}\sc Advance }}} #1}
+\newcommand{\gsreturn}[1][]{\text{\textsmaller{{\color{node}\sc Return }}} #1}
+\newcommand{\gsraise}[1][]{\text{\textsmaller{{\color{node}\sc Raise }}} #1}
+\newcommand{\gsifresult}[1][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} #1}
 % Relations
 \newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
 \newcommand{\gsBefore}{\rightarrowtriangle}
@@ -260,6 +261,7 @@
 % [\ifthenelse{\equal{#1}{}}{\ggraph}{#1}]
 
 \newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
+
 \newcommand{\rulename}[1]{%
     \begingroup%
         \setlength{\fboxsep}{1.5pt}%
@@ -270,3 +272,4 @@
     \endgroup%
     \\%
 }
+\newcommand{\formalRuleLine}{\\ \hspace*{1.5em}}

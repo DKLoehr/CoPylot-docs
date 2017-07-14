@@ -33,7 +33,7 @@
     \grule[directive]{\odirective}{
                 \gtlet \ovalvariable \gteq \oexpr \gline
         \gor    \gtlet \omemvariable \gteq \gtalloc \gline
-        \gor    \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable \gline
+        % \gor    \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \gline
         \gor    \gtlet \omemvariable \gteq \omemvariable \gline
         \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc \gline
@@ -63,6 +63,7 @@
         % \gor    \gtand
         % \gor    \gtor
         \gor    \gthaskey
+        \gor    \gtlstconcat
     }
     \grule[value expressions]{\oexpr}{
                 \mathbb{Z}
@@ -89,7 +90,7 @@
   \subsection{Lamia Evaluation Grammar}
 
   \begin{grammar}
-    \grule[memory addresses]{\omem,\opscope}{}
+    \grule[memory addresses]{\omem,\opscope}{\osFunc{Alloc}(\gsLR{\gnode, \gtime})}
     \grule[values]{\ovalue}{
                 \mathbb{Z}
         \gor    \mathbb{S}
@@ -98,7 +99,7 @@
         % \gor    (\omem, \ldots) % (m, ...)
         \gor    \obinding % B
         \gor    \ogenf
-        \gor    \ogenm
+        % \gor    \ogenm
         \gor    \osnone
     }
     \grule[binding records]{\obinding}{
@@ -107,9 +108,9 @@
     \grule[functions]{\ogenf}{
                 \gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts
     }
-    \grule[methods]{\ogenm}{
-                \osLR{\gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts, \omem_0}
-    }
+    % \grule[methods]{\ogenm}{
+    %             \osLR{\gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts, \omem_0}
+    % }
 
   \end{grammar}
 
@@ -135,17 +136,17 @@
     }
   \end{mathpar}
 
-  \begin{mathpar}
-    \relationRule{Method Assignment}{
-      \omem = \oheap[\omemvariable] \\
-      \ovalue = \oheap[\ovalvariable'] = \ogenf \\
-      \ovalue' = \osLR{\ovalue, \omem} \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
-    }{
-      [\gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable'] \listConcat \otstmts, \oheap \osTransition
-      \otstmts, \oheap'
-    }
-  \end{mathpar}
+  % \begin{mathpar}
+  %   \relationRule{Method Assignment}{
+  %     \omem = \oheap[\omemvariable] \\
+  %     \ovalue = \oheap[\ovalvariable'] = \ogenf \\
+  %     \ovalue' = \osLR{\ovalue, \omem} \\
+  %     \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+  %   }{
+  %     [\gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable'] \listConcat \otstmts, \oheap \osTransition
+  %     \otstmts, \oheap'
+  %   }
+  % \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Value Alias}{
@@ -293,17 +294,17 @@
     }
   \end{mathpar}
 
-  \begin{mathpar}
-    \relationRule{Method Call}{
-      \oheap[\ovalvariable_0] = \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}\\
-      \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_n] \\
-      \otstmts'_2 = [\gtlet \ovalvariable'_1 \gteq [\omem_0, \omem_1, \ldots, \omem_n], \gtlet \ovalvariable'_2 \gteq \ovalvariable_2, \ldots, \gtlet \ovalvariable'_n \gteq \ovalvariable_n] \listConcat \otstmts'_1 \\
-      \otstmts'_3 = \osFunc{$\alpha$}(\otstmts'_2)
-    }{
-      [\gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      [\gtlet \omemvariable \gteq \gtobrc \osBlock['_3]{fun} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
-    }
-  \end{mathpar}
+  % \begin{mathpar}
+  %   \relationRule{Method Call}{
+  %     \oheap[\ovalvariable_0] = \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \omem_0}\\
+  %     \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_n] \\
+  %     \otstmts'_2 = [\gtlet \ovalvariable'_1 \gteq [\omem_0, \omem_1, \ldots, \omem_n], \gtlet \ovalvariable'_2 \gteq \ovalvariable_2, \ldots, \gtlet \ovalvariable'_n \gteq \ovalvariable_n] \listConcat \otstmts'_1 \\
+  %     \otstmts'_3 = \osFunc{$\alpha$}(\otstmts'_2)
+  %   }{
+  %     [\gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtsemi] \listConcat \otstmts, \oheap \osTransition
+  %     [\gtlet \omemvariable \gteq \gtobrc \osBlock['_3]{fun} \gtcbrc \gtsemi] \listConcat \otstmts, \oheap
+  %   }
+  % \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Function Return}{
@@ -565,6 +566,18 @@
     }
   \end{mathpar}
 
+  \begin{mathpar}
+    \relationRule{List Concatenation}{
+      \ovalue_1 = \oheap[\ovalvariable_1] \\
+      \ovalue_2 = \oheap[\ovalvariable_2] \\
+      \ovalue = \ovalue_1 \listConcat \ovalue_2 \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+    }{
+      [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtlstconcat \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
   \subsection{Helper Functions}
 
   \begin{definition}[Value of]
@@ -597,9 +610,10 @@
                 \gsstart
         \gor    \gsend
         \gor    \ostmt
-        \gor    \gsadvance
-        \gor    \gsreturn
-        \gor    \gsraise
+        \gor    \gsadvance[\ostmt]
+        \gor    \gsifresult[\ostmt]
+        \gor    \gsreturn[\ostmt]
+        \gor    \gsraise[\ostmt]
     }
     \grule[general statements]{\gstmt}{
                 \ostmt
@@ -670,7 +684,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt \text{ is skippable}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -695,7 +709,7 @@
       \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
       \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable)
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -731,7 +745,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtifresult \ovalvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -765,7 +779,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtifresult \omemvariable \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -776,7 +790,7 @@
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \\
-      \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
+      \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \gnode_2, \lstack) \\
       \ostmts' = [\ostmt', \ldots]
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
@@ -785,13 +799,25 @@
 
   \tnote{We don't need param list here. This is done in lookup.}
 
+  % \begin{mathpar}
+  %   \relationRule{Method Call}{
+  %     \gnode_1 \gsBeforeIn \gnode_2 \\
+  %     \gnode_2 = \gsLR{\ostmt, \gtime}\\
+  %     \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \\
+  %     \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts', \omem_0} \in \osFunc{Lookup}(\ggraph, \gnode_2, \lstack) \\
+  %     \ostmts' = [\ostmt', \ldots]
+  %   }{
+  %     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+  %   }
+  % \end{mathpar}
+
   \begin{mathpar}
     \relationRule{Function Return}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtreturn \omemvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -814,7 +840,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtraise \omemvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -823,7 +849,7 @@
   \begin{mathpar}
     \relationRule{Advance}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \gnode_2 = \gsLR{\gsadvance[\ostmt], \gtime}\\
       \ostmt \osBefore \ostmt'
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
@@ -833,7 +859,7 @@
   \begin{mathpar}
     \relationRule{Advance End of While}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \gnode_2 = \gsLR{\gsadvance[\ostmt], \gtime}\\
       \ostmt \osBefore \osplat \\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a while statement}
@@ -845,12 +871,12 @@
   \begin{mathpar}
     \relationRule{Advance End of Try}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance, \gtime}\\
+      \gnode_2 = \gsLR{\gsadvance[\ostmt], \gtime}\\
       \ostmt \osBefore \osplat \\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt'], \gtime + 1}}
     }
   \end{mathpar}
 
@@ -868,53 +894,53 @@
   \begin{mathpar}
     \relationRule{Ifresult}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsifresult, \gtime}\\
+      \gnode_2 = \gsLR{\gsifresult[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is an if statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt'], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Ifresult Through Blocks}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsifresult, \gtime}\\
+      \gnode_2 = \gsLR{\gsifresult[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a while or try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt'], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Return}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \gnode_2 = \gsLR{\gsreturn[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a funcdef} \\
       \ostmt_1 \osStartof \ostmt' \\
       \gsLR{\ostmt_0, \gtime''} \gsBefore \gsLR{\ostmt_1.\gtime'} \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Return Through Blocks}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \gnode_2 = \gsLR{\gsreturn[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is not a funcdef}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt'], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Raise}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \gnode_2 = \gsLR{\gsreturn[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
       \ostmts_2 = [\ostmt_2, \ldots]
@@ -926,32 +952,97 @@
   \begin{mathpar}
     \relationRule{Raise Pop}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \gnode_2 = \gsLR{\gsreturn[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a funcdef} \\
       \ostmt_1 \osStartof \ostmt' \\
       \gsLR{\ostmt_0, \gtime''} \gsBefore \gsLR{\ostmt_1.\gtime'}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0], \gtime + 1}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Raise Through Blocks}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsreturn, \gtime}\\
+      \gnode_2 = \gsLR{\gsreturn[\ostmt], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is an if or while statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt'], \gtime + 1}}
     }
   \end{mathpar}
 
   \subsection{Helper Functions}
 
   \begin{definition}[Lookup]
-    Let \osFunc{Lookup}(\ggraph, \gnode, \lstack) be the function returning the least set \lresults \;such that the following rules hold for $\gnode_1 \gsBefore \gnode_0$ :
+    Let \osFunc{Lookup}($\ggraph, \gnode_0, \lstack$) be the function returning the least set \lresults \;such that the following rules hold for $\gnode_1 \gsBefore \gnode_0$ :
+    \begin{enumerate}[label=(\alph*)]
+      \item \rulename{Singleton stack}
+      If $\lstack = [\ovalue]$,
+      then \formalRuleLine $\ovalue \in \lresults$.
 
+      \item \rulename{Expression Assignment}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \oexpr, \gtime}$,
+         $\lstack = [\ovalvariable] \listConcat \lstack'$, and
+         $\ovalue = \osFunc{Valueof}(\oexpr)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{Memory Allocation}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc, \gtime}$,
+         $\lstack = [\omemvariable] \listConcat \lstack'$, and
+         $\omem = \osFunc{Alloc}(\gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc, \gtime})$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omem] \listConcat \lstack')$.
+
+      \item \rulename{Value Alias}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable_1 \gteq \ovalvariable_2, \gtime}$, and
+         $\lstack = [\ovalvariable_1] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_2] \listConcat \lstack')$.
+
+      \item \rulename{Memory Alias}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable_1 \gteq \omemvariable_2, \gtime}$, and
+         $\lstack = [\omemvariable_1] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_2] \listConcat \lstack')$.
+
+      \item \rulename{Bind}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtarrow \omemvariable \gtcbrc, \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_7, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \omemvariable, \lInstr{Capture}_3, $ \\
+      $\lInstr{Jump}\;\gnode_1, \lInstr{Bind}] \listConcat \lstack')$.
+
+      \item \rulename{Retrieve}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtcbrc, \gtime}$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Project}] \listConcat \lstack')$.
+
+      \item \rulename{Ifresult \ovalvariable \;(bound)}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtifresult \ovalvariable, \gtime}$, \\
+         $\gnode_0 = \gsLR{\gsadvance \; \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}$, and
+         $\lstack = [\ovalvariable_1] \listConcat \lstack'$
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable] \listConcat \lstack')$.
+
+      \item \rulename{Ifresult \ovalvariable \;(unbound)}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtifresult \ovalvariable, \gtime}$, \\
+         $\gnode_0 = \gsLR{\gsadvance \; \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}$,
+         $\lstack = [\ovalvariable_3] \listConcat \lstack'$, and
+         $\ovalvariable_3 \neq \ovalvariable_1$
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\gsLR{\olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}] \listConcat \lstack')$.
+
+      \item \rulename{Capture Rule}
+      If $\lstack = [\lresult, \lInstr{Capture}, \lstackelt_1, \ldots, \lstackelt_n] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lstackelt_1, \ldots, \lstackelt_n, \lresult] \listConcat \lstack')$.
+
+      \item \rulename{Project Rule}
+      If $\lstack = [\lInstr{Project}, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         $\ovalue_1 = \obinding, \ovalue_2 \in \mathbb{S}, \omem = \ovalue_1[\ovalue_2]$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omem] \listConcat \lstack')$.
+
+      \item \rulename{Bind Rule}
+      If $\lstack = [\lInstr{Bind}, \ovalue_1, \ovalue_2, \omem] \listConcat \lstack'$,
+      and
+         $\ovalue_1 = \obinding, \ovalue_2 \in \mathbb{S}, \obinding' = \obinding[\ovalue_2 \mapsto \omem]$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\obinding'] \listConcat \lstack')$.
+    \end{enumerate}
   \end{definition}
 
 \end{document}
