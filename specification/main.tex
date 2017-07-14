@@ -297,7 +297,7 @@
     }
   \end{mathpar}
 
-  \subsubsection{Function and Method}
+  \subsubsection{Function}
 
   \begin{mathpar}
     \relationRule{Function Block}{
@@ -672,6 +672,15 @@
     \end{flalign*}
   \end{notation}
 
+  \begin{notation} [Time stack operations]
+    \begin{flalign*}
+      ([n] \listConcat \gtime) \tplus & \iff [n+1] \listConcat \gtime \\
+      \gtime \tpush & \iff [0] \listConcat \gtime \\
+      ([p, q] \listConcat \gtime) \tpop & \iff [q+1] \listConcat \gtime \\
+      ([n] \listConcat \gtime) \treset & \iff [0] \listConcat \gtime \\
+    \end{flalign*}
+  \end{notation}
+
   \subsection{Lookup Grammar}
 
   \begin{grammar}
@@ -711,7 +720,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt \text{ is skippable}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -725,7 +734,7 @@
       \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable) \\
       \ostmts = [\ostmt', \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -736,7 +745,7 @@
       \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
       \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \omemvariable)
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -750,7 +759,7 @@
       \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts_1 = [\ostmt_1, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -762,7 +771,7 @@
       \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts_2 = [\ostmt_2, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -772,7 +781,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtifresult \ovalvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -784,7 +793,7 @@
       \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts_1 = [\ostmt_1, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -796,7 +805,7 @@
       \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, \ovalvariable') \\
       \ostmts_2 = [\ostmt_2, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -806,11 +815,11 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtifresult \omemvariable \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
-  \subsubsection{Function and Method}
+  \subsubsection{Function}
 
   \begin{mathpar}
     \relationRule{Function Call}{
@@ -820,7 +829,7 @@
       \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \gnode_2, \lstack) \\
       \ostmts' = [\ostmt', \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -834,7 +843,7 @@
   %     \osLR{\gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts', \omem_0} \in \osFunc{Lookup}(\ggraph, \gnode_2, \lstack) \\
   %     \ostmts' = [\ostmt', \ldots]
   %   }{
-  %     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+  %     \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tplus}}
   %   }
   % \end{mathpar}
 
@@ -844,11 +853,11 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtreturn \omemvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
-  \subsubsection{Exceptions}
+  \subsubsection{Exception}
 
   \begin{mathpar}
     \relationRule{Try}{
@@ -857,7 +866,7 @@
       \ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
       \ostmts_1 = [\ostmt_1, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_1, \gtime \tpush}}
     }
   \end{mathpar}
 
@@ -867,7 +876,7 @@
       \gnode_2 = \gsLR{\ostmt, \gtime}\\
       \ostmt = \olbl \gtcolon \gtraise \omemvariable
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -879,7 +888,7 @@
       \gnode_2 = \gsLR{\gsadvance[\ostmt]['], \gtime}\\
       \ostmt \osBefore \ostmt'
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -891,7 +900,7 @@
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a while statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tpop}}
     }
   \end{mathpar}
 
@@ -902,22 +911,22 @@
       \ostmt \osBefore \osplat \\
       % \ostmt \osUnder \ostmt' \\
       \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
+      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
       \ostmt_0 \text{ is a try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Advance End of Exception}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
-      \gnode_2 = \gsLR{\gsadvance[\ostmt][_s], \gtime}\\
+      \gnode_2 = \gsLR{\gsadvance[\ostmt]['], \gtime}\\
       \ostmt \osBefore \osplat \\
       \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\gsraise[\ostmt']['], \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
+      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\gsraise[\ostmt'][']][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\gsraise[\ostmt'][']][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -928,7 +937,7 @@
       \ostmt \osBefore \osplat \\
       \ostmt \osUnder \osplat
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsend, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsend, \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -941,7 +950,7 @@
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
       \ostmt_0 \text{ is an if statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -953,7 +962,7 @@
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
       \ostmt_0 \text{ is a while or try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt_0][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -966,7 +975,7 @@
       \ostmt_1 \osStartof \ostmt \\
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -979,7 +988,7 @@
       \ostmt_1 \osStartof \ostmt \\
       \gsLR{\ostmt', \gtime'} \gsBeforeIn \gsLR{\ostmt_1,\gtime_1} \\
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt']['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsreturn[\ostmt']['], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -991,7 +1000,7 @@
       \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
       \ostmts_2 = [\ostmt_2, \ldots]
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -1004,7 +1013,7 @@
       \ostmt_1 \osStartof \ostmt' \\
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1.\gtime_1}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0][_0], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0][_0], \gtime \tplus}}
     }
   \end{mathpar}
 
@@ -1017,7 +1026,7 @@
       \ostmt_1 \osStartof \ostmt' \\
       \gsLR{\ostmt', \gtime'} \gsBeforeIn \gsLR{\ostmt_1.\gtime_1}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt']['], \gtime + 1}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt']['], \gtime \tplus}}
     }
   \end{mathpar}
 
