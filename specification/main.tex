@@ -512,6 +512,21 @@
   \end{mathpar}
 
   \begin{mathpar}
+    \relationRule{Is Function}{
+      \ovalue = \oheap[\ovalvariable'] \\
+      \ovalue' =
+      \begin{cases}
+        \ostrue, & \text{if } \ovalue \text{ is a function} \cr
+        \osfalse, & \text{if } \ovalue \text{ is not a function}
+      \end{cases} \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+    }{
+      [\gtlet \ovalvariable \gteq \gtisfunc \ovalvariable' \gtsemi] \listConcat \otstmts, \oheap \osTransition
+      \otstmts, \oheap'
+    }
+  \end{mathpar}
+
+  \begin{mathpar}
     \relationRule{Int+}{
       \ovalue_1 = \oheap[\ovalvariable_1] \\
       \ovalue_2 = \oheap[\ovalvariable_2] \\
@@ -669,8 +684,7 @@
     \begin{flalign*}
       \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
       & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
-      & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable\ \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \\
-      & \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
+      & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable\ \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
     \end{flalign*}
   \end{definition}
 
@@ -714,9 +728,14 @@
     }
     \grule[lookup result set]{\lresults}{\gsSet{\lresult, \ldots}}
     \grule[lookup stack instructions]{\linstr}{
-                \lInstr{Capture} \; n
-        \gor    \lInstr{Jump} \; \gnode
+                \lInstr{Capture}_ n
+        \gor    \lInstr{Jump}
+        \gor    \lInstr{Binds}
         \gor    \lInstr{Project}
+        \gor    \lInstr{Index}
+        \gor    \lInstr{Slice}
+        \gor    \lInstr{Answer}
+        \gor    \lInstr{Cmp}
     }
   \end{grammar}
 
@@ -1102,38 +1121,67 @@
 
       \tnote{todo: store and get}
 
-      \item \rulename{Is}
-      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \omemvariable_1 \gtis \omemvariable_2 , \gtime}$, and
+      \item \rulename{Not}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtnot \ovalvariable' , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable', \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Not}] \listConcat \lstack')$.
+
+      \item \rulename{Isfunc}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtisfunc \ovalvariable' , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable', \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Isfunc}] \listConcat \lstack')$.
+
+      \item \rulename{Int Add}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtintplus \ovalvariable_2 , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{IntAdd}] \listConcat \lstack')$.
+
+      \item \rulename{Int Subtract}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtintminus \ovalvariable_2 , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{IntSub}] \listConcat \lstack')$.
+
+      \item \rulename{Haskey}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtcmp \ovalvariable_2 , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Cmp}] \listConcat \lstack')$.
+
+      \item \rulename{Equal \ovalvariable}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtcmp \ovalvariable_2 , \gtime}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Cmp}] \listConcat \lstack')$.
+
+      \item \rulename{Equal \omemvariable}
+      If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \omemvariable_1 \gtcmp \omemvariable_2 , \gtime}$, and
          $\lstack = [\ovalvariable] \listConcat \lstack'$,
       then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \omemvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Cmp}] \listConcat \lstack')$.
 
-      \tnote{fix ifreults in a moment}
 
       \item \rulename{Ifresult \ovalvariable \;(bound)}
-      If $\gnode_1 = \gsLR{\gsifresult [\olbl \gtcolon \gtifresult \ovalvariable], \gtime_1}$, \\
-         $\gnode_0 = \gsLR{\gsadvance [\olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$, and
-         $\lstack = [\ovalvariable'] \listConcat \lstack'$,
-      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable] \listConcat \lstack')$.
+      If $\gnode_1 = \gsLR{\gsifresult [\ostmt], \gtime_1}$, \\
+         $\gnode_0 = \gsLR{\gsadvance [\olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
 
       \item \rulename{Ifresult \ovalvariable \;(unbound)}
-      If $\gnode_1 = \gsLR{\gsifresult [\olbl \gtcolon \gtifresult \ovalvariable], \gtime_1}$, \\
-         $\gnode_0 = \gsLR{\gsadvance [\olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$,
-         $\lstack = [\ovalvariable'''] \listConcat \lstack'$, and
-         $\ovalvariable''' \neq \ovalvariable'$,
-      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \ovalvariable' \gteq \gtif \ovalvariable'' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
+      If $\gnode_1 = \gsLR{\gsifresult [\ostmt], \gtime_1}$, \\
+         $\gnode_0 = \gsLR{\gsadvance [\olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$,
+         $\lstack = [\ovalvariable''] \listConcat \lstack'$, and
+         $\ovalvariable'' \neq \ovalvariable$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
 
       \item \rulename{Ifresult \omemvariable \;(bound)}
-      If $\gnode_1 = \gsLR{\gsifresult [\olbl \gtcolon \gtifresult \omemvariable], \gtime_1}$, \\
-         $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable' \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$, and
-         $\lstack = [\omemvariable'] \listConcat \lstack'$,
-      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
+      If $\gnode_1 = \gsLR{\gsifresult [\ostmt], \gtime_1}$, \\
+         $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
 
       \item \rulename{Ifresult \omemvariable \;(unbound)}
-      If $\gnode_1 = \gsLR{\gsifresult [\olbl \gtcolon \gtifresult \omemvariable], \gtime_1}$, \\
-         $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable' \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$,
-         $\lstack = [\omemvariable''] \listConcat \lstack'$, and
-         $\omemvariable'' \neq \omemvariable'$,
-      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \omemvariable' \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
+      If $\gnode_1 = \gsLR{\gsifresult [\ostmt], \gtime_1}$, \\
+         $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$,
+         $\lstack = [\omemvariable'] \listConcat \lstack'$, and
+         $\omemvariable' \neq \omemvariable$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
 
       \item \rulename{Function Return \;(bound)}
       If $\gnode_1 = \gsLR{\gsreturn [\ostmt], \gtime_1}$,
@@ -1162,8 +1210,12 @@
       then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
 
       \item \rulename{Capture Rule}
-      If $\lstack = [\lresult, \lInstr{Capture}, \lstackelt_1, \ldots, \lstackelt_n] \listConcat \lstack'$,
+      If $\lstack = [\lresult, \lInstr{Capture}_n, \lstackelt_1, \ldots, \lstackelt_n] \listConcat \lstack'$,
       then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lstackelt_1, \ldots, \lstackelt_n, \lresult] \listConcat \lstack')$.
+
+      \item \rulename{Jump Rule}
+      If $\lstack = [\lInstr{Jump}, \gnode] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode, \lstack)$.
 
       \item \rulename{Bind Rule}
       If $\lstack = [\lInstr{Bind}, \ovalue_1, \ovalue_2, \omem] \listConcat \lstack'$,
@@ -1196,8 +1248,19 @@
          \ovalue' = [\omem_p, \ldots, \omem_q]$,
       then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\value'] \listConcat \lstack')$.
 
-      \item \rulename{Cmp Rule}
-      If $\lstack = [\lInstr{Index}, \omem_1, \omem_2] \listConcat \lstack'$, and
+      \item \rulename{Cmp Rule \ovalue}
+      If $\lstack = [\lInstr{Cmp}, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         \begin{flalign*}
+           \ovalue =
+           \begin{cases}
+             \ostrue, & \text{if } \ovalue_1 = \ovalue_2 \\
+             \osfalse, & \text{if } \ovalue_1 \neq \ovalue_2,
+           \end{cases}
+         \end{flalign*}
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{Cmp Rule \omem}
+      If $\lstack = [\lInstr{Cmp}, \omem_1, \omem_2] \listConcat \lstack'$, and
          \begin{flalign*}
            \ovalue =
            \begin{cases}

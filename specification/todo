@@ -136,5 +136,7 @@ add more rules
   slice                 DONE
   return, raise         DONE
 fix except              DONE
-add eq
-fix ifresult
+add eq                  DONE
+fix ifresult            DONE
+add jmp                 DONE
+add unop/binop rules
