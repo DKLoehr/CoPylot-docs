@@ -140,8 +140,9 @@ add eq                  DONE
 fix ifresult            DONE
 add jmp                 DONE
 add unop/binop rules    DONE
-add isint, isbool
+add isint, isbool       DONE
 add store, get          DONE
 add skip rules
   while                 DONE
   try                   DONE
+classify rules          DONE
