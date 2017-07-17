@@ -146,3 +146,7 @@ add skip rules
   while                 DONE
   try                   DONE
 classify rules          DONE
+mod while structure
+add in-func var search
+  Q add CALL utils that point to callsite? 
+put IS back             DONE
