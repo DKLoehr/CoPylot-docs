@@ -139,4 +139,7 @@ fix except              DONE
 add eq                  DONE
 fix ifresult            DONE
 add jmp                 DONE
-add unop/binop rules
+add unop/binop rules    DONE
+add isint, isbool
+add store, get
+add skip rules
