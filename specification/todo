@@ -123,10 +123,20 @@ add lookup rules
   index, is             DONE
   return, try
 mod flow node (s,chi)   DONE (sort of)
-fix all the raise rules
+fix all the raise rules DONE (sort of)
 add timestack
   make time macros      DONE
-  define time funcs
+  define time funcs     DONE
 add list slice          DONE
 add isfunc
 add eq, gt, lt
+
+=== 7.17 ===
+add more rules
+  slice                 DONE
+  return, raise         DONE
+fix except              DONE
+add eq                  DONE
+fix ifresult            DONE
+add jmp                 DONE
+add unop/binop rules
