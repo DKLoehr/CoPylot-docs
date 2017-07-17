@@ -19,17 +19,6 @@
     \grule[statements]{\ostmt}{
                 \olbl \gtcolon \odirective
     }
-    \grule[blocks]{\otstmts}{
-                \otstmt \gtsemi \ldots
-    }
-    \grule[statements]{\otstmt}{
-                \odirective \text{ such that all \ostmts \, are replaced with \otstmts}
-        \gor    \gtobrc \osBlock{while} \gtcbrc
-        % \gor    \gtobrc \osBlock{try} \gtcbrc
-        \gline
-        \gor    \gtobrc \osBlock{if} \gtcbrc
-        \gor    \gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc
-    }
     \grule[directive]{\odirective}{
                 \gtlet \ovalvariable \gteq \oexpr \gline
         \gor    \gtlet \omemvariable \gteq \gtalloc \gline
@@ -112,6 +101,17 @@
     }
     \grule[functions]{\ogenf}{
                 \gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts
+    }
+    \grule[blocks]{\otstmts}{
+                \otstmt \gtsemi \ldots
+    }
+    \grule[statements]{\otstmt}{
+                \odirective \text{ such that all \ostmts \, are replaced with \otstmts}
+        \gor    \gtobrc \osBlock{while} \gtcbrc
+        % \gor    \gtobrc \osBlock{try} \gtcbrc
+        \gline
+        \gor    \gtobrc \osBlock{if} \gtcbrc
+        \gor    \gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc
     }
     % \grule[methods]{\ogenm}{
     %             \osLR{\gtfun \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \gtarrow \otstmts, \omem_0}
