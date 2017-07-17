@@ -141,5 +141,7 @@ fix ifresult            DONE
 add jmp                 DONE
 add unop/binop rules    DONE
 add isint, isbool
-add store, get
+add store, get          DONE
 add skip rules
+  while                 DONE
+  try                   DONE
