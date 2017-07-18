@@ -192,6 +192,8 @@
 \defgn{ogenm}{M}
 \defgn{osplat}{\ast}
 
+\newcommand{\niton}{\not\owns}
+
 \newlength\dunder
 \settowidth{\dunder}{\_}
 
@@ -211,6 +213,7 @@
 \newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
 \newcommand{\osType}[1]{\text{\textsmaller{{\color{type}\sc #1}}}}
 \newcommand{\osMagic}[1]{\text{{\color{magic}\sc $\mathfrak{#1}$}}}
+\newcommand{\osNote}[1]{\textrm{\textsmaller{\itshape #1}}}
 % -fix
 \newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
 \newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
@@ -240,6 +243,7 @@
 % Time
 
 \defgn{tplus}{\triangleleft}
+\defgn{tminus}{\triangleright}
 \defgn{tpush}{\triangledown}
 \defgn{tpop}{\triangle}
 \defgn{treset}{\circledcirc}

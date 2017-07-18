@@ -148,5 +148,17 @@ add skip rules
 classify rules          DONE
 mod while structure
 add in-func var search
-  Q add CALL utils that point to callsite? 
+  Q add CALL utils that point to callsite?
 put IS back             DONE
+
+=== 7.18 ===
+skip while              DONE
+stop searching
+  function head         DONE
+  while head            DONE
+  if head               DONE
+  try/except head       DONE
+fix store               DONE
+generalize unop, binop  DONE
+skip rules
+end of exception
