@@ -160,5 +160,18 @@ stop searching
   try/except head       DONE
 fix store               DONE
 generalize unop, binop  DONE
-skip rules
-end of exception
+skip rules              DONE (sort of)
+end of exception        DONE
+add instr args
+mod JUMP
+
+=== 7.20 ===
+add func closure rule
+add while unbound       DONE
+add if unbound          DONE
+skip x's that don't match
+
+=== 7.21 ===
+unop/binop
+  fix skip              DONE
+implement function call

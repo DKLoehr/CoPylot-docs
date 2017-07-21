@@ -733,8 +733,8 @@
   \begin{definition}[Skippable statements]
     $\ostmt = \olbl \gtcolon \odirective$ is skippable if and only if
     \begin{flalign*}
-      \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
-      & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
+      \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
+      & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
       & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \\
       & \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
     \end{flalign*}
@@ -783,7 +783,7 @@
     \grule[lookup result set]{\lresults}{\gsSet{\lresult, \ldots}}
     \grule[lookup stack instructions]{\linstr}{
                 \lInstr{Capture}_ n
-        \gor    \lInstr{Jump}
+        \gor    \lInstr{Jump} \; \gnode
         \gor    \lInstr{Bind}
         \gor    \lInstr{Project}
         \gor    \lInstr{Index}
@@ -791,17 +791,8 @@
         \gor    \lInstr{Slice}
         \gor    \lInstr{Alias?}
         \gor    \lInstr{!}
-        \gor    \lInstr{Not}
-        \gor    \lInstr{Isfunc}
-        \gor    \lInstr{Isint}
-        \gline
-        \gor    \lInstr{Isbool}
-        \gor    \lInstr{IntAdd}
-        \gor    \lInstr{IntSub}
-        \gor    \lInstr{HasKey}
-        \gline
-        \gor    \lInstr{LstConcat}
-        \gor    \lInstr{Cmp}
+        \gor    \lInstr{Unop}
+        \gor    \lInstr{Binop}
         \gor    \lInstr{Answer}
         \gor    \lInstr{Is}
     }
@@ -1013,11 +1004,10 @@
       \gnode_2 = \gsLR{\gsadvance[\ostmt]['], \gtime}\\
       \ostmt \osBefore \osplat \\
       % \ostmt \osUnder \ostmt' \\
-      \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
-      \ostmt_0 \text{ is a try statement}
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is a try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime \tpop}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt'][\tpop \tminus], \gtime \tpop}}
     }
   \end{mathpar}
 
@@ -1026,11 +1016,10 @@
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\gsadvance[\ostmt]['], \gtime}\\
       \ostmt \osBefore \osplat \\
-      \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\gsadvance[\ostmt'][''], \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
+      \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is a try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt', \gtime \tpop}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt'][\tpop \tminus], \gtime \tpop}}
     }
   \end{mathpar}
 
@@ -1050,11 +1039,10 @@
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\gsifresult[\ostmt]['], \gtime}\\
       % \ostmt \osUnder \ostmt' \\
-      \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
-      \ostmt_0 \text{ is an if statement}
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is an if statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt_0][_0], \gtime \tpop}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsadvance[\ostmt'][\tpop \tminus], \gtime \tpop}}
     }
   \end{mathpar}
 
@@ -1062,11 +1050,10 @@
     \relationRule{Ifresult Through Blocks}{
       \gnode_1 \gsBeforeIn \gnode_2 \\
       \gnode_2 = \gsLR{\gsifresult[\ostmt]['], \gtime}\\
-      \ostmt_1 \osStartof \ostmt \\
-      \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset} \\
-      \ostmt_0 \text{ is a while or try statement}
+      \ostmt \osUnder \ostmt' \\
+      \ostmt' \text{ is a while or try statement}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt_0][_0], \gtime \tpop}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsifresult[\ostmt'][\tpop \tminus], \gtime \tpop}}
     }
   \end{mathpar}
 
@@ -1134,6 +1121,8 @@
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0][_0], \gtime \tpop}}
     }
   \end{mathpar}
+
+  \tnote{todo: add raise at top level}
 
   \subsection{Helper Functions}
 
@@ -1229,16 +1218,33 @@
            $\gnode_0 = \gsLR{\gsadvance [\ostmt] [_1], \gtime_0}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime_1 \tminus}, \lstack)$.
 
-        \item \rulename{While Block Start (undefined)}
+        \item \rulename{While Block Start (unbound \ovalvariable)}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
-           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$, and
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$,
-        then \formalRuleLine $\lresults \supseteq \emptyset$.
+           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
+           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
+           $\lstack = [\ovalvariable] \listConcat \lstack'$
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
-        \item \rulename{If Block Start (undefined)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$,
-        then \formalRuleLine $\lresults \supseteq \emptyset$.
+        \item \rulename{While Block Start (unbound \omemvariable)}
+        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
+           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
+           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
+           $\lstack = [\omemvariable'] \listConcat \lstack'$
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack')$.
+
+        \item \rulename{If Block Start (unbound \ovalvariable)}
+        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
+           $\lstack = [\ovalvariable] \listConcat \lstack'$
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+
+        \item \rulename{If Block Start (unbound \omemvariable)}
+        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
+           $\lstack = [\omem'variable] \listConcat \lstack'$
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+
+        \tnote{In the cases where we lookup memloc, just follow the cfg loop.}
 
         \item \rulename{Ifresult \ovalvariable \;(bound)}
         If $\gnode_1 = \gsLR{\gsifresult [\ostmt], \gtime_1}$, \\
@@ -1273,12 +1279,12 @@
            $\lstack = [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_i] \listConcat \lstack')$.
 
-        \item \rulename{Function Variable Search \;(undefined)}
+        \item \rulename{Function Variable Search \;(unbound)}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
            $\gnode_0 = \gsLR{\ostmt, \gtime_0}$, \\
-           $\ostmt \osUnder \gsLR{\olbl \gtcolon \gtlet \ovalvariable_0 \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \gtime_1'}$, and
+           $\ostmt \osUnder \ostmt' = \olbl \gtcolon \gtlet \ovalvariable_0 \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$,
            $\lstack = [\ovalvariable'_i] \listConcat \lstack'$ where $i \notin 1, \ldots, n$,
-        then \formalRuleLine $\lresults \supseteq \emptyset$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_0, \lInstr{Capture}_1, \lInstr{Drop}, \ovalvariable'_i] \listConcat \lstack')$.
 
         \item \rulename{Function Return \;(bound)}
         If $\gnode_1 = \gsLR{\gsreturn [\ostmt], \gtime_1}$,
@@ -1323,7 +1329,7 @@
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lstackelt_1, \ldots, \lstackelt_n, \lresult] \listConcat \lstack')$.
 
         \item \rulename{Jump Rule}
-        If $\lstack = [\lInstr{Jump}, \gnode] \listConcat \lstack'$,
+        If $\lstack = [\lInstr{Jump} \;\gnode] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode, \lstack)$.
 
         \item \rulename{Bind Rule}
