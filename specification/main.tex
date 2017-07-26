@@ -1203,12 +1203,12 @@
         \item \rulename{Unary Operation}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ounop \ovalvariable' , \gtime}$, and
            $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_0, [\ovalvariable', \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_0, \lInstr{Unop}] \listConcat \lstack')$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable', \lInstr{Capture}_2, \lInstr{Jump}\;\gnode_0, \lInstr{Unop}] \listConcat \lstack')$.
 
         \item \rulename{Binary Operation}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \obinop \ovalvariable_2 , \gtime}$, and
            $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_0, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_0, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_0, \lInstr{Binop}] \listConcat \lstack')$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_0, \lInstr{Binop}] \listConcat \lstack')$.
       \end{enumerate}
 
       \item \textbf{Block Search}
