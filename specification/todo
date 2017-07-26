@@ -172,6 +172,31 @@ add if unbound          DONE
 skip x's that don't match
 
 === 7.21 ===
-unop/binop
+unop/binop              DONE (sort of)
   fix skip              DONE
-implement function call
+implement function call DONE (sort of)
+slice rule
+
+=== 7.24 ===
+fixed:
+  capture now counts itself
+  capture takes both value and memory
+  let_is
+  assignment and aliasing
+  binding
+to do:
+  unop/binop giving wrong sets
+
+=== 7.25 ===
+fixed:
+  unop/binop
+  part of advance
+  store/get
+  if
+  lookup y
+  while
+to do:
+
+=== 7.26 ===
+mod CAPTURE sub         DONE
+more skip rules         
