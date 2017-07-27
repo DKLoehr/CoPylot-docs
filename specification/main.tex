@@ -1272,19 +1272,19 @@
            $\omemvariable' \neq \omemvariable$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc, \gtime'}, \lstack)$.
 
-        \item \rulename{Function Variable Search \;(bound)}
-        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
+        \item \rulename{Function Variable Search \;(argument)}
+        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
            $\gnode_0 = \gsLR{\ostmt, \gtime_0}$, \\
-           $\ostmt \osUnder \gsLR{\olbl \gtcolon \gtlet \ovalvariable_0 \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1, \gtime_1'}$, and
+           $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$, and
            $\lstack = [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_i] \listConcat \lstack')$.
 
-        \item \rulename{Function Variable Search \;(unbound)}
-        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
+        \item \rulename{Function Variable Search \;(free variable)}
+        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
            $\gnode_0 = \gsLR{\ostmt, \gtime_0}$, \\
-           $\ostmt \osUnder \ostmt' = \olbl \gtcolon \gtlet \ovalvariable_0 \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$,
-           $\lstack = [\ovalvariable'_i] \listConcat \lstack'$ where $i \notin 1, \ldots, n$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_0, \lInstr{Capture}_1, \lInstr{Drop}, \ovalvariable'_i] \listConcat \lstack')$.
+           $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$, and
+           $\lstack \neq [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable, \lInstr{Capture}_1, \lInstr{Drop}] \listConcat \lstack)$.
 
         \item \rulename{Function Return \;(bound)}
         If $\gnode_1 = \gsLR{\gsreturn [\ostmt], \gtime_1}$,
@@ -1330,7 +1330,11 @@
 
         \item \rulename{Jump Rule}
         If $\lstack = [\lInstr{Jump} \;\gnode] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode, \lstack)$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode, \lstack')$.
+
+        \item \rulename{Drop Rule}
+        If $\lstack = [\lInstr{Drop}, \lstackelt] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack')$.
 
         \item \rulename{Bind Rule}
         If $\lstack = [\lInstr{Bind}, \ovalue_1, \ovalue_2, \omem] \listConcat \lstack'$,
