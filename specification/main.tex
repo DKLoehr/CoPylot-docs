@@ -1448,11 +1448,36 @@
 
         \item \rulename{Skip Advance If \ovalvariable \;(unbound)}
         If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+        and
+           $\lstack = [\ovalvariable'] \listConcat \lstack'$ where $\ovalvariable \neq \ovalvariable'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
 
         \item \rulename{Skip Advance If \omemvariable \;(unbound)}
-        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+           $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
+
+        \item \rulename{Enter If block \ovalvariable \;(bound)}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+           $\lstack = [\ovalvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+        \item \rulename{Enter If block \omemvariable \;(bound)}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+           $\lstack = [\omemvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+        \item \rulename{Skip while}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
+        and
+           $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+
+        % \item \rulename{Skip function (unbound)}
+        % If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
+        % and
+        %    $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
+        % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \tnote{Add a lot more, and delete the Ifresult, etc. rules}
 
