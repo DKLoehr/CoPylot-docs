@@ -1236,31 +1236,16 @@
         %    $\gnode_0 = \gsLR{\gsadvance [\ostmt] [_1], \gtime_0}$,
         % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime_1}, \lstack)$.
 
-        \item \rulename{While Block Top (unbound \ovalvariable)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
-           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$,
+        \item \rulename{Leave Block}
+        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt$ %= \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
+           is an if/while/try statement,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
-        \item \rulename{While Block Top (unbound \omemvariable)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
-           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\omemvariable'] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack')$.
-
-        \item \rulename{If Block Top (unbound \ovalvariable)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
-
-        \item \rulename{If Block Top (unbound \omemvariable)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\omemvariable'] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+        % \item \rulename{If Block Top (unbound \ovalvariable)}
+        % If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+        %    $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
+        %    $\lstack = [\ovalvariable] \listConcat \lstack'$,
+        % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \tnote{In the cases where we lookup memloc, just follow the cfg loop.}
 
@@ -1301,14 +1286,14 @@
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
            $\gnode_0 = \gsLR{\ostmt, \gtime_0}$, \\
            $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$, and
-           $\lstack = [\omemvariable, \lInstr{!}] \listConcat \lstack'$
+           $\lstack = [\omem] \listConcat \lstack'$
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \item \rulename{Function Variable Search \;(free variable)}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime_1}$,
            $\gnode_0 = \gsLR{\ostmt, \gtime_0}$, \\
            $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$,
-           $\lstack \neq [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$ and $\lstack \neq [\omemvariable, \lInstr{!}] \listConcat \lstack'$,
+           $\lstack \neq [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$ and $\lstack \neq [\omem] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable, \lInstr{Capture}_1, \lInstr{Drop}] \listConcat \lstack)$.
 
         \item \rulename{Function Return \;(bound)}
@@ -1323,12 +1308,6 @@
            $\lstack = [\omemvariable'] \listConcat \lstack'$, and
            $\omemvariable \neq \omemvariable'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \omemvariable' \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime'}, \lstack)$.
-
-        \item \rulename{Try Block Start (undefined)}
-        If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
-           $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$,
-        then \formalRuleLine $\lresults \supseteq \emptyset$.
-      \end{enumerate}
 
       \item \textbf{Stack Instructions}
       \begin{enumerate}[label=(\alph*)]
