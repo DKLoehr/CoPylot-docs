@@ -199,4 +199,26 @@ to do:
 
 === 7.26 ===
 mod CAPTURE sub         DONE
-more skip rules         
+more skip rules
+
+=== 7.27 ===
+fix RAISE
+  enter try/except
+
+
+
+
+
+
+\item \rulename{Raise \;(bound)}
+If $\gnode_1 = \gsLR{\gsraise[\ostmt], \gtime_1}$,
+   $\gnode_0 \osUnder \gsLR{\olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc, \gtime_0}$, and
+   $\lstack = [\omemvariable] \listConcat \lstack'$,
+then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+\item \rulename{Raise \;(undefined)}
+If $\gnode_1 = \gsLR{\gsraise[\ostmt], \gtime_1}$,
+   $\gnode_0 \osUnder \gsLR{\olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc, \gtime_0}$,
+   $\lstack = [\omemvariable'] \listConcat \lstack'$, and
+   $\omemvariable \neq \omemvariable'$,
+then \formalRuleLine $\lresults \supseteq \emptyset$.

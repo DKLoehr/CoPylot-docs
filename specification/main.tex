@@ -1090,9 +1090,10 @@
       \ostmt \osUnder \ostmt' \\
       \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
       \ostmts_2 = [\ostmt_2, \ldots] \\
-      \gnode_3 = \gsLR{\gsadvance[\ostmt']['\tpop], \gtime \tplus}
+      \ostmt \in \ostmts_1
+      % \gnode_3 = \gsLR{\gsadvance[\ostmt']['\tpop], \gtime \tplus}
     }{
-      \gsAddEdge{\gnode_2 \gsBefore \gnode_3, \gnode_3 \gsBefore \gsLR{\ostmt_2, \gtime \tplus \tpop \tpush}}
+      \gsAddEdge{\gnode_2 \gsBefore \gsLR{\ostmt_2, \gtime \tplus \tpop \tpush}}
     }
   \end{mathpar}
 
@@ -1310,19 +1311,6 @@
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$,
         then \formalRuleLine $\lresults \supseteq \emptyset$.
-
-        \item \rulename{Raise \;(bound)}
-        If $\gnode_1 = \gsLR{\gsraise[\ostmt], \gtime_1}$,
-           $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$, and
-           $\lstack = [\omemvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
-
-        \item \rulename{Raise \;(undefined)}
-        If $\gnode_1 = \gsLR{\gsraise[\ostmt], \gtime_1}$,
-           $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc] ['], \gtime_0}$,
-           $\lstack = [\omemvariable'] \listConcat \lstack'$, and
-           $\omemvariable \neq \omemvariable'$,
-        then \formalRuleLine $\lresults \supseteq \emptyset$.
       \end{enumerate}
 
       \item \textbf{Stack Instructions}
@@ -1397,7 +1385,7 @@
 
         \item \rulename{Trace Answer}
         If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
-           $\gnode_1 = \gsLR{\gsreturn[\ostmt], \gtime'} \;|\; \gsLR{\gsraise[\ostmt], \gtime'} \;|\; \gsLR{\gsifresult[\ostmt], \gtime'}$,
+           $\gnode_1 = \gsLR{\gsreturn[\ostmt], \gtime'} \;|\; \gsLR{\gsifresult[\ostmt], \gtime'}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \item \rulename{Get Answer \ovalvariable}
@@ -1408,6 +1396,15 @@
         \item \rulename{Get Answer \omemvariable}
         If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
            $\gnode_1 = \gsLR{\olbl \gtcolon \gtreturn \omemvariable, \gtime} \;|\; \gsLR{\olbl \gtcolon \gtraise \omemvariable, \gtime} \;|\; \gsLR{\olbl \gtcolon \gtifresult \omemvariable, \gtime}$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
+
+        \item \rulename{Trace Except}
+        If $\lstack = [\lInstr{Except}] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+
+        \item \rulename{Get Except}
+        If $\lstack = [\lInstr{Except}] \listConcat \lstack'$, and
+           $\gnode_1 = \gsLR{\olbl \gtcolon \gtraise \omemvariable, \gtime}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
 
         \item \rulename{Is Rule \omem}
@@ -1502,6 +1499,11 @@
         If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
            $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
+        %
+        % \item \rulename{Enter Try/except with \omemvariable}
+        % If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
+        %    $\lstack = [\omemvariable] \listConcat \lstack'$,
+        % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
       \end{enumerate}
     \end{enumerate}
   \end{definition}
