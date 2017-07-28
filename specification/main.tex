@@ -1240,26 +1240,26 @@
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
            $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$
+           $\lstack = [\ovalvariable] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \item \rulename{While Block Top (unbound \omemvariable)}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
            $\gnode_0 = \gsLR{\ostmt', \gtime_0}$ where $\ostmt' \osUnder \ostmt$,
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\omemvariable'] \listConcat \lstack'$
+           $\lstack = [\omemvariable'] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack')$.
 
         \item \rulename{If Block Top (unbound \ovalvariable)}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$
+           $\lstack = [\ovalvariable] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \item \rulename{If Block Top (unbound \omemvariable)}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\omemvariable'] \listConcat \lstack'$
+           $\lstack = [\omemvariable'] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \tnote{In the cases where we lookup memloc, just follow the cfg loop.}
