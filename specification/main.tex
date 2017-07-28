@@ -1229,14 +1229,14 @@
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_0, \lInstr{Binop}] \listConcat \lstack')$.
       \end{enumerate}
 
-      \item \textbf{Block Search}
+      \item \textbf{Leave Block}
       \begin{enumerate}[label=(\alph*)]
         % \item \rulename{Skip While}
         % If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$, and
         %    $\gnode_0 = \gsLR{\gsadvance [\ostmt] [_1], \gtime_0}$,
         % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime_1}, \lstack)$.
 
-        \item \rulename{Leave Block}
+        \item \rulename{Leave If/While/Try}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt$ %= \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
            is an if/while/try statement,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
@@ -1295,19 +1295,27 @@
            $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$,
            $\lstack \neq [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$ and $\lstack \neq [\omem] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable, \lInstr{Capture}_1, \lInstr{Drop}] \listConcat \lstack)$.
+      \end{enumerate}
 
-        \item \rulename{Function Return \;(bound)}
-        If $\gnode_1 = \gsLR{\gsreturn [\ostmt], \gtime_1}$,
-           $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar] ['], \gtime_0}$, and
+      \item \textbf{Enter Block}
+      \begin{enumerate}[label=(\alph*)]
+
+        \item \rulename{Enter If block \ovalvariable}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+           $\lstack = [\ovalvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+        \item \rulename{Enter If block \omemvariable}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
            $\lstack = [\omemvariable] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
 
-        \item \rulename{Function Return \;(unbound)}
-        If $\gnode_1 = \gsLR{\gsreturn [\ostmt], \gtime_1}$,
-           $\gnode_0 = \gsLR{\gsadvance[\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar] ['], \gtime_0}$,
-           $\lstack = [\omemvariable'] \listConcat \lstack'$, and
-           $\omemvariable \neq \omemvariable'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\olbl \gtcolon \gtlet \omemvariable' \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar, \gtime'}, \lstack)$.
+        \item \rulename{Enter function block}
+        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar$, and
+           $\lstack = [\omemvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+      \end{enumerate}
 
       \item \textbf{Stack Instructions}
       \begin{enumerate}[label=(\alph*)]
@@ -1449,16 +1457,6 @@
            $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
 
-        \item \rulename{Enter If block \ovalvariable}
-        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
-
-        \item \rulename{Enter If block \omemvariable}
-        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
-           $\lstack = [\omemvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
-
         \item \rulename{Skip while}
         If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$, and
            $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
@@ -1478,14 +1476,9 @@
 
         % \tnote{Add a lot more, and delete the Ifresult, etc. rules}
 
-        \item \rulename{Skip Try/except with \ovalvariable}
+        \item \rulename{Skip Try/except}
         If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
-           $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
-
-        \item \rulename{Skip Try/except with \omemvariable}
-        If $\gnode_1 = \gsLR{\gsadvance [\ostmt] [], \gtime_1}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
-           $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
+           $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt, \gtime}, \lstack)$.
         %
         % \item \rulename{Enter Try/except with \omemvariable}
