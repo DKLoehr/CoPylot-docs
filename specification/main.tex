@@ -1403,6 +1403,18 @@
            $\gsLR{\olbl \gtcolon \gtifresult \omemvariable, \gtime}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
 
+        \item \rulename{Start Tracing Raise}
+        If $\gnode_1 = \gsLR{\gsraise[\ostmt]['], \gtime_1}$,
+           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$, and
+           $\lstack = [\omemvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+        \item \rulename{Start Tracing Raise (unbound)}
+        If $\gnode_1 = \gsLR{\gsraise[\ostmt]['], \gtime_1}$,
+           $\gnode_0 = \gsLR{\ostmt', \gtime_0}$, and
+           $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \! is not of form \omemvariable,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
+
         \item \rulename{Is Rule \omem}
         If $\lstack = [\lInstr{Is}, \omem_1, \omem_2] \listConcat \lstack'$, and
            \begin{flalign*}
