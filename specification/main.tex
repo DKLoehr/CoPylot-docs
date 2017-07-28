@@ -742,9 +742,9 @@
 
   \begin{notation} [Statement relations]
     \begin{flalign*}
-      \ostmt \osBefore \ostmt' & \iff \tnote{todo} \\
-      \ostmt \osUnder \ostmt' & \iff \tnote{todo} \\
-      \ostmt \osStartof \ostmt' & \iff \tnote{todo} \\
+      \ostmt \osBefore \ostmt' & \iff \text{\ostmt \! is lexically before \ostmt'} \\
+      \ostmt \osUnder \ostmt' & \iff \text{\ostmt' \! is the lexical parent of \ostmt} \\
+      \ostmt \osStartof \ostmt' & \iff \text{\ostmt \! is the first statement of the block where \ostmt' lives} \\
     \end{flalign*}
   \end{notation}
 
@@ -795,6 +795,8 @@
         \gor    \lInstr{Binop}
         \gor    \lInstr{Answer}
         \gor    \lInstr{Is}
+        \gline
+        \gor    \lInstr{drop}
     }
   \end{grammar}
 
@@ -1194,7 +1196,7 @@
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable, \lInstr{Capture}_1, \lInstr{Jump} \; \gnode_0, \lInstr{!}] \listConcat \lstack')$.
 
         \item \rulename{Is}
-        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \omemvariable_1 \gtcmp \omemvariable_2 , \gtime}$, and
+        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \omemvariable_1 \gtis \omemvariable_2 , \gtime}$, and
            $\lstack = [\ovalvariable] \listConcat \lstack'$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \omemvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Is}] \listConcat \lstack')$.
       \end{enumerate}
@@ -1242,7 +1244,7 @@
         \item \rulename{If Block Start (unbound \omemvariable)}
         If $\gnode_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
            $\gsLR{\gstate, \gtime_1 \tminus} \osBefore \gnode_1$, and
-           $\lstack = [\omem'variable] \listConcat \lstack'$
+           $\lstack = [\omemvariable'] \listConcat \lstack'$
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
 
         \tnote{In the cases where we lookup memloc, just follow the cfg loop.}
@@ -1397,16 +1399,7 @@
         If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
            $\gnode_1 = \gsLR{\olbl \gtcolon \gtreturn \omemvariable, \gtime} \;|\; \gsLR{\olbl \gtcolon \gtraise \omemvariable, \gtime} \;|\; \gsLR{\olbl \gtcolon \gtifresult \omemvariable, \gtime}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
-
-        \item \rulename{Trace Except}
-        If $\lstack = [\lInstr{Except}] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, \lstack)$.
-
-        \item \rulename{Get Except}
-        If $\lstack = [\lInstr{Except}] \listConcat \lstack'$, and
-           $\gnode_1 = \gsLR{\olbl \gtcolon \gtraise \omemvariable, \gtime}$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable] \listConcat \lstack')$.
-
+        
         \item \rulename{Is Rule \omem}
         If $\lstack = [\lInstr{Is}, \omem_1, \omem_2] \listConcat \lstack'$, and
            \begin{flalign*}
