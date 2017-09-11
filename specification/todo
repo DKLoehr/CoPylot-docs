@@ -202,10 +202,11 @@ mod CAPTURE sub         DONE
 more skip rules
 
 === 7.27 ===
-fix RAISE
+fix RAISE               DONE
   enter try/except
 
-
+=== 7.28 ===
+lint spec
 
 
 
