@@ -1,0 +1,281 @@
+\input{colors}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{xifthen}
+\usepackage{relsize}
+\usepackage{mathtools}
+\usepackage{yfonts}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{twoopt}
+\usepackage{catchfilebetweentags}
+\usepackage[usenames,dvipsnames]{xcolor}
+
+% Better TT font
+\let\oldrmdefault\rmdefault
+\let\oldsfdefault\sfdefault
+\usepackage{lmodern}
+\let\rmdefault\oldrmdefault
+\let\sfdefault\oldsfdefault
+
+%%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Produces the contents of the second argument only if the first argument is
+% empty.
+\newcommand{\ifnotempty}[2]{\ifthenelse{\isempty{#1}}{}{#2}}
+
+\newcommand{\znote}[1]{\textit{\color{ForestGreen}(#1 -- ZP)}}
+\newcommand{\tnote}[1]{\textit{\color{gothamorange}(#1 -- TC)}}
+
+%%% General algebraic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\listConcat}{\ensuremath{\mathop{||}}}
+\newcommand{\strConcat}{\ensuremath{\mathop{|}}}
+
+%%% General logic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Create a relational rule
+% [#1] - Additional mathpartir arguments
+% {#2} - Name of the rule
+% {#3} - Premises for the rule
+% {#4} - Conclusions for the rule
+\newcommand{\relationRule}[4][]{\inferrule*[lab={\sc #2},#1]{#3}{#4}}
+
+\declaretheorem[within=section]{lemma}
+\declaretheorem[name=Definition,numberlike=lemma]{definition}
+\declaretheorem[name=Notation,numberlike=lemma]{notation}
+\declaretheorem[name=Theorem,numberlike=lemma]{theorem}
+
+%%% Grammar definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Defines a grammar terminal.
+% [#1] - The name of the command to define.  Defaults to "\gt#2".
+% {#2} - The text of the grammar terminal.
+\newcommand{\defgt}[2][]{%
+    \ifthenelse{\isempty{#1}}{\defgt[\defgtname{#2}]{#2}}{%
+        \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgtstyle{#2}}
+    }%
+}
+\newcommand{\defgtstyle}[1]{\mathinner{\texttt{\,#1\,}}}
+\newcommand{\defgtname}[1]{gt#1}
+
+% Defines a grammar keyword terminal.
+% [#1] - The name of the command to define.  Defaults to "\gt#2".
+% {#2} - The text of the grammar terminal.
+\newcommand{\defkw}[2][]{%
+    \ifthenelse{\isempty{#1}}{\defkw[\defkwname{#2}]{#2}}{%
+        \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defkwstyle{#2}}
+    }%
+}
+\newcommand{\defkwstyle}[1]{\mathinner{\texttt{\color{kw}\,#1\,}}}
+\newcommand{\defkwname}[1]{gt#1}
+
+% Defines a grammar non-terminal.
+% {#1} - The name of the command to define.
+% {#2} - The math-mode text of the command.
+\newcommand{\defgn}[2]{%
+    \expandafter\newcommand\expandafter{\csname #1\endcsname}{\defgnstyle{#2}}%
+}
+\newcommand{\defgnstyle}[1]{\ensuremath{#1}}
+
+% Defines an environment, {grammar}, for displaying language grammars.
+% Within this environment, some commands are defined:
+%   \grule[description]{non-terminal}{productions}
+%   \gor (a symbol for separating productions)
+%   \gline (a symbol for breaking a line of productions if more space is needed)
+%   \setGrammarVertAdjustment{length} (which sets the vertical adjustment for
+%                                      the next grammar newline)
+\newcommand{\grammarNoteSpace}{\hspace{4mm}}
+\newcounter{grammarnote}
+\setcounter{grammarnote}{0}
+\newcommand{\grammarDefs}{%
+    \global\def\grammarVertAdjustment{0mm}%
+    \newcommand{\gcomment}[1]{\hfill%
+        \ifnum\value{grammarnote}=0
+            \stepcounter{grammarnote}
+            \grammarNoteSpace \textrm{\textsmaller{\itshape ##1}}
+        \fi
+    }%
+    \newcommand{\grule}[3][]{%
+        \setcounter{grammarnote}{0}
+        ##2 & \ifnotempty{##3}{::=} & \newcommand{\gcommenttext}{##1} ##3 \hfill \gcomment{##1} \endgrule
+    }%
+    \newcommand{\gskip}{&&\endgrule}%
+    \def\endgrule{\\[\grammarVertAdjustment]}%
+    \newcommand{\gor}{\mathrel{\vert}}%
+    \newcommand{\gline}{%
+        \hfill \gcomment{\gcommenttext} \\[\grammarVertAdjustment] &&
+    }%
+}
+\def\grammarColPad{\quad}%
+\newenvironment{grammar}{%
+    \begingroup%
+    \grammarDefs%
+    \begin{math}\begin{array}{@{}r@{\grammarColPad}c@{\grammarColPad}l@{}}%
+}{%
+    \end{array}\end{math}%
+    \endgroup%
+}
+
+%%% CoPylot grammars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Python Language Grammar
+
+\defgn{pvariable}{x}
+\defgn{psuite}{S}
+\defgn{pstmt}{s}
+\defgn{pexpr}{e}
+\defgn{pbinop}{\oplus}
+\defgn{punop}{\otimes}
+\defgn{pcmpop}{\gtrdot}
+\defgn{pelseblock}{l}
+\defgn{pexcepthandler}{h}
+\defgn{pslice}{TODO-SLICE}
+
+\defgt[gtcolon]{:}
+\defgt{let}
+\defgt[gteq]{=}
+\defgt{alloc}
+\defgt[gtopar]{(}
+\defgt[gtcpar]{)}
+\defgt[gtobrk]{[}
+\defgt[gtcbrk]{]}
+\defgt[gtobrc]{\char123} % {
+\defgt[gtcbrc]{\char125} % }
+\defgt[gtsemi]{;}
+\defgt[gtarrow]{->}
+\defgt[gtcomma]{,}
+\defgt{fun}
+
+\defkw{def}
+\defkw{is}
+\defkw{in}
+\defkw{return}
+\defkw{raise}
+\defkw{try}
+\defkw{except}
+\defkw{while}
+\defkw{for}
+\defkw{do}
+\defkw{if}
+\defkw{else}
+\defkw{pass}
+\defkw{break}
+\defkw{continue}
+\defkw{not}
+\defkw{None}
+\defkw{and}
+\defkw{or}
+
+%%% Lamia Evaluation Grammar
+
+\defgn{omem}{m}
+\defgn{opscope}{\eta}
+\defgn{ovalue}{v}
+\defgn{obinding}{B}
+\defgn{ogenf}{F}
+\defgn{ogenm}{M}
+\defgn{osplat}{\ast}
+
+\newcommand{\niton}{\not\owns}
+
+\newlength\dunder
+\settowidth{\dunder}{\_}
+
+% Special
+\newcommand{\osnone}{\texttt{None}}
+\newcommand{\ostrue}{\text{\textsmaller{{\color{func}\sc True}}}}
+\newcommand{\osfalse}{\text{\textsmaller{{\color{func}\sc False}}}}
+% Relations
+\newcommand{\osTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\osBefore}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangleleft}}}
+\newcommand{\osUnder}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangledown}}}
+\newcommand{\osStartof}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangleleft \kern -4pt \blacktriangleleft}}}
+% Format
+\newcommand{\osLR}[1]{\langle #1 \rangle}
+% Stylize
+\newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
+\newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+\newcommand{\osType}[1]{\text{\textsmaller{{\color{type}\sc #1}}}}
+\newcommand{\osMagic}[1]{\text{{\color{magic}\sc $\mathfrak{#1}$}}}
+\newcommand{\osNote}[1]{\textrm{\textsmaller{\itshape #1}}}
+% -fix
+\newcommand{\ostarvalue}[1]{\oq \star \ovariable_{\texttt{#1}} \oq}
+\newcommand{\osClown}[1]{\rule{2\dunder}{0.4pt} #1 \rule{2\dunder}{0.4pt}}
+\newcommand{\osBlock}[2][]{{\otstmts #1}_{\texttt{#2}}}
+
+%%% Lamia Graph Grammar
+
+\defgn{ggraph}{G}
+\defgn{gedge}{g}
+\defgn{gnode}{o}
+\defgn{gstate}{a}
+\defgn{gtime}{\chi}
+\defgn{genter}{\llparenthesis}
+\defgn{gleave}{\rrparenthesis}
+\defgn{gresult}{R}
+\defgn{gvset}{V}
+\defgn{gstmt}{\overset{\star}{s}}
+
+% Lookup
+
+\defgn{lstack}{K}
+\defgn{lstackelt}{k}
+\defgn{lresult}{r}
+\defgn{lresults}{R}
+\defgn{linstr}{I}
+
+% Time
+
+\defgn{tplus}{\triangleleft}
+\defgn{tminus}{\triangleright}
+\defgn{tpush}{\triangledown}
+\defgn{tpop}{\triangle}
+\defgn{treset}{\circledcirc}
+
+\newcommand{\lInstr}[1]{\text{\textsmaller{{\color{linstr}\sc #1}}}}
+
+% Special
+\newcommand{\gsstart}{\text{\textsmaller{{\color{node}\sc Start}}}}
+\newcommand{\gsend}{\text{\textsmaller{{\color{node}\sc End}}}}
+\newcommandtwoopt{\gsadvance}[2][][]{\text{\textsmaller{{\color{node}\sc Advance }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsreturn}[2][][]{\text{\textsmaller{{\color{node}\sc Return }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsraise}[2][][]{\text{\textsmaller{{\color{node}\sc Raise }}} \osLR{#1, \gtime#2}}
+\newcommandtwoopt{\gsifresult}[2][][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} \osLR{#1, \gtime#2}}
+% Relations
+\newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
+\newcommand{\gsBefore}{\rightarrowtriangle}
+\newcommand{\gsSkip}{\lll}
+\newcommand{\gsPrecede}{\ll \kern -4pt \ll}
+% Format
+\newcommand{\gsLR}[1]{\langle #1 \rangle}
+\newcommand{\gsSet}[1]{\{ #1 \}}
+% Stylize
+\newcommand{\gsFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}
+% Predicates
+\newcommand{\gsBeforeIn}[1][]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \overset{?}{\gsBefore}%
+  }{%
+    \overset{?}{\underset{#1}{\gsBefore}}%
+  }%
+}
+% [\ifthenelse{\equal{#1}{}}{\ggraph}{#1}]
+
+\newcommand{\gsAddEdge}[1]{\ggraph \gsTransition \ggraph \cup \gsSet{#1}}
+
+\newcommand{\rulename}[1]{%
+    \begingroup%
+        \setlength{\fboxsep}{1.5pt}%
+        \fcolorbox{black}{gray!15!white}{%
+            \textsc{\textsmaller{#1}}%
+        }%
+        \vspace*{1pt}%
+    \endgroup%
+    \\%
+}
+\newcommand{\formalRuleLine}{\\ \hspace*{1.5em}}

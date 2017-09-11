@@ -1,0 +1,76 @@
+\documentclass{article}
+
+\input{macros}
+\usepackage{enumitem}
+\usepackage{caption}
+
+\begin{document}
+  \section{Python Language Grammar}
+  % This grammar is based on the AST defined in the python2_ast.ml file
+
+  \begin{grammar}
+    \grule[variables]{\pvariable}{}
+    \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
+    \grule[statements]{\pstmt}{
+                \gtdef \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \gtreturn \overset{\star}{\pexpr} \gline
+        \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
+        \gor    \pexpr \pbinop\gteq \pexpr \gline
+        %I really don't care about print statements so I'm ignoring them
+        \gor    \gtfor \pexpr \gtin \pexpr \gtcolon \psuite \gline
+        \gor    \gtwhile \pexpr \gtcolon \psuite \gline
+        \gor    \gtif \pexpr: \psuite \gtobrk \pelseblock; \ldots \gtcbrk \gline
+        \gor    \gtraise \overset{\star}{\pexpr}, \overset{\star}{\pexpr}, \overset{\star}{\pexpr} \gline
+        \gor    \gttry: \psuite \gtobrk \pexcepthandler; \ldots \gtcbrk \gline
+        \gor    \pexpr \gline
+        \gor    \gtpass \gline
+        \gor    \gtbreak \gline
+        \gor    \gtcontinue \gline
+    }
+    \grule[expressions]{\pexpr}{
+                \punop \pexpr \gline
+        \gor    \pexpr \pbinop \pexpr \gline
+        \gor    \pexpr \gtand \pexpr \gline
+        \gor    \pexpr \gtor \pexpr \gline
+        \gor    \pexpr \pcmpop \pexpr \gline
+        \gor    \pexpr \gtif \pexpr \gtelse \pexpr \gline
+        \gor    \pexpr \gtopar \pexpr, \dots \gtcpar \gline
+        \gor    \mathbb{Z} \gline
+        \gor    \mathbb{S} \gline
+        \gor    \mathbb{B} \gline
+        \gor    \pexpr.\pvariable \gline
+        \gor    \pexpr \gtobrk \pslice \gtcbrk \gline
+        \gor    \pvariable \gline
+        \gor    \gtobrk \pexpr, \dots \gtcbrk \gline
+        \gor    \gtopar \pexpr, \dots \gtcpar \gline
+        \gor    \gtNone \gline
+    }
+    \grule[unary operators]{\punop}{
+                etc
+    }
+    \grule[binary operators]{\pbinop}{
+                +, etc
+    }
+    \grule[comparison operators]{\pcmpop}{TODO}
+    \grule[orelse blocks]{\pelseblock}{TODO}
+    \grule[exception handlers]{\pexcepthandler}{TODO}
+    \grule[slice]{\pslice}{TODO}
+
+    % \grule[literal]{\pliteral}{
+    %             \mathbb{Z}
+    %     \gor    \mathbb{S}
+    %     \gor    \mathbb{B}
+    %     \gor    \gtdef \gtopar \pvariable, \ldots \gtcpar \gtobrc \pstmts \gtcbrc
+    %     \gor    \gtobrk \pvariable, \ldots \gtcbrk
+    %     % \gor    \gtopar \pvariable, \ldots \gtcpar
+    %     \gor    \gtobrc \gtcbrc
+    %     \gor    \psnone
+    % }
+    \grule[strings]{\mathbb{S}}{}
+    \grule[booleans]{\mathbb{B}}{
+                \ostrue
+        \gor    \osfalse
+    }
+  \end{grammar}
+
+\end{document}
