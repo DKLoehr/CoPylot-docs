@@ -46,12 +46,30 @@
         \gor    \gtNone \gline
     }
     \grule[unary operators]{\punop}{
-                etc
+                \gtuplus
+           \gor \gtusub
+           \gor \gtnot
     }
     \grule[binary operators]{\pbinop}{
-                +, etc
+                \gtplus
+           \gor \gtsub
+           \gor \gtmult
+           \gor \gtdiv
+           \gor \gtmod
+           \gor \gtpow
     }
-    \grule[comparison operators]{\pcmpop}{TODO}
+    \grule[comparison operators]{\pcmpop}{
+                \gteq
+            \gor \gtneq
+           \gor \gtgeq
+           \gor \gtleq
+           \gor \gtge
+           \gor \gtle
+           \gor \gtis
+           \gor \gtis \gtnot
+           \gor \gtin
+           \gor \gtnot \gtin
+    }
     \grule[orelse blocks]{\pelseblock}{TODO}
     \grule[exception handlers]{\pexcepthandler}{TODO}
     \grule[slice]{\pslice}{TODO}
