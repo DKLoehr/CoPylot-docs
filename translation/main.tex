@@ -12,7 +12,7 @@
     \grule[variables]{\pvariable}{}
     \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
     \grule[statements]{\pstmt}{
-                \gtdef \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
+                \gtdef \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \gtreturn \pexpropt \gline
         \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
         \gor    \pexpr \pbinop\gteq \pexpr \gline
@@ -140,5 +140,45 @@
            \gor \gtStopIteration
     }
   \end{grammar}
+
+\section{Python Simplification Process}
+
+In the following rules, the expression ``\tfreshvar'' will indicate a fresh variable name.
+Identical expressions in a single rule will all refer to the same variable name.
+
+The left-hand side of each rule is in the Python language, while the right-hand side is
+in the the Simplified language.
+
+\begin{mathpar}
+  \translationRule{Function Definition}{
+    \pexpr_i = \pvariable_i, \psuite' = \osFunc{add\_return}(\psuite)
+  }{
+    \gtdef \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
+  }{
+    \gtobrk \tfreshvar \gteq
+    \gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar
+    \gtcolon \meaningof{\psuite'} \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Return Expression}{
+    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
+  }{
+    \gtreturn \pexpr
+  }{
+    \psuite \listConcat \gtobrk \gtreturn \pexpr' \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Empty Return}{
+    % No premises
+  }{
+    \gtreturn
+  }{
+    \gtobrk \gtreturn \gtNone \gtcbrk
+  }
+\end{mathpar}
 
 \end{document}

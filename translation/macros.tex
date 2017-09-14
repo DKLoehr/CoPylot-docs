@@ -38,12 +38,19 @@
 
 %%% General logic notation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Create a relational rule
+\newcommand{\meaningof}[1]{\llbracket #1 \rrbracket}
+
+% Create a translation rule
 % [#1] - Additional mathpartir arguments
 % {#2} - Name of the rule
 % {#3} - Premises for the rule
-% {#4} - Conclusions for the rule
-\newcommand{\relationRule}[4][]{\inferrule*[lab={\sc #2},#1]{#3}{#4}}
+% {#4} - Expression in first language
+% {#5} - Expression in second language
+\newcommand{\translationRule}[5][]{
+\inferrule*[lab={\sc #2},#1]
+{#3}
+{\meaningof{#4} = #5}
+}
 
 \declaretheorem[within=section]{lemma}
 \declaretheorem[name=Definition,numberlike=lemma]{definition}
@@ -200,15 +207,9 @@
 \defkw{TypeError}
 \defkw{StopIteration}
 
-%%% Lamia Evaluation Grammar
+%%% Translation Grammar
 
-\defgn{omem}{m}
-\defgn{opscope}{\eta}
-\defgn{ovalue}{v}
-\defgn{obinding}{B}
-\defgn{ogenf}{F}
-\defgn{ogenm}{M}
-\defgn{osplat}{\ast}
+\defgn{tfreshvar}{!\pvariable}
 
 \newcommand{\niton}{\not\owns}
 
