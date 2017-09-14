@@ -35,7 +35,7 @@
         \gor    \pexpr \pcmpop \pexpr \gline
         \gor    \pexpr \gtif \pexpr \gtelse \pexpr \gline
         \gor    \pexpr \gtopar \pexpr, \dots \gtcpar \gline
-        \gor    \mathbb{Z} \gline
+        \gor    \pnum \gline
         \gor    \mathbb{S} \gline
         \gor    \mathbb{B} \gline
         \gor    \pexpr.\pvariable \gline
@@ -79,12 +79,59 @@
                 \pexpr \gline
            \gor \pexpropt \gtcolon \pexpropt \gtcolon \pexpropt
     }
-
+    \grule[numbers]{\pnum}{}
     \grule[strings]{\mathbb{S}}{}
     \grule[booleans]{\mathbb{B}}{
                 \ostrue
         \gor    \osfalse
     }
+  \end{grammar}
+
+  \section{Python Simplified Grammar}
+  % This grammar is based on the AST defined in the python2_ast.ml file
+
+  \begin{grammar}
+    \grule[variables]{\pvariable}{}
+    \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
+    \grule[statements]{\pstmt}{
+                \gtreturn \pexpr \gline
+        \gor    \pvariable \gteq \pexpr \gline
+        \gor    \gtwhile \pvariable \gtcolon \psuite \gline
+        \gor    \gtif \pexpr \gtcolon \psuite \gtelse \gtcolon \psuite \gline
+        \gor    \gtraise \pexpr \gline
+        \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gline
+        \gor    \gtpass \gline
+        \gor    \gtbreak \gline
+        \gor    \gtcontinue \gline
+        \gor    \pexpr \gline
+    }
+    \grule[expressions]{\pexpr}{
+                \punop \pexpr \gline
+        \gor    \pexpr \pbinop \pexpr \gline
+        \gor    \pexpr \gtopar \pexpr, \dots \gtcpar \gline
+        \gor    \pexpr.\pvariable \gline
+        \gor    \gtobrk \pexpr, \dots \gtcbrk \gline
+        \gor    \gtopar \pexpr, \dots \gtcpar \gline
+        \gor    \pnum \gline
+        \gor    \mathbb{S} \gline
+        \gor    \mathbb{B} \gline
+        \gor    \pvariable \gline
+        \gor    \gtfun \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \pmagic
+    }
+    \grule[unary operators]{\punop}{
+                \gtnot
+    }
+    \grule[binary operators]{\pbinop}{
+                \gtis
+    }
+    \grule[numbers]{\pnum}{}
+    \grule[strings]{\mathbb{S}}{}
+    \grule[booleans]{\mathbb{B}}{
+                \ostrue
+        \gor    \osfalse
+    }
+    \grule[magic builtins]{\pmagic}{TODO}
   \end{grammar}
 
 \end{document}
