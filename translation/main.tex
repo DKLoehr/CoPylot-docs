@@ -131,7 +131,14 @@
                 \ostrue
         \gor    \osfalse
     }
-    \grule[magic builtins]{\pmagic}{TODO}
+    \grule[magic builtins]{\pmagic}{
+                \gtbool
+           \gor \gtslice
+           \gor \gtValueError
+           \gor \gtAttributeError \gline
+           \gor \gtTypeError
+           \gor \gtStopIteration
+    }
   \end{grammar}
 
 \end{document}
