@@ -8,6 +8,8 @@
   \section{Python Language Grammar}
   % This grammar is based on the AST defined in the python2_ast.ml file
 
+  We use the convention that a symbol with a star above it is optional.
+
   \begin{grammar}
     \grule[variables]{\pvariable}{}
     \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
@@ -151,7 +153,7 @@ in the the Simplified language.
 
 \begin{mathpar}
   \translationRule{Function Definition}{
-    \pexpr_i = \pvariable_i, \psuite' = \osFunc{add\_return}(\psuite)
+    \pexpr_i = \pvariable_i \\ \psuite' = \osFunc{add\_return}(\psuite)
   }{
     \gtdef \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
   }{
@@ -177,7 +179,29 @@ in the the Simplified language.
   }{
     \gtreturn
   }{
-    \gtobrk \gtreturn \gtNone \gtcbrk
+    \gtobrk \gtreturn \pvariable_{\star\gtNone} \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Multiple Assignment}{
+    n > 1 \\ \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
+  }{
+    \pexpr_1, \ldots \pexpr_n \gteq \pexpr
+  }{
+    \psuite \listConcat \gtobrk \tfreshvar \gteq \pexpr' \gtcbrk
+    \listConcat \meaningof{\pexpr_1 \gteq \tfreshvar} \listConcat \ldots
+    \listConcat \meaningof{\pexpr_n \gteq \tfreshvar}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Variable Assignment}{
+    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
+  }{
+    \pvariable \gteq \pexpr
+  }{
+    \psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
   }
 \end{mathpar}
 
