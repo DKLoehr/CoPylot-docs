@@ -129,15 +129,17 @@
 \defgn{psuite}{S}
 \defgn{pstmt}{s}
 \defgn{pexpr}{e}
+\defgn{pexpropt}{\overset{\star}{\pexpr}}
 \defgn{pbinop}{\oplus}
 \defgn{punop}{\otimes}
 \defgn{pcmpop}{\gtrdot}
 \defgn{pelseblock}{l}
 \defgn{pexcepthandler}{h}
-\defgn{pslice}{TODO-SLICE}
+\defgn{pslice}{\vdash}
 
 \defgt[gtcolon]{:}
 \defgt{let}
+\defgt[gteq]{=}
 \defgt{alloc}
 \defgt[gtopar]{(}
 \defgt[gtcpar]{)}
@@ -160,7 +162,7 @@
 \defgt[gtuplus]{\ensuremath{+_1}}
 \defgt[gtusub]{\ensuremath{-_1}}
 
-\defgt[gteq]{==}
+\defgt[gtiseq]{==}
 \defgt[gtneq]{!=}
 \defgt[gtgeq]{>=}
 \defgt[gtleq]{<=}
@@ -186,6 +188,7 @@
 \defkw{None}
 \defkw{and}
 \defkw{or}
+\defkw{as}
 
 %%% Lamia Evaluation Grammar
 
