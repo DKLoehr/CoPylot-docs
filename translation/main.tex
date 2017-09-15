@@ -79,6 +79,7 @@
     }
     \grule[slice]{\pslice}{
                 \pexpr \gline
+           \gor \pexpropt \gtcolon \pexpropt \gline
            \gor \pexpropt \gtcolon \pexpropt \gtcolon \pexpropt
     }
     \grule[numbers]{\pnum}{}
@@ -179,7 +180,7 @@ in the the Simplified language.
   }{
     \gtreturn
   }{
-    \gtobrk \gtreturn \pvariable_{\star\gtNone} \gtcbrk
+    \gtobrk \gtreturn \star\gtNone \gtcbrk
   }
 \end{mathpar}
 
@@ -187,7 +188,7 @@ in the the Simplified language.
   \translationRule{Multiple Assignment}{
     n > 1 \\ \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
   }{
-    \pexpr_1, \ldots \pexpr_n \gteq \pexpr
+    \pexpr_1 \gteq \ldots \gteq \pexpr_n \gteq \pexpr
   }{
     \psuite \listConcat \gtobrk \tfreshvar \gteq \pexpr' \gtcbrk
     \listConcat \meaningof{\pexpr_1 \gteq \tfreshvar} \listConcat \ldots
@@ -202,6 +203,63 @@ in the the Simplified language.
     \pvariable \gteq \pexpr
   }{
     \psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Attribute Assignment}{
+    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
+    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'} \\
+    s = \osFunc{string\_of\_variable}(\pvariable)
+  }{
+    \pexpr_1.\pvariable \gteq \pexpr_2
+  }{
+    \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
+    \pexpr_1'.\_\_setattr\_\_ \gtopar s, \pexpr_2' \gtcpar \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Slice Assignment}{
+    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
+    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'} \\
+    \meaningof{\pslice}  = \gsLR{\psuite_3, \pexpr_3'} \\
+  }{
+    \pexpr_1 \gtobrk \pslice \gtcbrk \gteq \pexpr_2
+  }{
+    \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
+    \pexpr_1'.\_\_setitem\_\_ \gtopar \pexpr_3', \pexpr_2' \gtcpar \gtcbrk
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{List Assignment}{
+  }{
+    \gtobrk \pvariable_1, \ldots, \pvariable_n \gtcbrk \gteq \pexpr
+  }{
+    \meaningof{\gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar \gteq \pexpr}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Tuple Assignment}{
+  }{
+    \gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar \gteq \pexpr
+  }{
+    I cry evertim
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Augmented Variable Assignment}{
+    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'} \\
+    f = \osFunc{binop\_to\_func}(\pbinop) \\
+    f_i = \osFunc{binop\_to\_ifunc}(\pbinop)
+  }{
+    \pvariable \pbinop \gteq \pexpr
+  }{
+    %\psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
+    Complicated stuff
   }
 \end{mathpar}
 
