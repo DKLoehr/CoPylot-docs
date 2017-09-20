@@ -14,6 +14,7 @@
 \usepackage{twoopt}
 \usepackage{catchfilebetweentags}
 \usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{listings}
 
 % Better TT font
 \let\oldrmdefault\rmdefault
@@ -21,6 +22,14 @@
 \usepackage{lmodern}
 \let\rmdefault\oldrmdefault
 \let\sfdefault\oldsfdefault
+
+%%% Macros for writing python code in LaTeX
+\newcommand{\pythonset}{\lstset{language=python,basicstyle=\ttfamily,escapeinside={$}{$},escapebegin=$,escapeend=$}}
+\newcommand{\basicstyle}{\ttfamily\small}
+\newcommand{\keywordstyle}{\basicstyle\color{blue}\bfseries}
+\lstnewenvironment{python}{\begingroup\pythonset\lstset{basicstyle=\basicstyle,keywordstyle=\keywordstyle}}{\endgroup}
+
+
 
 %%% TeX convenience macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -46,10 +55,18 @@
 % {#3} - Premises for the rule
 % {#4} - Expression in first language
 % {#5} - Expression in second language
+% \newcommand{\translationRule}[5][]{
+% \inferrule*[lab={\sc #2},#1]
+% {\meaningof{#3} \equiv #4}
+% {#5}
+% }
+
 \newcommand{\translationRule}[5][]{
 \inferrule*[lab={\sc #2},#1]
-{#3}
-{\meaningof{#4} \equiv #5}
+{\meaningof{#3} \ \ \ \equiv \ \ \ #4}
+{
+\mbox{where } #5
+}
 }
 
 \declaretheorem[within=section]{lemma}
@@ -209,7 +226,7 @@
 
 %%% Translation Grammar
 
-\defgn{tfreshvar}{!\pvariable}
+\defgn{tfreshvar}{\overset{!}\pvariable}
 
 \newcommand{\niton}{\not\owns}
 

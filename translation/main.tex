@@ -152,115 +152,172 @@ Identical expressions in a single rule will all refer to the same variable name.
 The left-hand side of each rule is in the Python language, while the right-hand side is
 in the the Simplified language.
 
+\newsavebox{\funcDefBox}
+\begin{lrbox}{\funcDefBox}
+\begin{python}
+$\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
+  $\meaningof{\psuite'}$
+\end{python}
+\end{lrbox}
+
 \begin{mathpar}
   \translationRule{Function Definition}{
-    \pexpr_i = \pvariable_i \\ \psuite' = \osFunc{add\_return}(\psuite)
-  }{
     \gtdef \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
   }{
-    \gtobrk \tfreshvar \gteq
-    \gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar
-    \gtcolon \meaningof{\psuite'} \gtcbrk
+    \usebox{\funcDefBox}
+  }{
+    \pexpr_i = \pvariable_i, \\ \psuite' = \osFunc{add\_return}(\psuite)
   }
 \end{mathpar}
+
+\newsavebox{\returnBox}
+\begin{lrbox}{\returnBox}
+\begin{python}
+<$\psuite$>
+return $\pexpr'$
+\end{python}
+\end{lrbox}
 
 \begin{mathpar}
   \translationRule{Return Expression}{
-    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
-  }{
     \gtreturn \pexpr
   }{
-    \psuite \listConcat \gtobrk \gtreturn \pexpr' \gtcbrk
+    \usebox{\returnBox}
+  }{
+    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
   }
 \end{mathpar}
+
+\newsavebox{\ereturnBox}
+\begin{lrbox}{\ereturnBox}
+\begin{python}
+return $\mathtt{None}$
+\end{python}
+\end{lrbox}
 
 \begin{mathpar}
   \translationRule{Empty Return}{
-    % No premises
-  }{
     \gtreturn
   }{
-    \gtobrk \gtreturn \star\gtNone \gtcbrk
+    \usebox{\ereturnBox}
+  }{
+    % No premises
   }
 \end{mathpar}
+
+\newsavebox{\multipleAssignmentBox}
+\begin{lrbox}{\multipleAssignmentBox}
+\begin{python}
+<$\psuite$>
+$\tfreshvar = \pexpr$
+$\meaningof{\pexpr_1 = \tfreshvar}$
+...
+$\meaningof{\pexpr_n = \tfreshvar}$
+\end{python}
+\end{lrbox}
 
 \begin{mathpar}
   \translationRule{Multiple Assignment}{
-    n > 1 \\ \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
-  }{
     \pexpr_1 \gteq \ldots \gteq \pexpr_n \gteq \pexpr
   }{
-    \psuite \listConcat \gtobrk \tfreshvar \gteq \pexpr' \gtcbrk
-    \listConcat \meaningof{\pexpr_1 \gteq \tfreshvar} \listConcat \ldots
-    \listConcat \meaningof{\pexpr_n \gteq \tfreshvar}
+    \usebox{\multipleAssignmentBox}
+  }{
+    n > 1, \\ \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
   }
 \end{mathpar}
+
+\newsavebox{\variableAssignmentBox}
+\begin{lrbox}{\variableAssignmentBox}
+\begin{python}
+<$\psuite$>
+$\pvariable = \pexpr'$
+\end{python}
+\end{lrbox}
 
 \begin{mathpar}
   \translationRule{Variable Assignment}{
-    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
-  }{
     \pvariable \gteq \pexpr
   }{
-    \psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
+    \usebox{\variableAssignmentBox}
+  }{
+    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
   }
 \end{mathpar}
+
+\newsavebox{\attributeAssignmentBox}
+\begin{lrbox}{\attributeAssignmentBox}
+\begin{python}
+<$\psuite_1$>
+<$\psuite_2$>
+$\pexpr_1'$.__setattr__($s$, $\pexpr_2'$)
+\end{python}
+\end{lrbox}
 
 \begin{mathpar}
   \translationRule{Attribute Assignment}{
-    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
-    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'} \\
-    s = \osFunc{string\_of\_variable}(\pvariable)
-  }{
     \pexpr_1.\pvariable \gteq \pexpr_2
   }{
-    \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
-    \pexpr_1'.\_\_setattr\_\_ \gtopar s, \pexpr_2' \gtcpar \gtcbrk
+    % \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
+    % \pexpr_1'.\_\_setattr\_\_ \gtopar s, \pexpr_2' \gtcpar \gtcbrk
+    \usebox{\attributeAssignmentBox}
+  }{
+    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'}, \\
+    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'}, \\
+    s = \osFunc{string\_of\_variable}(\pvariable)
   }
 \end{mathpar}
 
+\newsavebox{\sliceAssignmentBox}
+\begin{lrbox}{\sliceAssignmentBox}
+\begin{python}
+<$\psuite_1$>
+<$\psuite_2$>
+$\pexpr_1'$.__setitem__($\pexpr_3'$, $\pexpr_2'$)
+\end{python}
+\end{lrbox}
+
 \begin{mathpar}
   \translationRule{Slice Assignment}{
+    \pexpr_1 \gtobrk \pslice \gtcbrk \gteq \pexpr_2
+  }{
+    \usebox{\sliceAssignmentBox}
+  }{
     \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
     \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'} \\
     \meaningof{\pslice}  = \gsLR{\psuite_3, \pexpr_3'} \\
-  }{
-    \pexpr_1 \gtobrk \pslice \gtcbrk \gteq \pexpr_2
-  }{
-    \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
-    \pexpr_1'.\_\_setitem\_\_ \gtopar \pexpr_3', \pexpr_2' \gtcpar \gtcbrk
   }
 \end{mathpar}
 
 \begin{mathpar}
   \translationRule{List Assignment}{
-  }{
     \gtobrk \pvariable_1, \ldots, \pvariable_n \gtcbrk \gteq \pexpr
   }{
     \meaningof{\gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar \gteq \pexpr}
+  }{
+    % No premises
   }
 \end{mathpar}
 
-\begin{mathpar}
-  \translationRule{Tuple Assignment}{
-  }{
-    \gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar \gteq \pexpr
-  }{
-    I cry evertim
-  }
-\end{mathpar}
-
-\begin{mathpar}
-  \translationRule{Augmented Variable Assignment}{
-    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'} \\
-    f = \osFunc{binop\_to\_func}(\pbinop) \\
-    f_i = \osFunc{binop\_to\_ifunc}(\pbinop)
-  }{
-    \pvariable \pbinop \gteq \pexpr
-  }{
-    %\psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
-    Complicated stuff
-  }
-\end{mathpar}
+% \begin{mathpar}
+%   \translationRule{Tuple Assignment}{
+%   }{
+%     \gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar \gteq \pexpr
+%   }{
+%     I cry evertim
+%   }
+% \end{mathpar}
+%
+% \begin{mathpar}
+%   \translationRule{Augmented Variable Assignment}{
+%     \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'} \\
+%     f = \osFunc{binop\_to\_func}(\pbinop) \\
+%     f_i = \osFunc{binop\_to\_ifunc}(\pbinop)
+%   }{
+%     \pvariable \pbinop \gteq \pexpr
+%   }{
+%     %\psuite \listConcat \gtobrk \pvariable \gteq \pexpr' \gtcbrk
+%     Complicated stuff
+%   }
+% \end{mathpar}
 
 \end{document}
