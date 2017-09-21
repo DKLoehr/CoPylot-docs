@@ -64,9 +64,7 @@
 \newcommand{\translationRule}[5][]{
 \inferrule*[lab={\sc #2},#1]
 {\meaningof{#3} \ \ \ \equiv \ \ \ #4}
-{
-\mbox{where } #5
-}
+{#5}
 }
 
 \declaretheorem[within=section]{lemma}

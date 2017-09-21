@@ -152,6 +152,10 @@ Identical expressions in a single rule will all refer to the same variable name.
 The left-hand side of each rule is in the Python language, while the right-hand side is
 in the the Simplified language.
 
+Additionally, for all $e_1$, we will define $S_{(e_1)}$ and $e_{(e_1)}$ to be such
+that $\meaningof{e_1} = \gsLR{S_{(e_1)}, e_{(e_1)}}$. We may also use this notation
+for slices.
+
 \newsavebox{\funcDefBox}
 \begin{lrbox}{\funcDefBox}
 \begin{python}
@@ -166,15 +170,17 @@ $\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
   }{
     \usebox{\funcDefBox}
   }{
-    \pexpr_i = \pvariable_i, \\ \psuite' = \osFunc{add\_return}(\psuite)
+    \mbox{where }
+    \pexpr_i = \pvariable_i, \\
+    \psuite' = \osFunc{add\_return}(\psuite)
   }
 \end{mathpar}
 
 \newsavebox{\returnBox}
 \begin{lrbox}{\returnBox}
 \begin{python}
-$\meaningof{\psuite}$
-return $\pexpr'$
+$\meaningof{\psuite_{(\pexpr)}}$
+return $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
 
@@ -184,7 +190,7 @@ return $\pexpr'$
   }{
     \usebox{\returnBox}
   }{
-    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
+    % No premises
   }
 \end{mathpar}
 
@@ -208,8 +214,8 @@ return $\mathtt{None}$
 \newsavebox{\multipleAssignmentBox}
 \begin{lrbox}{\multipleAssignmentBox}
 \begin{python}
-$\meaningof{\psuite}$
-$\tfreshvar = \pexpr$
+$\meaningof{\psuite_{(\pexpr)}}$
+$\tfreshvar = \pexpr_{(\pexpr)}$
 $\meaningof{\pexpr_1 = \tfreshvar}$
 ...
 $\meaningof{\pexpr_n = \tfreshvar}$
@@ -222,15 +228,16 @@ $\meaningof{\pexpr_n = \tfreshvar}$
   }{
     \usebox{\multipleAssignmentBox}
   }{
-    n > 1, \\ \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
+    \mbox{where }
+    n > 1
   }
 \end{mathpar}
 
 \newsavebox{\variableAssignmentBox}
 \begin{lrbox}{\variableAssignmentBox}
 \begin{python}
-$\meaningof{\psuite}$
-$\pvariable = \pexpr'$
+$\meaningof{\psuite_{(\pexpr)}}$
+$\pvariable = \pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
 
@@ -240,16 +247,15 @@ $\pvariable = \pexpr'$
   }{
     \usebox{\variableAssignmentBox}
   }{
-    \meaningof{\pexpr} = \gsLR{\psuite, \pexpr'}
   }
 \end{mathpar}
 
 \newsavebox{\attributeAssignmentBox}
 \begin{lrbox}{\attributeAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_1}$
-$\meaningof{\psuite_2}$
-$\pexpr_1'$.__setattr__($s$, $\pexpr_2'$)
+$\meaningof{\psuite_{(\pexpr_2)}}$
+$\meaningof{\psuite_{(\pexpr_1)}}$
+$\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
 
@@ -257,12 +263,9 @@ $\pexpr_1'$.__setattr__($s$, $\pexpr_2'$)
   \translationRule{Attribute Assignment}{
     \pexpr_1.\pvariable \gteq \pexpr_2
   }{
-    % \psuite_1 \listConcat \psuite_2 \listConcat \gtobrk
-    % \pexpr_1'.\_\_setattr\_\_ \gtopar s, \pexpr_2' \gtcpar \gtcbrk
     \usebox{\attributeAssignmentBox}
   }{
-    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'}, \\
-    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'}, \\
+    \mbox{where }
     s = \osFunc{string\_of\_variable}(\pvariable)
   }
 \end{mathpar}
@@ -270,9 +273,10 @@ $\pexpr_1'$.__setattr__($s$, $\pexpr_2'$)
 \newsavebox{\sliceAssignmentBox}
 \begin{lrbox}{\sliceAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_1}$
-$\meaningof{\psuite_2}$
-$\pexpr_1'$.__setitem__($\pexpr_3'$, $\pexpr_2'$)
+$\meaningof{\psuite_{(\pexpr_2)}}$
+$\meaningof{\psuite_{(\pexpr_1)}}$
+$\meaningof{\psuite_{(\pslice)}}$
+$\pexpr_{(\pexpr_1)}$.__setitem__($\pexpr_{(\pslice)}$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
 
@@ -282,9 +286,6 @@ $\pexpr_1'$.__setitem__($\pexpr_3'$, $\pexpr_2'$)
   }{
     \usebox{\sliceAssignmentBox}
   }{
-    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
-    \meaningof{\pexpr_2} = \gsLR{\psuite_2, \pexpr_2'} \\
-    \meaningof{\pslice}  = \gsLR{\psuite_3, \pexpr_3'} \\
   }
 \end{mathpar}
 
@@ -332,9 +333,9 @@ $\pexpr_n$ = $\tfreshvar_n$
   }
 \end{mathpar}
 
-TODO: This rule reflects the current code, but is wrong. It also needs to
-check for \_\_radd\_\_ and maybe some more stuff, and should throw a
-TypeError if it can't figure out how to do the addition. Also, the value
+TODO: The augmented assignment rules reflect the current code, but are wrong.
+We also need to check for \_\_radd\_\_ and maybe some more stuff, and should throw a
+TypeError if we can't figure out how to do the addition. Also, the value
 expression should be evaluated first.
 \newsavebox{\augmentedAssignmentBox}
 \begin{lrbox}{\augmentedAssignmentBox}
@@ -361,8 +362,8 @@ $\pvariable$ = $\tfreshvar$($\pexpr$)
 \newsavebox{\augmentedAttributeAssignmentBox}
 \begin{lrbox}{\augmentedAttributeAssignmentBox}
 \begin{python}
-$\psuite$
-$\tfreshvar_1$ = $\pexpr_1'$
+$\psuite_{(\pexpr_1)}$
+$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
 try:
   $\tfreshvar_2$ = $\tfreshvar_1$.$\pvariable$.iopFunc
 except AttributeError:
@@ -377,7 +378,6 @@ $\tfreshvar_1$.$\pvariable$ = $\tfreshvar_2$($\pexpr_2$)
   }{
     \left\llbracket\usebox{\augmentedAttributeAssignmentBox}\right\rrbracket
   }{
-    \meaningof{\pexpr_1} = \gsLR{\psuite, \pexpr_1'} \\
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
     \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
   }
@@ -386,15 +386,15 @@ $\tfreshvar_1$.$\pvariable$ = $\tfreshvar_2$($\pexpr_2$)
 \newsavebox{\augmentedSliceAssignmentBox}
 \begin{lrbox}{\augmentedSliceAssignmentBox}
 \begin{python}
-$\psuite_1$
-$\psuite_2$
-$\tfreshvar_1$ = $\pexpr_1'$
-$\tfreshvar_2$ = $\pexpr_3'$
+$\psuite_{(\pexpr_1)}$
+$\psuite_{(\pslice)}$
+$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
+$\tfreshvar_2$ = $\pexpr_{(\pslice)}$
 try:
-  $\tfreshvar_3$ = $\pexpr_1'$[$\pexpr_3'$].iopFunc
+  $\tfreshvar_3$ = $\tfreshvar_1$[$\tfreshvar_2$].iopFunc
 except AttributeError:
-  $\tfreshvar_2$ = $\pexpr_1'$[$\pexpr_3'$].opFunc
-$\pexpr_1'$[$\pexpr_3'$] = $\tfreshvar_2$($\pexpr_2$)
+  $\tfreshvar_3$ = $\tfreshvar_1$[$\tfreshvar_2$].opFunc
+$\tfreshvar_1$[$\tfreshvar_2$] = $\tfreshvar_3$($\pexpr_2$)
 \end{python}
 \end{lrbox}
 
@@ -404,8 +404,6 @@ $\pexpr_1'$[$\pexpr_3'$] = $\tfreshvar_2$($\pexpr_2$)
   }{
     \left\llbracket\usebox{\augmentedSliceAssignmentBox}\right\rrbracket
   }{
-    \meaningof{\pexpr_1} = \gsLR{\psuite_1, \pexpr_1'} \\
-    \meaningof{\pslice} = \gsLR{\psuite_3, \pexpr_3'} \\
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
     \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
   }
