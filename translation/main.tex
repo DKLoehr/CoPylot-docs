@@ -156,6 +156,8 @@ Additionally, for all $e_1$, we will define $S_{(e_1)}$ and $e_{(e_1)}$ to be su
 that $\meaningof{e_1} = \gsLR{S_{(e_1)}, e_{(e_1)}}$. We may also use this notation
 for slices.
 
+\subsection{Statements}
+
 \newsavebox{\funcDefBox}
 \begin{lrbox}{\funcDefBox}
 \begin{python}
@@ -408,5 +410,151 @@ $\tfreshvar_1$[$\tfreshvar_2$] = $\tfreshvar_3$($\pexpr_2$)
     \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
   }
 \end{mathpar}
+
+\newsavebox{\forBox}
+\begin{lrbox}{\forBox}
+\begin{python}
+$\tfreshvar$ = $\pexpr_2$.__iter__().next
+try:
+  while True:
+    $\pexpr_1$ = $\tfreshvar$()
+    $\psuite$
+except StopIteration:
+  pass
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{For loop}{
+    \gtfor \pexpr_1 \gtin \pexpr_2 \gtcolon \psuite
+  }{
+    \left\llbracket\usebox{\forBox}\right\rrbracket
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\whileBox}
+\begin{lrbox}{\whileBox}
+\begin{python}
+$\meaningof{\psuite_{(\pexpr)}}$
+$\tfreshvar$ = bool($\pexpr_{(\pexpr)}$)
+while $\tfreshvar$:
+  $\meaningof{\psuite}$
+  $\meaningof{\psuite_{(\pexpr)}}$
+  $\tfreshvar$ = bool($\pexpr_{(\pexpr)}$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{While loop}{
+    \gtwhile \pexpr \gtcolon \psuite
+  }{
+    \usebox{\whileBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\ifBox}
+\begin{lrbox}{\ifBox}
+\begin{python}
+$\meaningof{\psuite_{(\pexpr)}}$
+if bool($\pexpr_{(\pexpr)}$):
+  $\meaningof{\psuite_1}$
+else:
+  $\meaningof{\psuite_2}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{If statement}{
+    \gtif \pexpr \gtcolon \psuite_1 \gtelse \gtcolon \psuite_2
+  }{
+    \usebox{\ifBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\raiseBox}
+\begin{lrbox}{\raiseBox}
+\begin{python}
+$\meaningof{\psuite_{(\pexpr)}}$
+raise $\pexpr_{(\pexpr)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Raise statement}{
+    \gtraise \pexpr
+  }{
+    \usebox{\raiseBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\tryBox}
+\begin{lrbox}{\tryBox}
+\begin{python}
+COMPLICATED -- TODO
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Try/Except statement}{
+    \gttry \gtcolon \psuite \gtobrk \pexcepthandler; \ldots \gtcbrk
+  }{
+    \usebox{\tryBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\passBox}
+\begin{lrbox}{\passBox}
+\begin{python}
+pass
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Pass statement}{
+    \gtpass
+  }{
+    \usebox{\passBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\breakBox}
+\begin{lrbox}{\breakBox}
+\begin{python}
+break
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Break statement}{
+    \gtbreak
+  }{
+    \usebox{\breakBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\continueBox}
+\begin{lrbox}{\continueBox}
+\begin{python}
+continue
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Continue statement}{
+    \gtcontinue
+  }{
+    \usebox{\continueBox}
+  }{
+  }
+\end{mathpar}
+
+\subsection{Expressions}
 
 \end{document}
