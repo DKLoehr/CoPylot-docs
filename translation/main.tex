@@ -356,6 +356,7 @@ $\pvariable$ = $\tfreshvar$($\pexpr$)
   }{
     \left\llbracket\usebox{\augmentedAssignmentBox}\right\rrbracket
   }{
+  \mbox{where }
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
     \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
   }
@@ -556,5 +557,133 @@ continue
 \end{mathpar}
 
 \subsection{Expressions}
+
+\newsavebox{\andBox}
+\begin{lrbox}{\andBox}
+\begin{python}
+$\tfreshvar$ = $\pexpr_1$
+$\pexpr_2$ if $\tfreshvar$ else $\tfreshvar$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Boolean expression (And)}{
+    \pexpr_1 \gtand \pexpr_2
+  }{
+    \left\llbracket\usebox{\andBox}\ \ \ \ \ \ \right\rrbracket
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\orBox}
+\begin{lrbox}{\orBox}
+\begin{python}
+$\tfreshvar$ = $\pexpr_1$
+$\tfreshvar$ if $\tfreshvar$ else $\pexpr_2$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Boolean expression (Or)}{
+    \pexpr_1 \gtor \pexpr_2
+  }{
+    \left\llbracket\usebox{\orBox}\ \ \ \ \ \ \right\rrbracket
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\binopBox}
+\begin{lrbox}{\binopBox}
+\begin{python}
+$\psuite_{(\pexpr_1)}$
+$\psuite_{(\pexpr_2)}$
+$\pexpr_{(\pexpr_1)}$.opFunc($\pexpr_{(\pexpr_2)}$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Binary Operation}{
+    \pexpr_1 \pbinop \pexpr_2
+  }{
+    \usebox{\binopBox}
+  }{
+  \mbox{where }
+  \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop)
+  }
+\end{mathpar}
+
+\newsavebox{\notBox}
+\begin{lrbox}{\notBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+not bool($\pexpr_{(\pexpr)}$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Unary Operation (not)}{
+    \gtnot \pexpr
+  }{
+    \usebox{\notBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\uplusBox}
+\begin{lrbox}{\uplusBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+$\pexpr_{(\pexpr)}$.__pos__()
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Unary Operation (+)}{
+    \gtuplus \pexpr
+  }{
+    \usebox{\uplusBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\usubBox}
+\begin{lrbox}{\usubBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+$\pexpr_{(\pexpr)}$.__neg__()
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Unary Operation (-)}{
+    \gtusub \pexpr
+  }{
+    \usebox{\usubBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\ifExpBox}
+\begin{lrbox}{\ifExpBox}
+\begin{python}
+$\psuite_{(\pexpr_2)}$
+if $\pexpr_{(\pexpr_2)}$:
+  $\psuite_{(\pexpr_1)}$
+  $\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
+else:
+  $\psuite_{(\pexpr_3)}$
+  $\tfreshvar_1$ = $\pexpr_{(\pexpr_3)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Unary Operation (-)}{
+    \pexpr_1 \gtif \pexpr_2 \gtelse \pexpr_3
+  }{
+    \usebox{\ifExpBox}
+  }{
+  \mbox{and we return } \tfreshvar_1
+  }
+\end{mathpar}
 
 \end{document}
