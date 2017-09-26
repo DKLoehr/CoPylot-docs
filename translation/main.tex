@@ -495,13 +495,16 @@ raise $\pexpr_{(\pexpr)}$
 \newsavebox{\tryBox}
 \begin{lrbox}{\tryBox}
 \begin{python}
-COMPLICATED -- TODO
+try:
+  $\meaningof{\psuite}$
+except $\tfreshvar$:
+  $\meaningof{\gtobrk \pexcepthandler_1; \ldots; \pexcepthandler_n \gtcbrk}_{\tfreshvar}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{Try/Except statement}{
-    \gttry \gtcolon \psuite \gtobrk \pexcepthandler; \ldots \gtcbrk
+    \gttry \gtcolon \psuite \gtobrk \pexcepthandler_1; \ldots; \pexcepthandler_n \gtcbrk
   }{
     \usebox{\tryBox}
   }{
@@ -831,6 +834,8 @@ $\psuite_{(\pexpr_n)}$
   }
 \end{mathpar}
 
+\subsection{Other forms}
+
 \newsavebox{\sliceBox}
 \begin{lrbox}{\sliceBox}
 \begin{python}
@@ -849,6 +854,86 @@ $\psuite_{(\pexpr_3)}$
   }{
     \mbox{where } \psuite_{(\pexpr_i)} \mbox{ is empty and } \pexpr_{(\pexpr_i)}
     \mbox{ is } \mathtt{*None} \mbox{ if } \pexpr_i \mbox{ is omitted}
+  }
+\end{mathpar}
+
+\newsavebox{\exnBox}
+\begin{lrbox}{\exnBox}
+\begin{python}
+if(True):
+  $\psuite$
+else:
+  $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Exception handler list}{
+    \gtobrk (\gtexcept \gtcolon \psuite); \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
+  }{
+    \usebox{\exnBox}
+  }{
+    \mbox{where } n > 0
+  }
+\end{mathpar}
+
+\newsavebox{\exnBoxTwo}
+\begin{lrbox}{\exnBoxTwo}
+\begin{python}
+$\psuite_{(\pexpr)}$
+if $\tfreshvar$.__class__ is $\pexpr_{(\pexpr)}$:
+  $\psuite$
+else:
+  $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Exception handler list}{
+    \gtobrk (\gtexcept \pexpr \gtcolon \psuite); \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
+  }{
+    \usebox{\exnBoxTwo}
+  }{
+    \mbox{where } n > 0
+  }
+\end{mathpar}
+
+\newsavebox{\exnBoxThree}
+\begin{lrbox}{\exnBoxThree}
+\begin{python}
+$\psuite_{(\pexpr)}$
+if $\pvariable$.__class__ is $\pexpr_{(\pexpr)}$:
+  $\pvariable_1$ = $\pvariable$
+  $\psuite$
+else:
+  $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Exception handler list}{
+    \gtobrk (\gtexcept \pexpr \gtas \pvariable_1 \gtcolon \psuite);
+    \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
+  }{
+    \usebox{\exnBoxThree}
+  }{
+    \mbox{where } n > 0
+  }
+\end{mathpar}
+
+\newsavebox{\exnBoxEmpty}
+\begin{lrbox}{\exnBoxEmpty}
+\begin{python}
+raise $\pvariable$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Exception handler list}{
+    \gtobrk  \gtcbrk _{\pvariable}
+  }{
+    \usebox{\exnBoxEmpty}
+  }{
   }
 \end{mathpar}
 
@@ -889,6 +974,5 @@ $\psuite_{(\pexpr_3)}$
   \osFunc{Add\_Return}(\psuite) = \psuite || \gtobrk \gtreturn \gtNone \gtcbrk
   \end{flalign*}
 \end{definition}
-
 
 \end{document}
