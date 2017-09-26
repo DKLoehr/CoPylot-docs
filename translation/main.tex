@@ -17,7 +17,7 @@
                 \gtdef \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \gtreturn \pexpropt \gline
         \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
-        \gor    \pexpr \pbinop\gteq \pexpr \gline
+        \gor    \pexpr \pbinop \gteq \pexpr \gline
         %I really don't care about print statements so I'm ignoring them
         \gor    \gtfor \pexpr \gtin \pexpr \gtcolon \psuite \gline
         \gor    \gtwhile \pexpr \gtcolon \psuite \gline
@@ -34,7 +34,7 @@
         \gor    \pexpr \pbinop \pexpr \gline
         \gor    \pexpr \gtand \pexpr \gline
         \gor    \pexpr \gtor \pexpr \gline
-        \gor    \pexpr \pcmpop \pexpr \gline
+        \gor    \pexpr \pcmpop \pexpr \pcmpop \ldots \pcmpop \pexpr \gline
         \gor    \pexpr \gtif \pexpr \gtelse \pexpr \gline
         \gor    \pexpr \gtopar \pexpr, \dots \gtcpar \gline
         \gor    \pnum \gline
@@ -558,11 +558,13 @@ continue
 
 \subsection{Expressions}
 
+We will use the convention that $\left<\psuite, \meaningof{\pexpr}\right>$ is to be interpreted as
+$\left<\psuite || \psuite_{(\pexpr)}, \pexpr_{(\pexpr)}\right>$.
+
 \newsavebox{\andBox}
 \begin{lrbox}{\andBox}
 \begin{python}
 $\tfreshvar$ = $\pexpr_1$
-$\pexpr_2$ if $\tfreshvar$ else $\tfreshvar$
 \end{python}
 \end{lrbox}
 
@@ -570,7 +572,8 @@ $\pexpr_2$ if $\tfreshvar$ else $\tfreshvar$
   \translationRule{Boolean expression (And)}{
     \pexpr_1 \gtand \pexpr_2
   }{
-    \left\llbracket\usebox{\andBox}\ \ \ \ \ \ \right\rrbracket
+    \left<\usebox{\andBox}\hspace{20pt},
+    \meaningof{\pexpr_2 \gtif \tfreshvar \gtelse \tfreshvar}\right>
   }{
   }
 \end{mathpar}
@@ -579,7 +582,6 @@ $\pexpr_2$ if $\tfreshvar$ else $\tfreshvar$
 \begin{lrbox}{\orBox}
 \begin{python}
 $\tfreshvar$ = $\pexpr_1$
-$\tfreshvar$ if $\tfreshvar$ else $\pexpr_2$
 \end{python}
 \end{lrbox}
 
@@ -587,7 +589,8 @@ $\tfreshvar$ if $\tfreshvar$ else $\pexpr_2$
   \translationRule{Boolean expression (Or)}{
     \pexpr_1 \gtor \pexpr_2
   }{
-    \left\llbracket\usebox{\orBox}\ \ \ \ \ \ \right\rrbracket
+    \left<\usebox{\orBox}\hspace{18pt},
+    \meaningof{\tfreshvar \gtif \tfreshvar \gtelse \pexpr_2}\right>
   }{
   }
 \end{mathpar}
@@ -597,7 +600,6 @@ $\tfreshvar$ if $\tfreshvar$ else $\pexpr_2$
 \begin{python}
 $\psuite_{(\pexpr_1)}$
 $\psuite_{(\pexpr_2)}$
-$\pexpr_{(\pexpr_1)}$.opFunc($\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
 
@@ -605,7 +607,7 @@ $\pexpr_{(\pexpr_1)}$.opFunc($\pexpr_{(\pexpr_2)}$)
   \translationRule{Binary Operation}{
     \pexpr_1 \pbinop \pexpr_2
   }{
-    \usebox{\binopBox}
+    \left<\usebox{\binopBox}\hspace{25pt}, \pexpr_{(\pexpr_1)}.\mathtt{opFunc}(\pexpr_{(\pexpr_2)}) \right>
   }{
   \mbox{where }
   \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop)
@@ -616,7 +618,6 @@ $\pexpr_{(\pexpr_1)}$.opFunc($\pexpr_{(\pexpr_2)}$)
 \begin{lrbox}{\notBox}
 \begin{python}
 $\psuite_{(\pexpr)}$
-not bool($\pexpr_{(\pexpr)}$)
 \end{python}
 \end{lrbox}
 
@@ -624,7 +625,7 @@ not bool($\pexpr_{(\pexpr)}$)
   \translationRule{Unary Operation (not)}{
     \gtnot \pexpr
   }{
-    \usebox{\notBox}
+    \left<\usebox{\notBox}\hspace{20pt}, \gtnot \gtbool(\pexpr_{(\pexpr)})\right>
   }{
   }
 \end{mathpar}
@@ -633,7 +634,6 @@ not bool($\pexpr_{(\pexpr)}$)
 \begin{lrbox}{\uplusBox}
 \begin{python}
 $\psuite_{(\pexpr)}$
-$\pexpr_{(\pexpr)}$.__pos__()
 \end{python}
 \end{lrbox}
 
@@ -641,7 +641,7 @@ $\pexpr_{(\pexpr)}$.__pos__()
   \translationRule{Unary Operation (+)}{
     \gtuplus \pexpr
   }{
-    \usebox{\uplusBox}
+    \left<\usebox{\uplusBox}\hspace{20pt}, \pexpr_{(\pexpr)}.\mathtt{\_\_pos\_\_}() \right>
   }{
   }
 \end{mathpar}
@@ -650,7 +650,6 @@ $\pexpr_{(\pexpr)}$.__pos__()
 \begin{lrbox}{\usubBox}
 \begin{python}
 $\psuite_{(\pexpr)}$
-$\pexpr_{(\pexpr)}$.__neg__()
 \end{python}
 \end{lrbox}
 
@@ -658,7 +657,7 @@ $\pexpr_{(\pexpr)}$.__neg__()
   \translationRule{Unary Operation (-)}{
     \gtusub \pexpr
   }{
-    \usebox{\usubBox}
+    \left<\usebox{\usubBox}\hspace{20pt}, \pexpr_{(\pexpr)}.\mathtt{\_\_neg\_\_}() \right>
   }{
   }
 \end{mathpar}
@@ -669,21 +668,227 @@ $\pexpr_{(\pexpr)}$.__neg__()
 $\psuite_{(\pexpr_2)}$
 if $\pexpr_{(\pexpr_2)}$:
   $\psuite_{(\pexpr_1)}$
-  $\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
+  $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 else:
   $\psuite_{(\pexpr_3)}$
-  $\tfreshvar_1$ = $\pexpr_{(\pexpr_3)}$
+  $\tfreshvar$ = $\pexpr_{(\pexpr_3)}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
-  \translationRule{Unary Operation (-)}{
+  \translationRule{If expression}{
     \pexpr_1 \gtif \pexpr_2 \gtelse \pexpr_3
   }{
-    \usebox{\ifExpBox}
+    \left< \usebox{\ifExpBox}\hspace{30pt}, \tfreshvar \right>
   }{
-  \mbox{and we return } \tfreshvar_1
   }
 \end{mathpar}
+
+\newsavebox{\compareBox}
+\begin{lrbox}{\compareBox}
+\begin{python}
+$\meaningof{\tfreshvar_1 = \pexpr_1}$
+$\meaningof{\tfreshvar_2 = \pexpr_2}$
+$\tfreshvar_3$ = $\tfreshvar_1.\mathtt{opFunc}(\tfreshvar_2)$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Comparison operator}{
+    \pexpr_1 \pcmpop_1 \pexpr_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n
+  }{
+    \left< \usebox{\compareBox}\hspace{30pt},
+    \meaningof{(\tfreshvar_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n) \gtif
+    \tfreshvar_3 \gtelse \tfreshvar_3} \right>
+  }{
+    \mbox{where } \pcmpop_1 \mbox { is not } \gtis, \gtis \gtnot,\mbox{ or } \gtnot \gtin,
+    \mathtt{opFunc} = \osFunc{cpmop\_to\_func}(\pbinop)
+  }
+\end{mathpar}
+
+\newsavebox{\compareIsBox}
+\begin{lrbox}{\compareIsBox}
+\begin{python}
+$\meaningof{\tfreshvar_1 = \pexpr_1}$
+$\meaningof{\tfreshvar_2 = \pexpr_2}$
+$\tfreshvar_3$ = $\tfreshvar_1 \gtis \tfreshvar_2$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Comparison operator (is)}{
+    \pexpr_1 \gtis \pexpr_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n
+  }{
+    \left< \usebox{\compareIsBox}\hspace{30pt},
+    \meaningof{(\tfreshvar_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n) \gtif
+    \tfreshvar_3 \gtelse \tfreshvar_3} \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\compareIsNotBox}
+\begin{lrbox}{\compareIsNotBox}
+\begin{python}
+$\meaningof{\tfreshvar_1 = \pexpr_1}$
+$\meaningof{\tfreshvar_2 = \pexpr_2}$
+$\tfreshvar_3$ = $\gtnot$($\tfreshvar_1 \gtis \tfreshvar_2$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Comparison operator (is not)}{
+    \pexpr_1 (\gtis \gtnot) \pexpr_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n
+  }{
+    \left< \usebox{\compareIsNotBox}\hspace{30pt},
+    \meaningof{(\tfreshvar_2 \pcmpop_2 \ldots \pcmpop_{n-1} \pexpr_n) \gtif
+    \tfreshvar_3 \gtelse \tfreshvar_3} \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\callBox} % No, not the blue one
+\begin{lrbox}{\callBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+$\psuite_{(\pexpr_1)}$
+...
+$\psuite_{(\pexpr_n)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Function call}{
+    \pexpr \gtopar \pexpr_1, \ldots \pexpr_n \gtcpar
+  }{
+    \left< \usebox{\callBox}\hspace{10pt},
+    \pexpr_{(\pexpr)}(\pexpr_{(\pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)})}) \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Attribute access}{
+    \pexpr.\pvariable
+  }{
+    \left< \psuite_{(\pexpr)} , \pexpr_{(\pexpr)}.\pvariable \right>
+  }{
+  \mbox{where } \pexpr \mbox{ is a number, string, boolean or identifier}
+  }
+\end{mathpar}
+
+\newsavebox{\listBox}
+\begin{lrbox}{\listBox}
+\begin{python}
+$\psuite_{(\pexpr_1)}$
+...
+$\psuite_{(\pexpr_n)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{List expression}{
+    \gtobrk \pexpr_1, \ldots, \pexpr_n \gtcbrk
+  }{
+    \left< \usebox{\listBox}\hspace{5pt}, \gtobrk \pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)} \gtcbrk \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Tuple expression}{
+    \gtopar \pexpr_1, \ldots, \pexpr_n \gtcpar
+  }{
+    \left< \usebox{\listBox}\hspace{5pt}, \gtopar \pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)} \gtcpar \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{None expression}{
+    \gtNone
+  }{
+    \left< [] , \mathtt{*None} \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Literal expression}{
+    \pexpr
+  }{
+    \left< [] , \pexpr \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Slice (index)}{
+    \pslice
+  }{
+    \left< [] , \meaningof{\pexpr} \right>
+  }{
+    \mbox{where} \pslice \gteq \pexpr
+  }
+\end{mathpar}
+
+\newsavebox{\sliceBox}
+\begin{lrbox}{\sliceBox}
+\begin{python}
+$\psuite_{(\pexpr_1)}$
+$\psuite_{(\pexpr_2)}$
+$\psuite_{(\pexpr_3)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Slice (slice)}{
+    \pexpr_1 \gtcolon \pexpr_2 \gtcolon \pexpr_3
+  }{
+    \left< \usebox{\sliceBox}\hspace{20pt},
+    \mathtt{slice}(\pexpr_{(\pexpr_1)}, \pexpr_{(\pexpr_2)}, \pexpr_{(\pexpr_3)}) \right>
+  }{
+    \mbox{where } \psuite_{(\pexpr_i)} \mbox{ is empty and } \pexpr_{(\pexpr_i)}
+    \mbox{ is } \mathtt{*None} \mbox{ if } \pexpr_i \mbox{ is omitted}
+  }
+\end{mathpar}
+
+\subsection{Helper function definitions}
+\begin{definition}[Binary Operators]
+  \begin{flalign*}
+  \begin{array}[t]{ c | c c }
+   \pbinop & \osFunc{Binop\_to\_func}(\pbinop) & \osFunc{Binop\_to\_ifunc}(\pbinop) \\
+   \hline
+   \gtplus & \_\_add\_\_ & \_\_iadd\_\_ \\
+   \gtsub & \_\_sub\_\_ & \_\_isub\_\_ \\
+   \gtmult & \_\_mul\_\_ & \_\_imul\_\_ \\
+   \gtdiv & \_\_div\_\_ & \_\_idiv\_\_ \\
+   \gtmod & \_\_mod\_\_ & \_\_imod\_\_ \\
+   \gtpow & \_\_pow\_\_ & \_\_ipow\_\_ \\
+  \end{array}
+  \end{flalign*}
+\end{definition}
+
+\begin{definition}[Comparison Operators]
+  \begin{flalign*}
+  \begin{array}[t]{ c | c c }
+   \pbinop & \osFunc{Cmpop\_to\_func}(\pbinop) \\
+   \hline
+   \gteq & \_\_eq\_\_ \\
+   \gtneq & \_\_ne\_\_ \\
+   \gtle & \_\_lt\_\_ \\
+   \gtleq & \_\_le\_\_ \\
+   \gtge & \_\_gt\_\_ \\
+   \gtgeq & \_\_ge\_\_ \\
+   \gtin & \_\_contains\_\_ \\
+  \end{array}
+  \end{flalign*}
+\end{definition}
+
+\begin{definition}[Comparison Operators]
+  \begin{flalign*}
+  \osFunc{Add\_Return}(\psuite) = \psuite || \gtobrk \gtreturn \gtNone \gtcbrk
+  \end{flalign*}
+\end{definition}
+
 
 \end{document}
