@@ -207,28 +207,28 @@
     }
   \end{mathpar}
 
-  \begin{mathpar}
-    \relationRule{Slice}{
-      \ovalue = \oheap[\ovalvariable'] = [\omem_0, \ldots, \omem_n] \\
-      \ovalue_1 = \oheap[\ovalvariable_1] \\
-      \ovalue_2 = \oheap[\ovalvariable_2] \\
-      p =
-      \begin{cases}
-        \ovalue_1, & \text{if } \ovalue_1 \in \mathbb{Z} \cr
-        0, & \text{if } \ovalue_1 = \osnone
-      \end{cases} \\
-      q =
-      \begin{cases}
-        \ovalue_2 - 1, & \text{if } \ovalue_2 \in \mathbb{Z} \cr
-        n, & \text{if } \ovalue_2 = \osnone
-      \end{cases} \\
-      \ovalue' = [\omem_p, \ldots, \omem_q] \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
-    }{
-      [\gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
-      \otstmts, \oheap'
-    }
-  \end{mathpar}
+%  \begin{mathpar}
+%    \relationRule{Slice}{
+%      \ovalue = \oheap[\ovalvariable'] = [\omem_0, \ldots, \omem_n] \\
+%      \ovalue_1 = \oheap[\ovalvariable_1] \\
+%      \ovalue_2 = \oheap[\ovalvariable_2] \\
+%      p =
+%      \begin{cases}
+%        \ovalue_1, & \text{if } \ovalue_1 \in \mathbb{Z} \cr
+%        0, & \text{if } \ovalue_1 = \osnone
+%      \end{cases} \\
+%      q =
+%      \begin{cases}
+%        \ovalue_2 - 1, & \text{if } \ovalue_2 \in \mathbb{Z} \cr
+%        n, & \text{if } \ovalue_2 = \osnone
+%      \end{cases} \\
+%      \ovalue' = [\omem_p, \ldots, \omem_q] \\
+%      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
+%    }{
+%      [\gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
+%      \otstmts, \oheap'
+%    }
+%  \end{mathpar}
 
   \begin{mathpar}
     \relationRule{Store}{
