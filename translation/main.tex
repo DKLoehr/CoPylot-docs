@@ -975,4 +975,59 @@ raise $\pvariable$
   \end{flalign*}
 \end{definition}
 
+\section{Normalized Python Grammar}
+\begin{grammar}
+  \grule[variables]{\pvariable}{}
+  \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
+  \grule[statements]{\pstmt}{
+              \gtreturn \pvariable \gline
+      \gor    \pvariable \gteq \pexpr \gline
+      \gor    \gtwhile \pvariable \gtcolon \psuite \gline
+      \gor    \gtif \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
+      \gor    \gtraise \pvariable \gline
+      \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gline
+      \gor    \gtpass \gline
+      \gor    \gtbreak \gline
+      \gor    \gtcontinue \gline
+  }
+  \grule[expressions]{\pexpr}{
+              \punop \pvariable \gline
+      \gor    \pvariable \pbinop \pvariable \gline
+      \gor    \pvariable \gtopar \pvariable, \dots \gtcpar \gline
+      \gor    \pvariable.\pvariable \gline
+      \gor    \gtobrk \pvariable, \dots \gtcbrk \gline
+      \gor    \gtopar \pvariable, \dots \gtcpar \gline
+      \gor    \pnum \gline
+      \gor    \mathbb{S} \gline
+      \gor    \mathbb{B} \gline
+      \gor    \pvariable \gline
+      \gor    \gtfun \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+      \gor    \pmagic
+  }
+  \grule[unary operators]{\punop}{
+              \gtnot
+  }
+  \grule[binary operators]{\pbinop}{
+              \gtis
+  }
+  \grule[numbers]{\pnum}{}
+  \grule[strings]{\mathbb{S}}{}
+  \grule[booleans]{\mathbb{B}}{
+              \ostrue
+      \gor    \osfalse
+  }
+  \grule[magic builtins]{\pmagic}{
+              \gtbool
+         \gor \gtslice
+         \gor \gtValueError
+         \gor \gtAttributeError \gline
+         \gor \gtTypeError
+         \gor \gtStopIteration
+  }
+\end{grammar}
+
+The translation process from Simplified to Normalized Python is standard A-normalization.
+It is entirely unremarkable in every way, so we omit it.
+
+
 \end{document}
