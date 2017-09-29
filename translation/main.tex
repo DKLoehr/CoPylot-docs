@@ -1029,5 +1029,89 @@ raise $\pvariable$
 The translation process from Simplified to Normalized Python is standard A-normalization.
 It is entirely unremarkable in every way, so we omit it.
 
+\section{Lamia Language Grammar}
+
+\begin{grammar}
+  \grule[labels]{\olbl}{}
+  \grule[value variables]{\ovalvariable}{}
+  \grule[memory variables]{\omemvariable}{}
+  \grule[blocks]{\ostmts}{
+              \ostmt \gtsemi \ldots
+  }
+  \grule[statements]{\ostmt}{
+              \olbl \gtcolon \odirective
+  }
+  \grule[blocks]{\otstmts}{
+              \otstmt \gtsemi \ldots
+  }
+  \grule[statements]{\otstmt}{
+              \odirective \text{ such that all \ostmts \, are replaced with \otstmts}
+      \gor    \gtobrc \osBlock{while} \gtcbrc
+      % \gor    \gtobrc \osBlock{try} \gtcbrc
+      \gline
+      \gor    \gtobrc \osBlock{if} \gtcbrc
+      \gor    \gtlet \omemvariable \gteq \gtobrc \osBlock{fun} \gtcbrc
+  }
+  \grule[directive]{\odirective}{
+              \gtlet \ovalvariable \gteq \oexpr \gline
+      \gor    \gtlet \omemvariable \gteq \gtalloc \gline
+      % \gor    \gtlet \ovalvariable \gteq \gtmethodbind \omemvariable \; \ovalvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \ovalvariable \gline
+      \gor    \gtlet \omemvariable \gteq \omemvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc \gline
+      \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc \gline
+      \gor    \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable \gtcomma \ldots \gtcpar \gline
+      \gor    \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk \gline
+      \gor    \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk \gline
+      \gor    \gtstore \omemvariable\ \ovalvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \gtget \omemvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \ounop \ovalvariable \gline
+      \gor    \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable \gline
+      \gor    \gtifresult \ovalvariable \gline
+      \gor    \gtifresult \omemvariable \gline
+      \gor    \gtreturn \omemvariable \gline
+      \gor    \gtraise \omemvariable \gline
+      \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gline
+      \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
+      \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
+      \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc
+  }
+  \grule[unary operators]{\ounop}{
+              \gtnot
+      \gor    \gtisfunc
+      \gor    \gtisint
+      \gor    \gtisbool
+  }
+  \grule[binary operators]{\obinop}{
+              \gtintplus
+      \gor    \gtintminus
+      % \gor    \gtand
+      % \gor    \gtor
+      \gor    \gthaskey
+      \gor    \gtlstconcat
+      \gor    \gtcmp
+  }
+  \grule[value expressions]{\oexpr}{
+              \mathbb{Z}
+      \gor    \mathbb{S}
+      \gor    \mathbb{B}
+      \gor    \gtdef \gtopar \ovalvariable, \ldots \gtcpar \gtobrc \ostmts \gtcbrc
+      \gor    \gtobrk \omemvariable, \ldots \gtcbrk
+      \gor    \gtobrk \omemvariable, \ldots \gtcpar
+      \gor    \gtobrc \gtcbrc
+      \gor    \osnone
+  }
+  \grule[strings]{\mathbb{S}}{}
+  \grule[booleans]{\mathbb{B}}{
+              \ostrue
+      \gor    \osfalse
+  }
+  \grule[heap]{\oheap}{
+              \gtobrc \ovalvariable \mapsto \ovalue, \ldots \gtcbrc
+      \cup    \gtobrc \omemvariable \mapsto \omem, \ldots \gtcbrc
+      \cup    \gtobrc \omem \mapsto \ovalue, \ldots \gtcbrc
+  }
+\end{grammar}
 
 \end{document}

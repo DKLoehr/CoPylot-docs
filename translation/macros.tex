@@ -161,9 +161,7 @@
 \defgn{pnum}{N}
 
 \defgt[gtcolon]{:}
-\defgt{let}
 \defgt[gteq]{=}
-\defgt{alloc}
 \defgt[gtopar]{(}
 \defgt[gtcpar]{)}
 \defgt[gtobrk]{[}
@@ -201,7 +199,6 @@
 \defkw{except}
 \defkw{while}
 \defkw{for}
-\defkw{do}
 \defkw{if}
 \defkw{else}
 \defkw{pass}
@@ -225,6 +222,45 @@
 %%% Translation Grammar
 
 \defgn{tfreshvar}{\breve{\pvariable}}
+
+%%% Lamia Language Grammar
+
+\defgn{olbl}{\ell}
+\defgn{ovalvariable}{x}
+\defgn{omemvariable}{y}
+\defgn{ostmts}{\psuite}
+\defgn{ostmt}{\pstmt}
+\defgn{odirective}{d}
+\defgn{oexpr}{\pexpr}
+\defgn{obinop}{\pbinop}
+\defgn{ounop}{\punop}
+\defgn{oheap}{H}
+\defgn{otstmts}{T}
+\defgn{otstmt}{t}
+
+\defgt{let}
+\defgt{alloc}
+
+\defkw{store}
+\defkw{get}
+\defkw{ifresult}
+\defkw{do}
+\defkw{then}
+
+\defkw{isfunc}
+\defkw{isint}
+\defkw{isbool}
+
+\defkw{haskey}
+\defkw[gtintplus]{int+}
+\defkw[gtintminus]{int-}
+\defkw[gtlstconcat]{lst+}
+\defkw[gtcmp]{==}
+
+\defgn{ovalue}{v}
+\defgn{omem}{m}
+
+
 
 \newcommand{\niton}{\not\owns}
 
