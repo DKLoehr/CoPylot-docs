@@ -148,6 +148,8 @@
 \defgt[gtcbrk]{]}
 \defgt[gtobrc]{\char123} % {
 \defgt[gtcbrc]{\char125} % }
+\defgt[gtobag]{\lbag}
+\defgt[gtcbag]{\rbag}
 \defgt[gtsemi]{;}
 \defgt[gtarrow]{->}
 \defgt[gtcomma]{,}
@@ -191,7 +193,7 @@
 \defgn{ogenf}{F}
 \defgn{ogenm}{M}
 \defgn{osplat}{\ast}
-\defgn{olst}{\hat{l}}
+% \defgn{olst}{\hat{l}}
 \defgn{otype}{\tau}
 
 \newcommand{\niton}{\not\owns}
@@ -210,6 +212,7 @@
 \newcommand{\osStartof}{\mathrel{\stackrel{{\scriptscriptstyle\boldsymbol{\ostmts}}}{\blacktriangleleft \kern -4pt \blacktriangleleft}}}
 % Format
 \newcommand{\osLR}[1]{\langle #1 \rangle}
+\newcommand{\osBag}[1]{\lbag #1 \rbag}
 % Stylize
 \newcommand{\osMC}[1]{\text{\textsmaller{{\color{microcode}\sc #1}}}}
 \newcommand{\osFunc}[1]{\text{\textsmaller{{\color{func}\sc #1}}}}

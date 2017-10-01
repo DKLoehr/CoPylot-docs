@@ -100,17 +100,13 @@
                 \mathbb{Z}
         \gor    \mathbb{S}
         \gor    \mathbb{B}
-        \gor    [\omem, \ldots]_n % [m, ...]
-        \gor	\olst_{\otype}
+        \gor    [\omem, \ldots]_k % [m, ...]
+        \gor	  \osBag{\omem, \ldots}
         % \gor    (\omem, \ldots) % (m, ...)
         \gor    \obinding % B
         \gor    \ogenf
         % \gor    \ogenm
         \gor    \osnone
-    }
-    \grule[abstract lists]{\olst_{\otype}}{
-                % \{ \mathbb{S} \mapsto \omem, \ldots \}
-                % TODO: type implementation
     }
     \grule[binding records]{\obinding}{
                 \{ \mathbb{S} \mapsto \omem, \ldots \}
@@ -124,7 +120,7 @@
 
   \end{grammar} \\
   \tnote{We need some type implementation. }
-    
+
 
   \subsection{Lamia Language Rules}
 
@@ -204,7 +200,7 @@
 
   \begin{mathpar}
     \relationRule{Index}{
-      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_0, \ldots, \omem_n] \\
+      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_0, \ldots, \omem_n]_k \\
       \ovalue_2 = \oheap[\ovalvariable_2] = i \in \mathbb{Z^+} \\
       \omem = \text{the memloc stored in the $i^{th}$ position of $\ovalue_1$} \\
       \oheap' = \oheap[\omemvariable \mapsto \omem]
@@ -213,11 +209,11 @@
       \otstmts, \oheap'
     }
   \end{mathpar}
-  
+
     \begin{mathpar}
     \relationRule{Index (abstract)}{
-      \ovalue_1 = \oheap[\ovalvariable_1] = \olst_{\otype} \\
-      \ovalue_2 = \{\ovalue \;|\; \ovalue \text{ is a value of type } \in \otype\} \\
+      \ovalue_1 = \oheap[\ovalvariable_1] = \osBag{\omem_1, \ldots, \omem_n} \\
+      \ovalue_2 \in \ovalue_1 \\
       \oheap' = \oheap[\omem \mapsto \ovalue_2] \\
       \oheap'' = \oheap'[\omemvariable \mapsto \omem]
     }{
@@ -251,9 +247,9 @@
 
   \begin{mathpar}
     \relationRule{Slice (abstract)}{ % TODO: how to address error
-      \ovalue = \oheap[\ovalvariable'] = \olst_{\otype} \\ % TODO: of the same type
-      \ovalue' = \olst'_{\otype} \\
-      \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
+      \ovalue = \oheap[\ovalvariable'] = \osBag{\omem_1, \ldots, \omem_n} \\ % TODO: of the same type
+      \ovalue' \subseteq \ovalue \\
+      \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
@@ -688,10 +684,10 @@
 
   \begin{mathpar}
     \relationRule{List Concatenation (within bound)}{
-      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_i]_n \\
-      \ovalue_2 = \oheap[\ovalvariable_2] = [\omem_1', \ldots, \omem_j']_n\\
-      i+j \leq n \\
-      \ovalue = [\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j']_n \\
+      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_i]_k \\
+      \ovalue_2 = \oheap[\ovalvariable_2] = [\omem_1', \ldots, \omem_j']_k\\
+      i+j \leq k \\
+      \ovalue = [\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j']_k \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtlstconcat \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
@@ -701,36 +697,34 @@
 
   \begin{mathpar}
     \relationRule{List Concatenation (out of bound)}{
-      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_i]_n \\
-      \ovalue_2 = \oheap[\ovalvariable_2] = [\omem_1', \ldots, \omem_j']_n\\
-      i+j > n \\
-      \otype = \text{ the set of types involved in }\ovalue_1, \ovalue_2 \\
-      \ovalue = \olst_{\otype} \\
+      \ovalue_1 = \oheap[\ovalvariable_1] = [\omem_1, \ldots, \omem_i]_k \\
+      \ovalue_2 = \oheap[\ovalvariable_2] = [\omem_1', \ldots, \omem_j']_k\\
+      i+j > k \\
+      \ovalue = \osBag{\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j'}  \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtlstconcat \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
     }
   \end{mathpar}
-  
+
   \begin{mathpar}
     \relationRule{List Concatenation (one is abstract)}{
-      \ovalue_1 = \olst_{\otype} \\
-      \ovalue_2 = [\omem_1, \ldots, \omem_n] \text{ or vice versa }\\
-      \otype' = \text{ the set of types involved in }\ovalue_2 \\
-      \ovalue = \olst''_{\otype \cup \otype'} \\
+      \ovalue_1 = \osBag{\omem_1, \ldots, \omem_i}  \\
+      \ovalue_2 = [\omem_1', \ldots, \omem_j']_k \text{ or vice versa }\\
+      \ovalue = \osBag{\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j'}  \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtlstconcat \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
       \otstmts, \oheap'
     }
   \end{mathpar}
-  
+
   \begin{mathpar}
     \relationRule{List Concatenation (abstract)}{
-      \ovalue_1 = \olst_{\otype} \\
-      \ovalue_2 = \olst'_{\otype'}\\
-      \ovalue = \olst''_{\otype \cup \otype'} \\
+      \ovalue_1 = \osBag{\omem_1, \ldots, \omem_i}  \\
+      \ovalue_2 = \osBag{\omem_1', \ldots, \omem_j'} \\
+      \ovalue = \osBag{\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j'}  \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue]
     }{
       [\gtlet \ovalvariable \gteq \ovalvariable_1 \gtlstconcat \ovalvariable_2 \gtsemi] \listConcat \otstmts, \oheap \osTransition
