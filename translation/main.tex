@@ -1114,4 +1114,233 @@ It is entirely unremarkable in every way, so we omit it.
   }
 \end{grammar}
 
+\section{Normalized to Lamia Translation}
+
+\subsection{Statements}
+
+\newsavebox{\lamiaAsgnBox}
+\begin{lrbox}{\lamiaAsgnBox}
+\begin{python}
+$\osFunc{Python\_assign}$($\pvariable$, $\meaningof{\pexpr}$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Variable assignment}{
+    \pvariable \gteq \pexpr
+  }{
+    \usebox{\lamiaAsgnBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaRetBox}
+\begin{lrbox}{\lamiaRetBox}
+\begin{python}
+return $\osFunc{Lookup}$($\pvariable$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Return statement}{
+    \gtreturn \pvariable
+  }{
+    \usebox{\lamiaRetBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaWhileBox}
+\begin{lrbox}{\lamiaWhileBox}
+\begin{python}
+let $\tfreshmem$ = alloc
+let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+store $\tfreshmem$ $\tfreshval$
+while $\tfreshmem$ do {
+  $\meaningof{\psuite}$
+  let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+  store $\tfreshmem$ $\tfreshval$
+}
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{While loop}{
+    \gtwhile \pvariable \gtcolon \psuite
+  }{
+    \usebox{\lamiaWhileBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaIfBox}
+\begin{lrbox}{\lamiaIfBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\osFunc{Lookup}$($\pvariable$) is True
+$\gtlet$ $\tfreshval_2$ =
+  $\gtif$ $\tfreshval_1$ $\gtthen$ {
+    $\meaningof{\psuite_1}$
+    $\gtlet$ $\tfreshval_3$ = $\star$None
+    $\gtifresult$ $\tfreshval_3$
+  } $\gtelse$ {
+    $\meaningof{\psuite_2}$
+    $\gtlet$ $\tfreshval_3$ = $\star$None
+    $\gtifresult$ $\tfreshval_3$
+  }
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{If statement}{
+    \gtif \pvariable \gtthen \gtcolon \psuite_1 \gtelse \gtcolon \psuite_2
+  }{
+    \usebox{\lamiaIfBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaRaiseBox}
+\begin{lrbox}{\lamiaRaiseBox}
+\begin{python}
+raise $\osFunc{Lookup}$($\pvariable$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Raise statement}{
+    \gtraise \pvariable
+  }{
+    \usebox{\lamiaRaiseBox}
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaTryBox}
+\begin{lrbox}{\lamiaTryBox}
+\begin{python}
+$\gttry$ {
+  $\meaningof{\psuite_1}$
+} $\gtexcept$ $\tfreshmem$ {
+  $\osFunc{Python\_assign}$($\pvariable$, $\tfreshmem$)
+  $\meaningof{\psuite_2}$
+}
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Try/Except block}{
+    \gttry \gtcolon \psuite_1 \gtexcept \pvariable \gtcolon \psuite_2
+  }{
+    \usebox{\lamiaTryBox}
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Pass statement}{
+    \gtpass
+  }{
+    \gtobrk \gtcbrk
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Break statement}{
+    \gtbreak
+  }{
+    \mbox{Not yet implemented}
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Continue statement}{
+    \gtcontinue
+  }{
+    \mbox{Not yet implemented}
+  }{
+  }
+\end{mathpar}
+
+\subsection{Expressions}
+
+\newsavebox{\lamiaUnopBox}
+\begin{lrbox}{\lamiaUnopBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\osFunc{lookup\_and\_get\_attr}$("$\star$value", $\pvariable$)
+$\gtlet$ $\tfreshval_2$ = $\gtnot$ $\tfreshval_1$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Unary Operation (not)}{
+    \gtnot \pvariable
+  }{
+    \left<
+    \usebox{\lamiaUnopBox}\hspace{120pt},
+    \meaningof{\osFunc{wrap\_bool}(\tfreshval_2)}
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaBinopBox}
+\begin{lrbox}{\lamiaBinopBox}
+\begin{python}
+$\gtlet$ $\tfreshval$ = $\osFunc{Lookup}$($\pvariable_1$) is $\osFunc{Lookup}$($\pvariable_2$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Binary Operation (is)}{
+    \pvariable_1 \gtis \pvariable_2
+  }{
+    \left<
+    \usebox{\lamiaBinopBox}\hspace{100pt},
+    \meaningof{\osFunc{wrap\_bool}(\tfreshval)}
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaCallBox}
+\begin{lrbox}{\lamiaCallBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\osFunc{Lookup}(\pvariable)$
+$\gtlet$ $\tfreshval_2$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
+$\gtlet$ $\tfreshval_3$ = $\osFunc{Get\_call}(\tfreshval_1)$
+$\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Function Call}{
+    \pvariable \gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar
+  }{
+    \left<
+    \usebox{\lamiaCallBox}\hspace{120pt},
+    \tfreshmem
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\subsection{Helper functions}
+
+\newsavebox{\PythonAssignBox}
+\begin{lrbox}{\PythonAssignBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\osFunc{string\_of\_id}$($\pvariable$)
+$\gtlet$ $\tfreshval_2$ = $\gtget$ $\star$scope
+$\gtlet$ $\tfreshval_3$ = $\tfreshval_2${$\tfreshval_1$ $\gtarrow$ $\omemvariable$}
+$\gtstore$ $\tfreshval_3$ $\star$scope
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Python\_assign]\ \\
+$\osFunc{Python\_assign}(\pvariable,\omemvariable)$ =
+\usebox{\PythonAssignBox}
+\end{definition}
+
 \end{document}
