@@ -1326,6 +1326,138 @@ $\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
   }
 \end{mathpar}
 
+\newsavebox{\lamiaAttrBox}
+\begin{lrbox}{\lamiaAttrBox}
+\begin{python}
+TODO: I cry evertim
+\end{python}
+\end{lrbox}
+
+NOTE: This rule will change significantly when we add inheritance
+\begin{mathpar}
+  \translationRule{Attribute access}{
+    \pvariable_1.\pvariable_2
+  }{
+    \left<
+    \usebox{\lamiaAttrBox}
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaListBox}
+\begin{lrbox}{\lamiaListBox}
+\begin{python}
+$\gtlet$ $\tfreshvar$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{List value}{
+    \gtobrk \pvariable_1, \ldots, \pvariable_n \gtcbrk
+  }{
+    \left<
+    \usebox{\lamiaListBox}\hspace{120pt},
+    \osFunc{wrap\_list}(\tfreshvar)
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Tuple value}{
+    \gtopar \pvariable_1, \ldots, \pvariable_n \gtcpar
+  }{
+    \left<
+    \usebox{\lamiaListBox}\hspace{120pt},
+    \osFunc{wrap\_tuple}(\tfreshvar)
+    \right>
+  }{
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaIntBox}
+\begin{lrbox}{\lamiaIntBox}
+\begin{python}
+$\gtlet$ $\tfreshvar$ = $n$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Integer literal}{
+    n
+  }{
+    \left<
+    \usebox{\lamiaIntBox}\hspace{30pt},
+    \osFunc{wrap\_int}(\tfreshvar)
+    \right>
+  }{
+    \mbox{where } n \mbox{ is an integer}
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaFloatBox}
+\begin{lrbox}{\lamiaFloatBox}
+\begin{python}
+$\gtlet$ $\tfreshvar$ = $f$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Float literal}{
+    f
+  }{
+    \left<
+    \usebox{\lamiaFloatBox}\hspace{30pt},
+    \osFunc{wrap\_float}(\tfreshvar)
+    \right>
+  }{
+    \mbox{where } f \mbox{ is a float}
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaStrBox}
+\begin{lrbox}{\lamiaStrBox}
+\begin{python}
+$\gtlet$ $\tfreshvar$ = $t$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{String literal}{
+    t
+  }{
+    \left<
+    \usebox{\lamiaStrBox}\hspace{30pt},
+    \osFunc{wrap\_str}(\tfreshvar)
+    \right>
+  }{
+    \mbox{where } t \mbox{ is a string}
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaBoolBox}
+\begin{lrbox}{\lamiaBoolBox}
+\begin{python}
+$\gtlet$ $\tfreshvar$ = $b$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Boolean literal}{
+    b
+  }{
+    \left<
+    \usebox{\lamiaBoolBox}\hspace{30pt},
+    \osFunc{wrap\_bool}(\tfreshvar)
+    \right>
+  }{
+    \mbox{where } b \mbox{ is a string}
+  }
+\end{mathpar}
+
+TODO: Builtins (maybe?), function values
+
 \subsection{Helper functions}
 
 \newsavebox{\PythonAssignBox}
