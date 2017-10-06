@@ -1591,4 +1591,34 @@
     \end{array}
     \end{flalign*}
   \end{definition}
+
+  \tnote{TODO: fill in these charts}
+
+  \begin{definition}[Precise Slice]
+    $\osFunc{PreciseSlice}(\ovalue, \ovalue_1, \ovalue_2)$ returns the content of row $\ovalue_1$, column $\ovalue_2$:
+    \begin{flalign*}
+    \begin{array}[t]{ c | c c c c }
+     & \gtintplus & \gtintminus & \gtintzero & \osnone \\
+     \hline
+     \gtintplus &  & \text{---} & \text{---} & \\
+     \gtintminus & \text{---} & \text{---} & \text{---} & \text{---} \\
+     \gtintzero &  & \text{---} & [\ovalue[0]]_1 & \ovalue \\
+     \osnone &  & \text{---} & [\ovalue[0]]_1 & \ovalue \\
+    \end{array}
+    \end{flalign*}
+  \end{definition}
+
+  \begin{definition}[Imprecise Slice]
+    $\osFunc{PreciseSlice}(\ovalue, \ovalue_1, \ovalue_2)$ returns the content of row $\ovalue_1$, column $\ovalue_2$:
+    \begin{flalign*}
+    \begin{array}[t]{ c | c c c c }
+     & \gtintplus & \gtintminus & \gtintzero & \osnone \\
+     \hline
+     \gtintplus &  & \text{---} & \text{---} & \\
+     \gtintminus & \text{---} & \text{---} & \text{---} & \text{---} \\
+     \gtintzero &  & \text{---} & \ovalue & \ovalue \\
+     \osnone &  & \text{---} & \ovalue & \ovalue \\
+    \end{array}
+    \end{flalign*}
+  \end{definition}
 \end{document}
