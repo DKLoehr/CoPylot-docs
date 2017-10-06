@@ -1220,9 +1220,9 @@
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gnode_1, \lInstr{Index}] \listConcat \lstack')$.
 
         \item \rulename{List Slicing}
-        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk, \gtime}$, and
-           $\lstack = [\omemvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable, \lInstr{Capture}_8, \lInstr{Jump}\;\gnode_1, \ovalvariable_1, \lInstr{Capture}_6, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_4, $ \\
+        If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk, \gtime}$, and
+           $\lstack = [\ovalvariable] \listConcat \lstack'$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalvariable', \lInstr{Capture}_8, \lInstr{Jump}\;\gnode_1, \ovalvariable_1, \lInstr{Capture}_6, \lInstr{Jump}\;\gnode_1, \ovalvariable_2, \lInstr{Capture}_4, $ \\
         $\lInstr{Jump}\;\gnode_1, \lInstr{Slice}] \listConcat \lstack')$.
 
         \item \rulename{Store}
