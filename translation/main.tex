@@ -1116,6 +1116,15 @@ It is entirely unremarkable in every way, so we omit it.
 
 \section{Normalized to Lamia Translation}
 
+Whenever a statement $s$ involves a function returning a tuple of $<\psuite, \pexpr>$ we
+replace it with $\psuite || [s']$, where $s'$ is $s$ but with the function call replaced by $\pexpr$.
+
+If a statement contains multiple such function calls, we replace them in order from left-to-right.
+
+Furthermore, we define $<\psuite, \pexpr>$ to mean $<\psuite || \psuite', \pexpr'>$ whenever\\
+$\meaningof{\pexpr} = <\psuite', \pexpr'>$. This is ok because eventually the expression will become simple
+enough that $\meaningof{\pexpr} = <\gtobrk \gtcbrk, \pexpr>$
+
 \subsection{Statements}
 
 \newsavebox{\lamiaAsgnBox}
@@ -1509,13 +1518,13 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 \begin{lrbox}{\PythonAssignBox}
 \begin{python}
 $\gtlet$ $\tfreshval_1$ = $\osFunc{string\_of\_id}$($\pvariable$)
-$\gtlet$ $\tfreshval_2$ = $\gtget$ $\star$scope
+$\gtlet$ $\tfreshval_2$ = $\gtget$ &scope
 $\gtlet$ $\tfreshval_3$ = $\tfreshval_2${$\tfreshval_1$ $\gtarrow$ $\omemvariable$}
 $\gtstore$ $\tfreshval_3$ $\star$scope
 \end{python}
 \end{lrbox}
 
-\begin{definition}[Python\_assign]\ \\
+\begin{definition}[Python variable assignment]\ \\
 $\osFunc{Python\_assign}(\pvariable,\omemvariable)$ =
 \usebox{\PythonAssignBox}
 \end{definition}
@@ -1550,9 +1559,27 @@ $\meaningof{\psuite}$
 \end{python}
 \end{lrbox}
 
-\begin{definition}[Python\_assign]\ \\
+\begin{definition}[Function body conversion]\ \\
 $\osFunc{Convert\_func\_body}(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n))$ =
 \usebox{\ConvertFuncBox}
+\end{definition}
+
+\newsavebox{\LookupBox}
+\begin{lrbox}{\LookupBox}
+\begin{python}
+$\gtlet$ $\tfreshval$ = $\osFunc{string\_of\_id}$($\pvariable$)
+$\gtlet$ $\tfreshmem$ = get_from_scope([$\tfreshval$])
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Lookup]\ \\
+$\osFunc{Lookup}(\pvariable)$ =
+$\left<\usebox{\LookupBox}\hspace{30px}, \tfreshmem\right>$
+\end{definition}
+
+\begin{definition}[string\_of\_id]\ \\
+$\osFunc{string\_of\_id}(\pvariable)$ = $\pvariable$
+
 \end{definition}
 
 \end{document}
