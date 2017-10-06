@@ -256,7 +256,7 @@ $\pvariable = \pexpr_{(\pexpr)}$
 \begin{lrbox}{\attributeAssignmentBox}
 \begin{python}
 $\meaningof{\psuite_{(\pexpr_2)}}$
-$\meaningof{\psuite_{(\pexpr_1)}}$
+$\meaningof{\psuite_{(\pexpr_1)}}$0
 $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
@@ -311,9 +311,9 @@ try:
   $\tfreshvar_n$ = $\tfreshvar$()
 
   try:
-    $\tfreshvar$() # Should throw StopIteration
-    raise ValueError, "too many elements to unpack"
-  except StopIteration:
+    $\tfreshvar$() # Should throw $\star$StopIteration
+    raise $\star$ValueError, "too many elements to unpack"
+  except $\star$StopIteration:
     pass
 
 except StopIteration:
@@ -344,7 +344,7 @@ expression should be evaluated first.
 \begin{python}
 try:
   $\tfreshvar$ = $\pvariable$.iopFunc
-except AttributeError:
+except $\star$AttributeError:
   $\tfreshvar$ = $\pvariable$.opFunc
 $\pvariable$ = $\tfreshvar$($\pexpr$)
 \end{python}
@@ -417,10 +417,10 @@ $\tfreshvar_1$[$\tfreshvar_2$] = $\tfreshvar_3$($\pexpr_2$)
 \begin{python}
 $\tfreshvar$ = $\pexpr_2$.__iter__().next
 try:
-  while True:
+  while $\star$True:
     $\pexpr_1$ = $\tfreshvar$()
     $\psuite$
-except StopIteration:
+except $\star$StopIteration:
   pass
 \end{python}
 \end{lrbox}
@@ -438,11 +438,11 @@ except StopIteration:
 \begin{lrbox}{\whileBox}
 \begin{python}
 $\meaningof{\psuite_{(\pexpr)}}$
-$\tfreshvar$ = bool($\pexpr_{(\pexpr)}$)
+$\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 while $\tfreshvar$:
   $\meaningof{\psuite}$
   $\meaningof{\psuite_{(\pexpr)}}$
-  $\tfreshvar$ = bool($\pexpr_{(\pexpr)}$)
+  $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 \end{python}
 \end{lrbox}
 
@@ -459,7 +459,7 @@ while $\tfreshvar$:
 \begin{lrbox}{\ifBox}
 \begin{python}
 $\meaningof{\psuite_{(\pexpr)}}$
-if bool($\pexpr_{(\pexpr)}$):
+if $\star$bool($\pexpr_{(\pexpr)}$):
   $\meaningof{\psuite_1}$
 else:
   $\meaningof{\psuite_2}$
@@ -628,7 +628,7 @@ $\psuite_{(\pexpr)}$
   \translationRule{Unary Operation (not)}{
     \gtnot \pexpr
   }{
-    \left<\usebox{\notBox}\hspace{20pt}, \gtnot \gtbool(\pexpr_{(\pexpr)})\right>
+    \left<\usebox{\notBox}\hspace{20pt}, \gtnot \star\gtbool(\pexpr_{(\pexpr)})\right>
   }{
   }
 \end{mathpar}
@@ -669,7 +669,7 @@ $\psuite_{(\pexpr)}$
 \begin{lrbox}{\ifExpBox}
 \begin{python}
 $\psuite_{(\pexpr_2)}$
-if $\pexpr_{(\pexpr_2)}$:
+if $\star$bool($\pexpr_{(\pexpr_2)}$):
   $\psuite_{(\pexpr_1)}$
   $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 else:
@@ -850,7 +850,7 @@ $\psuite_{(\pexpr_3)}$
     \pexpr_1 \gtcolon \pexpr_2 \gtcolon \pexpr_3
   }{
     \left< \usebox{\sliceBox}\hspace{20pt},
-    \mathtt{slice}(\pexpr_{(\pexpr_1)}, \pexpr_{(\pexpr_2)}, \pexpr_{(\pexpr_3)}) \right>
+    \star\mathtt{slice}(\pexpr_{(\pexpr_1)}, \pexpr_{(\pexpr_2)}, \pexpr_{(\pexpr_3)}) \right>
   }{
     \mbox{where } \psuite_{(\pexpr_i)} \mbox{ is empty and } \pexpr_{(\pexpr_i)}
     \mbox{ is } \mathtt{*None} \mbox{ if } \pexpr_i \mbox{ is omitted}
