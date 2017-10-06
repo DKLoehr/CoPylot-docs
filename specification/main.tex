@@ -211,7 +211,7 @@
   \end{mathpar}
 
     \begin{mathpar}
-    \relationRule{Index (abstract)}{
+    \relationRule{Index (imprecise)}{
       \ovalue_1 = \oheap[\ovalvariable_1] = \osBag{\omem_1, \ldots, \omem_n} \\
       \ovalue_2 \in \ovalue_1 \\
       \oheap' = \oheap[\omem \mapsto \ovalue_2] \\
@@ -246,7 +246,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Slice (abstract)}{ % TODO: how to address error
+    \relationRule{Slice (imprecise)}{ % TODO: how to address error
       \ovalue = \oheap[\ovalvariable'] = \osBag{\omem_1, \ldots, \omem_n} \\ % TODO: of the same type
       \ovalue' \subseteq \ovalue \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
@@ -709,7 +709,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{List Concatenation (one is abstract)}{
+    \relationRule{List Concatenation (one is imprecise)}{
       \ovalue_1 = \osBag{\omem_1, \ldots, \omem_i}  \\
       \ovalue_2 = [\omem_1', \ldots, \omem_j']_k \text{ or vice versa }\\
       \ovalue = \osBag{\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j'}  \\
@@ -721,7 +721,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{List Concatenation (abstract)}{
+    \relationRule{List Concatenation (imprecise)}{
       \ovalue_1 = \osBag{\omem_1, \ldots, \omem_i}  \\
       \ovalue_2 = \osBag{\omem_1', \ldots, \omem_j'} \\
       \ovalue = \osBag{\omem_1, \ldots, \omem_i, \omem_1', \ldots, \omem_j'}  \\
@@ -860,7 +860,7 @@
         \gor    \lInstr{Answer}
         \gor    \lInstr{Is}
         \gline
-        \gor    \lInstr{drop}
+        \gor    \lInstr{Drop}
     }
   \end{grammar}
 
@@ -1369,14 +1369,21 @@
 
         \item \rulename{Index Rule}
         If $\lstack = [\lInstr{Index}, \ovalue_1, \ovalue_2] \listConcat \lstack'$,
-           $\ovalue_1 \text{ is a list}$,
+           $\ovalue_1 \text{ is a precise list}$,
            $\ovalue_2 \in \mathbb{Z} = i$, and \\
            $\omem = \text{the value in the $i^{th}$ position of }\ovalue_1$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omem] \listConcat \lstack')$.
 
-        \item \rulename{Slice Rule}
+        \item \rulename{Index Rule (imprecise)}
+        If $\lstack = [\lInstr{Index}, \ovalue_1, \ovalue_2] \listConcat \lstack'$,
+           $\ovalue_1 \text{ is an imprecise list}$,
+           $\ovalue_2 \in \mathbb{Z} = i$, and \\
+           $\omem_i \in \ovalue_1$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omem_i] \listConcat \lstack')$.
+
+        \item \rulename{Slice Rule (precise)}
         If $\lstack = [\lInstr{slice}, \ovalue, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
-           $\ovalue = [\omem_1, \ldots, \omem_n], p =
+           $\ovalue = [\omem_1, \ldots, \omem_n]_k, p =
            \begin{cases}
              \ovalue_1, & \text{if } \ovalue_1 \in \mathbb{Z} \cr
              0, & \text{if } \ovalue_1 = \osnone
@@ -1386,8 +1393,28 @@
              \ovalue_2 - 1, & \text{if } \ovalue_2 \in \mathbb{Z} \cr
              n, & \text{if } \ovalue_2 = \osnone
            \end{cases},
-           \ovalue' = [\omem_p, \ldots, \omem_q]$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\value'] \listConcat \lstack')$.
+           q \le p,
+           \ovalue' = [\omem_p, \ldots, \omem_q]_k,
+           k = q-p+1$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue'] \listConcat \lstack')$.
+
+        \item \rulename{Slice Rule (imprecise)}
+        If $\lstack = [\lInstr{slice}, \ovalue, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+           $\ovalue = \osBag{\omem_1, \ldots, \omem_n},
+           \ovalue_1 \le \ovalue_2,
+           \omem_i, \ldots, \omem_j \in \ovalue,
+           \ovalue' = \osBag{\omem_i, \ldots, \omem_j}$,
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue'] \listConcat \lstack')$.
+
+        % \item \rulename{List k}
+        % If $\lstack = [\omem_p, \ldots, \omem_q, \lInstr{List}_k] \listConcat \lstack'$, and
+        % $\ovalue = [\omem_p, \ldots, \omem_q]_k$,
+        % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue] \listConcat \lstack')$.
+        %
+        % \item \rulename{Bag}
+        % If $\lstack = [\omem_i, \ldots, \omem_j, \lInstr{Bag}] \listConcat \lstack'$, and
+        % $\ovalue = \osBag{\omem_i, \ldots, \omem_j}$,
+        % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue] \listConcat \lstack')$.
 
         \item \rulename{Is Alias}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$, and
@@ -1561,6 +1588,36 @@
      \gtlstconcat & [\omem_m, \ldots, \omem_n] & [\omem_p, \ldots, \omem_q] & [\omem_m, \ldots, \omem_n, \omem_p, \ldots, \omem_q] \\
      \gtcmp & \ovalue & \ovalue & \ostrue \\
      \gtcmp & \ovalue & \ovalue' \neq \ovalue & \osfalse \\
+    \end{array}
+    \end{flalign*}
+  \end{definition}
+
+  \tnote{TODO: fill in these charts}
+
+  \begin{definition}[Precise Slice]
+    $\osFunc{PreciseSlice}(\ovalue, \ovalue_1, \ovalue_2)$ returns the content of row $\ovalue_1$, column $\ovalue_2$:
+    \begin{flalign*}
+    \begin{array}[t]{ c | c c c c }
+     & \gtintplus & \gtintminus & \gtintzero & \osnone \\
+     \hline
+     \gtintplus &  & \text{---} & \text{---} & \\
+     \gtintminus & \text{---} & \text{---} & \text{---} & \text{---} \\
+     \gtintzero &  & \text{---} & [\ovalue[0]]_1 & \ovalue \\
+     \osnone &  & \text{---} & [\ovalue[0]]_1 & \ovalue \\
+    \end{array}
+    \end{flalign*}
+  \end{definition}
+
+  \begin{definition}[Imprecise Slice]
+    $\osFunc{PreciseSlice}(\ovalue, \ovalue_1, \ovalue_2)$ returns the content of row $\ovalue_1$, column $\ovalue_2$:
+    \begin{flalign*}
+    \begin{array}[t]{ c | c c c c }
+     & \gtintplus & \gtintminus & \gtintzero & \osnone \\
+     \hline
+     \gtintplus &  & \text{---} & \text{---} & \\
+     \gtintminus & \text{---} & \text{---} & \text{---} & \text{---} \\
+     \gtintzero &  & \text{---} & \ovalue & \ovalue \\
+     \osnone &  & \text{---} & \ovalue & \ovalue \\
     \end{array}
     \end{flalign*}
   \end{definition}
