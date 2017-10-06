@@ -1001,7 +1001,7 @@ raise $\pvariable$
       \gor    \mathbb{S} \gline
       \gor    \mathbb{B} \gline
       \gor    \pvariable \gline
-      \gor    \gtfun \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+      \gor    \gtfun \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
       \gor    \pmagic
   }
   \grule[unary operators]{\punop}{
@@ -1484,7 +1484,7 @@ $\gtlet$ $\tfreshvar$ = $b$
 \newsavebox{\lamiaFuncBox}
 \begin{lrbox}{\lamiaFuncBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$) }
+$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$, $\tfreshval_2 $($\pvariable_1, \ldots, \pvariable_n$)) }
 $\gtlet$ $\tfreshmem$ = alloc
 $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 \end{python}
@@ -1492,10 +1492,10 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 
 \begin{mathpar}
   \translationRule{Function Value}{
-    \gtfun (\pexpr_1, \ldots, \pexpr_n) \gtcolon \psuite
+    \gtfun (\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
   }{
     \left<
-    \usebox{\lamiaFuncBox}\hspace{140pt},
+    \usebox{\lamiaFuncBox}\hspace{180pt},
     \tfreshmem
     \right>
   }{
@@ -1518,6 +1518,41 @@ $\gtstore$ $\tfreshval_3$ $\star$scope
 \begin{definition}[Python\_assign]\ \\
 $\osFunc{Python\_assign}(\pvariable,\omemvariable)$ =
 \usebox{\PythonAssignBox}
+\end{definition}
+
+\newsavebox{\ConvertFuncBox}
+\begin{lrbox}{\ConvertFuncBox}
+\begin{python}
+$\gtlet$ get_from_parent_scope = get_from_scope
+$\gtlet$ &scope = alloc
+$\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+$\gtlet$ $\tfreshval_{scope-0}$ = { }
+
+$\gtlet$ $\tfreshval_{1-1}$ = 0
+$\gtlet$ $\tfreshval_{1-2}$ = $\pvariable$[$\tfreshval_{1-1}$]
+$\gtlet$ $\tfreshval_{1-3}$ = $\osFunc{string\_of\_id}(\pvariable_1)$
+$\gtlet$ $\tfreshval_{scope-1}$ = $\tfreshval_{scope-0}${$\tfreshval_{1-3}$ $\gtarrow$ $\tfreshval_{1-2}$}
+
+$\gtlet$ $\tfreshval_{2-1}$ = 1
+$\gtlet$ $\tfreshval_{2-2}$ = $\pvariable$[$\tfreshval_{2-1}$]
+$\gtlet$ $\tfreshval_{2-3}$ = $\osFunc{string\_of\_id}(\pvariable_2)$
+$\gtlet$ $\tfreshval_{scope-2}$ = $\tfreshval_{scope-1}${$\tfreshval_{2-3}$ $\gtarrow$ $\tfreshval_{2-2}$}
+
+...
+
+$\gtlet$ $\tfreshval_{n-1}$ = (n-1)
+$\gtlet$ $\tfreshval_{n-2}$ = $\pvariable$[$\tfreshval_{n-1}$]
+$\gtlet$ $\tfreshval_{n-3}$ = $\osFunc{string\_of\_id}(\pvariable_3)$
+$\gtlet$ $\tfreshval_{scope-n}$ = $\tfreshval_{scope-(n-1)}${$\tfreshval_{n-3}$ $\gtarrow$ $\tfreshval_{n-2}$}
+
+$\gtstore$ &scope $\tfreshval_{scope-n}$
+$\meaningof{\psuite}$
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Python\_assign]\ \\
+$\osFunc{Convert\_func\_body}(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n))$ =
+\usebox{\ConvertFuncBox}
 \end{definition}
 
 \end{document}
