@@ -1452,11 +1452,56 @@ $\gtlet$ $\tfreshvar$ = $b$
     \osFunc{wrap\_bool}(\tfreshvar)
     \right>
   }{
-    \mbox{where } b \mbox{ is a string}
+    \mbox{where } b \mbox{ is a boolean}
   }
 \end{mathpar}
 
-TODO: Builtins (maybe?), function values
+\begin{mathpar}
+  \translationRule{Name}{
+    \pvariable
+  }{
+    \left<
+    \gtobrk \gtcbrk, \osFunc{Lookup}(\pvariable)
+    \right>
+  }{
+    % No premises
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Builtin name}{
+    \star\pvariable
+  }{
+    \left<
+    \gtobrk \gtcbrk,
+    \osFunc{builtin\_memloc}(\star\pvariable)
+    \right>
+  }{
+    % No premises
+  }
+\end{mathpar}
+
+\newsavebox{\lamiaFuncBox}
+\begin{lrbox}{\lamiaFuncBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$) }
+$\gtlet$ $\tfreshmem$ = alloc
+$\gtstore$ $\tfreshmem$ $\tfreshval_1$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Function Value}{
+    \gtfun (\pexpr_1, \ldots, \pexpr_n) \gtcolon \psuite
+  }{
+    \left<
+    \usebox{\lamiaFuncBox}\hspace{140pt},
+    \tfreshmem
+    \right>
+  }{
+    % No premises
+  }
+\end{mathpar}
 
 \subsection{Helper functions}
 
