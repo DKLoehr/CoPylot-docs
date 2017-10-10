@@ -1145,7 +1145,7 @@
       \ostmt \osUnder \ostmt' \\
       \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
       \ostmt \in \ostmts_2 \\
-      \ostmt_1 \osStartof \ostmt' \\
+      \ostmt_1 \osStartof \ostmt \\
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset}
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0][_0], \gtime \tpop}}
@@ -1158,7 +1158,7 @@
       \gnode_2 = \gsLR{\gsraise[\ostmt]['], \gtime}\\
       \ostmt \osUnder \ostmt' \\
       \ostmt' \text{ is an if statement, while statement or funcdef} \\
-      \ostmt_1 \osStartof \ostmt' \\
+      \ostmt_1 \osStartof \ostmt \\
       \gsLR{\ostmt_0, \gtime_0} \gsBeforeIn \gsLR{\ostmt_1, \gtime' \treset}
     }{
       \gsAddEdge{\gnode_2 \gsBefore \gsLR{\gsraise[\ostmt_0][_0], \gtime \tpop}}
