@@ -1125,6 +1125,28 @@ Furthermore, we define $<\psuite, \pexpr>$ to mean $<\psuite || \psuite', \pexpr
 $\meaningof{\pexpr} = <\psuite', \pexpr'>$. This is ok because eventually the expression will become simple
 enough that $\meaningof{\pexpr} = <\gtobrk \gtcbrk, \pexpr>$
 
+\subsection{Blocks}
+
+\begin{mathpar}
+  \translationRule{Entire program}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \osFunc{preamble}()\ \listConcat \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+    \mbox{where } \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk \mbox{ is at the top level}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Subordinate blocks}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+    \mbox{where } \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk \mbox{ is not at the top level}
+  }
+\end{mathpar}
+
 \subsection{Statements}
 
 \newsavebox{\lamiaAsgnBox}
@@ -1504,7 +1526,7 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
     \gtfun (\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
   }{
     \left<
-    \usebox{\lamiaFuncBox}\hspace{180pt},
+    \usebox{\lamiaFuncBox}\hspace{190pt},
     \tfreshmem
     \right>
   }{
@@ -1579,7 +1601,69 @@ $\left<\usebox{\LookupBox}\hspace{30px}, \tfreshmem\right>$
 
 \begin{definition}[string\_of\_id]\ \\
 $\osFunc{string\_of\_id}(\pvariable)$ = $\pvariable$
+\end{definition}
 
+\begin{definition}[Builtins]
+  \begin{flalign*}
+  \begin{array}[t]{ c | c }
+   \star\pvariable & \osFunc{Builtin\_memloc}(\pbinop)\\
+   \hline
+   \star \mathtt{True} & \&\mathtt{True} \\
+   \star \mathtt{False} & \&\mathtt{False} \\
+   \star \mathtt{slice} & \&\mathtt{slice} \\
+   \star \mathtt{bool} & \&\mathtt{bool} \\
+   \star \mathtt{AttributeError} & \&\mathtt{AttributeError} \\
+   \star \mathtt{ValueError} & \&\mathtt{ValueError} \\
+   \star \mathtt{TypeError} & \&\mathtt{TypeError} \\
+   \star \mathtt{StopIteraiton} & \&\mathtt{StopIteration} \\
+  \end{array}
+  \end{flalign*}
+\end{definition}
+
+\newsavebox{\ScopegetBox}
+\begin{lrbox}{\ScopegetBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\gtget$ &scope
+$\gtlet$ $\tfreshval_2$ = $\tfreshval_1$ haskey $\tfreshval$
+$\gtlet$ $\tfreshmem_1$ =
+  if $\tfreshval_2$ then {
+    $\gtlet$ $\tfreshmem_2$ = $\tfreshval_1${$\tfreshval$}
+    $\gtifresult$ $\tfreshmem_2$
+  } else {
+    $\gtlet$ $\tfreshmem_3$ = get_from_parent_scope($\tfreshval$)
+    $\gtifresult$ $\tfreshmem_3$
+  }
+return $\tfreshmem_1$
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Python variable retrieval]\ \\
+$\osFunc{get\_from\_scope}()$ = $\gtdef (\tfreshval) : \{ \psuite \}$, \\
+where $\psuite = $
+$\usebox{\ScopegetBox}$
+\end{definition}
+
+\newsavebox{\GetCallBox}
+\begin{lrbox}{\GetCallBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\gtget$ &scope
+$\gtlet$ $\tfreshval_2$ = $\tfreshval_1$ haskey $\tfreshval$
+$\gtlet$ $\tfreshmem_1$ =
+  if $\tfreshval_2$ then {
+    $\gtlet$ $\tfreshmem_2$ = $\tfreshval_1${$\tfreshval$}
+    $\gtifresult$ $\tfreshmem_2$
+  } else {
+    $\gtlet$ $\tfreshmem_3$ = get_from_parent_scope($\tfreshval$)
+    $\gtifresult$ $\tfreshmem_3$
+  }
+return $\tfreshmem_1$
+\end{python}
+\end{lrbox}
+TODO: Need to change use of Lookup to reflect the fact it returns a memvar. Sigh.
+\begin{definition}[Get callable]\ \\
+$\osFunc{get\_call}(\pvariable)$ = $\gtdef (\tfreshval) : \{ \psuite \}$, \\
+where $\psuite = $
+$\usebox{\GetCallBox}$
 \end{definition}
 
 \end{document}
