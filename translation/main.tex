@@ -1659,7 +1659,6 @@ $\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
 #Loop until error or callable
 while $\tfreshmem_1$:
   $\gtlet$ $\tfreshval_5$ = "__call__"
-  get_from_binding($\tfreshval_5$, $\tfreshval_1$, throw_exn)
   $\gtlet$ $\tfreshval_6$ = $\tfreshval_1$ haskey $\tfreshval_5$
   $\gtlet$ $\tfreshmem_2$ =
     if $\tfreshval_6$ then {
@@ -1683,12 +1682,42 @@ while $\tfreshmem_1$:
 \end{python}
 \end{lrbox}
 
-\begin{definition}[Detemining calling behavior]\ \\
+\begin{definition}[Determine calling behavior]\ \\
 $\osFunc{get\_call}(\omemvariable)$ = $\left< \psuite, \tfreshval_2 \right>$ \\
 where \psuite =
 \usebox{\GetCallBox}
 \end{definition}
 
-TODO: Preamble, (lookup\_and\_)get\_attr, wrap*
+\newsavebox{\GetAttrFuncBox}
+\begin{lrbox}{\GetAttrFuncBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = s
+$\gtlet$ $\tfreshval_2$ = $\ovalvariable$ haskey $\tfreshval_1$
+$\gtlet$ $\tfreshmem$ =
+  if $\tfreshval_2$ then {
+    $\gtlet$ $\tfreshmem_2$ = $\ovalvariable${$\tfreshval_1$}
+    $\gtifresult$ $\tfreshmem_2$
+  } else {
+    $\gtlet$ $\tfreshval_1$ = "Object has no attribute" ^ s
+    $\gtlet$ $\tfreshmem_3$ = $\osFunc{wrap\_attr\_error}$($\tfreshval_1$)
+    raise $\tfreshmem_3$
+  }
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Attribute Retrieval]\ \\
+$\osFunc{get\_attr}(s, \ovalvariable)$ = $\left< \psuite, \tfreshmem \right>$ \\
+where s is a string literal, \^{} denotes compile-time string concatenation, and
+\\\psuite =
+\usebox{\GetAttrFuncBox}
+\end{definition}
+
+\begin{definition}[Lookup followed by attribute retrieval]\ \\
+$\osFunc{lookup\_and\_get\_attr}(s_1, s_2)$ =
+$\left< \gtlet \tfreshval_1 = \gtget \osFunc{Lookup}(s_1), \osFunc{get\_attr}(s_2, \tfreshval_1) \right>$ \\
+where $s_1,s_2$ are string literals
+\end{definition}
+
+TODO: Preamble, wrap*
 
 \end{document}
