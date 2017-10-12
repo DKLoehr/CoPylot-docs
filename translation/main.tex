@@ -1338,10 +1338,10 @@ $\gtlet$ $\tfreshval$ = $\osFunc{Lookup}$($\pvariable_1$) is $\osFunc{Lookup}$($
 \newsavebox{\lamiaCallBox}
 \begin{lrbox}{\lamiaCallBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\osFunc{Lookup}(\pvariable)$
-$\gtlet$ $\tfreshval_2$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
-$\gtlet$ $\tfreshval_3$ = $\osFunc{Get\_call}(\tfreshval_1)$
-$\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
+$\gtlet$ $\tfreshmem_1$ = $\osFunc{Lookup}(\pvariable)$
+$\gtlet$ $\tfreshval_1$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
+$\gtlet$ $\tfreshval_2$ = $\osFunc{Get\_call}(\tfreshmem_1)$
+$\gtlet$ $\tfreshmem_2$ = $\tfreshval_2$($\tfreshval_1$)
 \end{python}
 \end{lrbox}
 
@@ -1351,7 +1351,7 @@ $\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
   }{
     \left<
     \usebox{\lamiaCallBox}\hspace{120pt},
-    \tfreshmem
+    \tfreshmem_2
     \right>
   }{
   }
@@ -1640,30 +1640,55 @@ return $\tfreshmem_1$
 \begin{definition}[Python variable retrieval]\ \\
 $\osFunc{get\_from\_scope}()$ = $\gtdef (\tfreshval) : \{ \psuite \}$, \\
 where $\psuite = $
-$\usebox{\ScopegetBox}$
+\usebox{\ScopegetBox}
 \end{definition}
 
 \newsavebox{\GetCallBox}
 \begin{lrbox}{\GetCallBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\gtget$ &scope
-$\gtlet$ $\tfreshval_2$ = $\tfreshval_1$ haskey $\tfreshval$
-$\gtlet$ $\tfreshmem_1$ =
-  if $\tfreshval_2$ then {
-    $\gtlet$ $\tfreshmem_2$ = $\tfreshval_1${$\tfreshval$}
-    $\gtifresult$ $\tfreshmem_2$
-  } else {
-    $\gtlet$ $\tfreshmem_3$ = get_from_parent_scope($\tfreshval$)
-    $\gtifresult$ $\tfreshmem_3$
-  }
-return $\tfreshmem_1$
+$\gtlet$ $\tfreshmem$ = $\omemvariable$
+
+#Compute test condition for our loop
+$\gtlet$ $\tfreshval_1$ = get $\tfreshmem$
+$\gtlet$ $\tfreshval_2$ = get $\osFunc{get\_attr}$("$\star$value", $\tfreshval_1$)
+$\gtlet$ $\tfreshval_3$ = is_function? $\tfreshval_2$
+$\gtlet$ $\tfreshval_4$ = not $\tfreshval_3$
+$\gtlet$ $\tfreshmem_1$ = alloc
+$\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
+
+#Loop until error or callable
+while $\tfreshmem_1$:
+  $\gtlet$ $\tfreshval_5$ = "__call__"
+  get_from_binding($\tfreshval_5$, $\tfreshval_1$, throw_exn)
+  $\gtlet$ $\tfreshval_6$ = $\tfreshval_1$ haskey $\tfreshval_5$
+  $\gtlet$ $\tfreshmem_2$ =
+    if $\tfreshval_6$ then {
+      $\gtlet$ $\tfreshmem_3$ = $\tfreshval_1${$\tfreshval_5$}
+      $\gtifresult$ $\tfreshmem_3$
+    } else {
+      #FIXME: Strictly speaking this string should contain the class of the object
+      $\gtlet \tfreshval_7$ = "Object is not callable"
+      $\gtlet \tfreshval_8$ = $\osFunc{wrap\_type\_error}(\tfreshval_7)$
+      raise $\tfreshval_8$
+    }
+  #At the end of the loop recompute the test
+  $\gtlet$ $\tfreshmem$ = $\tfreshmem_2$
+  $\gtlet$ $\tfreshval_1$ = get $\tfreshmem$
+  $\gtlet$ $\tfreshval_2$ = get $\osFunc{get\_attr}$("$\star$value", $\tfreshval_1$)
+  $\gtlet$ $\tfreshval_3$ = is_function? $\tfreshval_2$
+  $\gtlet$ $\tfreshval_4$ = not $\tfreshval_3$
+  $\gtlet$ $\tfreshmem_1$ = alloc
+  $\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
+
 \end{python}
 \end{lrbox}
-TODO: Need to change use of Lookup to reflect the fact it returns a memvar. Sigh.
-\begin{definition}[Get callable]\ \\
-$\osFunc{get\_call}(\pvariable)$ = $\gtdef (\tfreshval) : \{ \psuite \}$, \\
-where $\psuite = $
-$\usebox{\GetCallBox}$
+
+\begin{definition}[Detemining calling behavior]\ \\
+$\osFunc{get\_call}(\omemvariable)$ = $\left< \psuite, \tfreshval_2 \right>$ \\
+where \psuite =
+\usebox{\GetCallBox}
 \end{definition}
+
+TODO: Preamble, (lookup\_and\_)get\_attr, wrap*
 
 \end{document}
