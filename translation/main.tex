@@ -1699,7 +1699,7 @@ $\gtlet$ $\tfreshmem$ =
     $\gtifresult$ $\tfreshmem_2$
   } else {
     $\gtlet$ $\tfreshval_1$ = "Object has no attribute" ^ s
-    $\gtlet$ $\tfreshmem_3$ = $\osFunc{wrap\_attr\_error}$($\tfreshval_1$)
+    $\gtlet$ $\tfreshmem_3$ = $\osFunc{wrap\_attribute\_error}$($\tfreshval_1$)
     raise $\tfreshmem_3$
   }
 \end{python}
@@ -1718,6 +1718,49 @@ $\left< \gtlet \tfreshval_1 = \gtget \osFunc{Lookup}(s_1), \osFunc{get\_attr}(s_
 where $s_1,s_2$ are string literals
 \end{definition}
 
-TODO: Preamble, wrap*
+\begin{definition}[Wrapping Objects]\ \\
+The functions of the form $\osFunc{wrap\_*}$ result in an object of type * with
+the given value. The details will change heavily when we add classes so we omit them.
+\end{definition}
+
+\newsavebox{\PreambleBox}
+\begin{lrbox}{\PreambleBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = {}
+$\gtlet$ &scope = $\gtalloc$
+$\gtstore$ $\tfreshval_1$ &scope
+
+$\gtlet$ get_from_parent_scope = def ($\tfreshval_2$) {
+  # Technically should contain the actual name
+  $\gtlet$ $\tfreshval_3$ = "Name is not defined"
+  $\gtlet$ $\tfreshmem_1$ = $\osFunc{wrap\_name\_error}$($\tfreshval_3$)
+  raise $\tfreshmem_1$
+}
+
+$\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+
+#We add each of the below variables to the python scope after they are defined
+
+$\gtlet$ $\star$True = #builtin true object
+$\gtlet$ $\star$False = #builtin false object
+$\gtlet$ $\star$None = #builtin none object
+
+$\gtlet$ $\star$AttributeError = #builtin AttrError type
+$\gtlet$ $\star$TypeError = #builtin TypeError type
+$\gtlet$ $\star$NameError = #builtin NameError type
+$\gtlet$ $\star$StopIteration = #builtin StopIteration type
+
+$\gtlet$ $\star$bool = #builtin bool function
+
+#Stop adding new variables to the python scope
+
+$\gtlet$ $\star$int_add = #builtin integer addition function
+
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Preamble]\ \\
+$\osFunc{Preamble}()$ = \usebox{\PreambleBox}
+\end{definition}
 
 \end{document}
