@@ -1211,11 +1211,11 @@ return $\osFunc{Lookup}$($\pvariable$)
 \begin{lrbox}{\lamiaWhileBox}
 \begin{python}
 let $\tfreshmem$ = alloc
-let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
 store $\tfreshmem$ $\tfreshval$
 while $\tfreshmem$ do {
   $\meaningof{\psuite}$
-  let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+  let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
   store $\tfreshmem$ $\tfreshval$
 }
 \end{python}
@@ -1541,7 +1541,7 @@ $\gtlet$ $\tfreshvar$ = $b$
 \newsavebox{\lamiaFuncBox}
 \begin{lrbox}{\lamiaFuncBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$, $\tfreshval_2 $($\pvariable_1, \ldots, \pvariable_n$)) }
+$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$, $\tfreshval_2$, ($\pvariable_1, \ldots, \pvariable_n$)) }
 $\gtlet$ $\tfreshmem$ = alloc
 $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 \end{python}
@@ -1568,7 +1568,7 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 $\gtlet$ $\tfreshval_1$ = $\osFunc{string\_of\_id}$($\pvariable$)
 $\gtlet$ $\tfreshval_2$ = $\gtget$ &scope
 $\gtlet$ $\tfreshval_3$ = $\tfreshval_2${$\tfreshval_1$ $\gtarrow$ $\omemvariable$}
-$\gtstore$ $\tfreshval_3$ $\star$scope
+$\gtstore$ $\tfreshval_3$ &scope
 \end{python}
 \end{lrbox}
 
@@ -1702,7 +1702,6 @@ while $\tfreshmem_1$:
   $\gtlet$ $\tfreshval_2$ = get $\osFunc{get\_attr}$("$\star$value", $\tfreshval_1$)
   $\gtlet$ $\tfreshval_3$ = is_function? $\tfreshval_2$
   $\gtlet$ $\tfreshval_4$ = not $\tfreshval_3$
-  $\gtlet$ $\tfreshmem_1$ = alloc
   $\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
 
 \end{python}
