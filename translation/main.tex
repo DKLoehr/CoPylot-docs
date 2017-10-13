@@ -14,7 +14,7 @@
     \grule[variables]{\pvariable}{}
     \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
     \grule[statements]{\pstmt}{
-                \gtdef \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+                \gtdef \pvariable\gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \gtreturn \pexpropt \gline
         \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
         \gor    \pexpr \pbinop \gteq \pexpr \gline
@@ -158,17 +158,26 @@ for slices.
 
 \subsection{Statements}
 
+\begin{mathpar}
+  \translationRule{Suite (statement list)}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+  }
+\end{mathpar}
+
 \newsavebox{\funcDefBox}
 \begin{lrbox}{\funcDefBox}
 \begin{python}
-$\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
+$\pvariable$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
   $\meaningof{\psuite'}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{Function Definition}{
-    \gtdef \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
+    \gtdef \pvariable \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
   }{
     \usebox{\funcDefBox}
   }{
@@ -181,7 +190,7 @@ $\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
 \newsavebox{\returnBox}
 \begin{lrbox}{\returnBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 return $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -199,7 +208,7 @@ return $\pexpr_{(\pexpr)}$
 \newsavebox{\ereturnBox}
 \begin{lrbox}{\ereturnBox}
 \begin{python}
-return $\mathtt{None}$
+return $\mathtt{\star None}$
 \end{python}
 \end{lrbox}
 
@@ -216,7 +225,7 @@ return $\mathtt{None}$
 \newsavebox{\multipleAssignmentBox}
 \begin{lrbox}{\multipleAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\tfreshvar = \pexpr_{(\pexpr)}$
 $\meaningof{\pexpr_1 = \tfreshvar}$
 ...
@@ -238,7 +247,7 @@ $\meaningof{\pexpr_n = \tfreshvar}$
 \newsavebox{\variableAssignmentBox}
 \begin{lrbox}{\variableAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\pvariable = \pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -255,8 +264,8 @@ $\pvariable = \pexpr_{(\pexpr)}$
 \newsavebox{\attributeAssignmentBox}
 \begin{lrbox}{\attributeAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr_2)}}$
-$\meaningof{\psuite_{(\pexpr_1)}}$0
+$\psuite_{(\pexpr_2)}$
+$\psuite_{(\pexpr_1)}$
 $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
@@ -275,9 +284,9 @@ $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \newsavebox{\sliceAssignmentBox}
 \begin{lrbox}{\sliceAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr_2)}}$
-$\meaningof{\psuite_{(\pexpr_1)}}$
-$\meaningof{\psuite_{(\pslice)}}$
+$\psuite_{(\pexpr_2)}$
+$\psuite_{(\pexpr_1)}$
+$\psuite_{(\pslice)}$
 $\pexpr_{(\pexpr_1)}$.__setitem__($\pexpr_{(\pslice)}$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
@@ -316,8 +325,8 @@ try:
   except $\star$StopIteration:
     pass
 
-except StopIteration:
-  raise ValueError, "too few elements to unpack"
+except $\star$StopIteration:
+  raise $\star$ValueError, "too few elements to unpack"
 
 $\pexpr_1$ = $\tfreshvar_1$
 ...
@@ -437,11 +446,11 @@ except $\star$StopIteration:
 \newsavebox{\whileBox}
 \begin{lrbox}{\whileBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 while $\tfreshvar$:
   $\meaningof{\psuite}$
-  $\meaningof{\psuite_{(\pexpr)}}$
+  $\psuite_{(\pexpr)}$
   $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 \end{python}
 \end{lrbox}
@@ -458,7 +467,7 @@ while $\tfreshvar$:
 \newsavebox{\ifBox}
 \begin{lrbox}{\ifBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 if $\star$bool($\pexpr_{(\pexpr)}$):
   $\meaningof{\psuite_1}$
 else:
@@ -478,7 +487,7 @@ else:
 \newsavebox{\raiseBox}
 \begin{lrbox}{\raiseBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 raise $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -567,7 +576,8 @@ $\left<\psuite || \psuite_{(\pexpr)}, \pexpr_{(\pexpr)}\right>$.
 \newsavebox{\andBox}
 \begin{lrbox}{\andBox}
 \begin{python}
-$\tfreshvar$ = $\pexpr_1$
+$\psuite_{(\pexpr_1)}$
+$\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 \end{python}
 \end{lrbox}
 
@@ -575,28 +585,23 @@ $\tfreshvar$ = $\pexpr_1$
   \translationRule{Boolean expression (And)}{
     \pexpr_1 \gtand \pexpr_2
   }{
-    \left<\usebox{\andBox}\hspace{20pt},
+    \left<\usebox{\andBox}\hspace{25pt},
     \meaningof{\pexpr_2 \gtif \tfreshvar \gtelse \tfreshvar}\right>
   }{
   }
 \end{mathpar}
 
-\newsavebox{\orBox}
-\begin{lrbox}{\orBox}
-\begin{python}
-$\tfreshvar$ = $\pexpr_1$
-\end{python}
-\end{lrbox}
-
 \begin{mathpar}
   \translationRule{Boolean expression (Or)}{
     \pexpr_1 \gtor \pexpr_2
   }{
-    \left<\usebox{\orBox}\hspace{18pt},
+    \left<\usebox{\andBox}\hspace{25pt},
     \meaningof{\tfreshvar \gtif \tfreshvar \gtelse \pexpr_2}\right>
   }{
   }
 \end{mathpar}
+
+TODO: Stuff like \_\_radd\_\_ if $\pexpr_1$ doesn't have an appropriate function, etc
 
 \newsavebox{\binopBox}
 \begin{lrbox}{\binopBox}
@@ -628,7 +633,7 @@ $\psuite_{(\pexpr)}$
   \translationRule{Unary Operation (not)}{
     \gtnot \pexpr
   }{
-    \left<\usebox{\notBox}\hspace{20pt}, \gtnot \star\gtbool(\pexpr_{(\pexpr)})\right>
+    \left<\usebox{\notBox}\hspace{20pt}, \gtnot (\star\gtbool(\pexpr_{(\pexpr)}))\right>
   }{
   }
 \end{mathpar}
@@ -695,6 +700,8 @@ $\meaningof{\tfreshvar_2 = \pexpr_2}$
 $\tfreshvar_3$ = $\tfreshvar_1.\mathtt{opFunc}(\tfreshvar_2)$
 \end{python}
 \end{lrbox}
+
+TODO: Look for comparison functions on both sides, maybe?
 
 \begin{mathpar}
   \translationRule{Comparison operator}{
@@ -764,7 +771,7 @@ $\psuite_{(\pexpr_n)}$
     \pexpr \gtopar \pexpr_1, \ldots \pexpr_n \gtcpar
   }{
     \left< \usebox{\callBox}\hspace{10pt},
-    \pexpr_{(\pexpr)}(\pexpr_{(\pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)})}) \right>
+    \pexpr_{(\pexpr)}(\pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)}) \right>
   }{
   }
 \end{mathpar}
@@ -775,7 +782,25 @@ $\psuite_{(\pexpr_n)}$
   }{
     \left< \psuite_{(\pexpr)} , \pexpr_{(\pexpr)}.\pvariable \right>
   }{
-  \mbox{where } \pexpr \mbox{ is a number, string, boolean or identifier}
+  }
+\end{mathpar}
+
+\newsavebox{\listAccessBox}
+\begin{lrbox}{\listAccessBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+$\psuite_{(\pslice)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Subscript}{
+    \pexpr \gtobrk \pslice \gtcbrk
+  }{
+    \left< \usebox{\listAccessBox}\hspace{20pt},
+    \pexpr_{(\pexpr)}.\mathtt{\_\_getitem\_\_} ( \pexpr_{(\pslice)} )
+    \right>
+  }{
   }
 \end{mathpar}
 
@@ -810,7 +835,7 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{None expression}{
     \gtNone
   }{
-    \left< [] , \mathtt{*None} \right>
+    \left< \gtobrk \gtcbrk , \mathtt{\star None} \right>
   }{
   }
 \end{mathpar}
@@ -819,8 +844,9 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{Literal expression}{
     \pexpr
   }{
-    \left< [] , \pexpr \right>
+    \left< \gtobrk \gtcbrk , \pexpr \right>
   }{
+    \mbox{where } \pexpr \mbox{ is a number, string, boolean or identifier}
   }
 \end{mathpar}
 
@@ -828,7 +854,7 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{Slice (index)}{
     \pslice
   }{
-    \left< [] , \meaningof{\pexpr} \right>
+    \left< \gtobrk \gtcbrk , \meaningof{\pexpr} \right>
   }{
     \mbox{where} \pslice \gteq \pexpr
   }
@@ -861,7 +887,7 @@ $\psuite_{(\pexpr_3)}$
 \begin{lrbox}{\exnBox}
 \begin{python}
 if(True):
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
@@ -882,7 +908,7 @@ else:
 \begin{python}
 $\psuite_{(\pexpr)}$
 if $\tfreshvar$.__class__ is $\pexpr_{(\pexpr)}$:
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
@@ -904,7 +930,7 @@ else:
 $\psuite_{(\pexpr)}$
 if $\pvariable$.__class__ is $\pexpr_{(\pexpr)}$:
   $\pvariable_1$ = $\pvariable$
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
