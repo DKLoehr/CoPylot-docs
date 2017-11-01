@@ -14,7 +14,8 @@
     \grule[variables]{\pvariable}{}
     \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
     \grule[statements]{\pstmt}{
-                \gtdef \pvariable\gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+                \gtdef \pvariable \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \gtclass \pvariable \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \gtreturn \pexpropt \gline
         \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
         \gor    \pexpr \pbinop \gteq \pexpr \gline
@@ -120,6 +121,7 @@
         \gor    \mathbb{B} \gline
         \gor    \pvariable \gline
         \gor    \gtfun \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \gtclass \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \pmagic
     }
     \grule[unary operators]{\punop}{
@@ -184,6 +186,27 @@ $\pvariable$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
     \mbox{where }
     \pexpr_i = \pvariable_i, \\
     \psuite' = \osFunc{add\_return}(\psuite)
+  }
+\end{mathpar}
+
+\newsavebox{\classDefBox}
+\begin{lrbox}{\classDefBox}
+\begin{python}
+$\psuite_{(e_0)}$
+$\psuite_{(e_1  )}$
+$\ldots$
+$\psuite_{(e_n)}$
+$\pvariable$ = $\gtclass \gtopar \pexpr_{(\pexpr_0)}, \ldots, \pexpr_{(\pexpr_n)} \gtcpar$:
+  $\meaningof{\psuite'}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Class Definition}{
+    \gtclass \pvariable \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
+  }{
+    \usebox{\classDefBox}
+  }{
   }
 \end{mathpar}
 
@@ -1028,6 +1051,7 @@ raise $\pvariable$
       \gor    \mathbb{B} \gline
       \gor    \pvariable \gline
       \gor    \gtfun \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
+      \gor    \gtclass \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
       \gor    \pmagic
   }
   \grule[unary operators]{\punop}{
