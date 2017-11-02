@@ -246,7 +246,7 @@
   \end{mathpar}
 
   \begin{mathpar}
-    \relationRule{Slice (imprecise)}{ % TODO: how to address error
+    \relationRule{Slice (imprecise)}{
       \ovalue = \oheap[\ovalvariable'] = \osBag{\omem_1, \ldots, \omem_n} \\ % TODO: of the same type
       \ovalue' \subseteq \ovalue \\
       \oheap' = \oheap[\ovalvariable \mapsto \ovalue']
@@ -1607,8 +1607,6 @@
     \end{flalign*}
   \end{definition}
 
-  \tnote{TODO: fill in these charts}
-
   \begin{definition}[Precise Slice]
     $\osFunc{PreciseSlice}(\ovalue, \ovalue_1, \ovalue_2)$ returns the content of row $\ovalue_1$, column $\ovalue_2$ for $\ovalue=[\omem_1,\ldots,\omem_n]_k$:
     \begin{flalign*}
@@ -1629,11 +1627,12 @@
     \begin{array}[t]{ c | c c c c }
      & \gtintplus & \gtintminus & \gtintzero & \osnone \\
      \hline
-     \gtintplus & \osBag{\omem_i,\ldots,\omem_j}, \omem_i,\ldots,\omem_j \in \ovalue & \text{---} & \text{---} & \osBag{\omem_i,\ldots,\omem_j}, \omem_i,\ldots,\omem_j \in \ovalue \\
+     \gtintplus & \osBag{\omem_i,\ldots,\omem_j} \subseteq \ovalue & \text{---} & \text{---} & \osBag{\omem_i,\ldots,\omem_j} \subseteq \ovalue \\
      \gtintminus & \text{---} & \text{---} & \text{---} & \text{---} \\
-     \gtintzero & \osBag{\omem_i,\ldots,\omem_j}, \omem_i,\ldots,\omem_j \in \ovalue & \text{---} & \ovalue & \ovalue \\
-     \osnone & \osBag{\omem_i,\ldots,\omem_j}, \omem_i,\ldots,\omem_j \in \ovalue & \text{---} & \ovalue & \ovalue \\
+     \gtintzero & \osBag{\omem_i,\ldots,\omem_j} \subseteq \ovalue & \text{---} & \osBag{\omem_1} & \ovalue \\
+     \osnone & \osBag{\omem_i,\ldots,\omem_j} \subseteq \ovalue & \text{---} & \osBag{\omem_1} & \ovalue \\
     \end{array}
     \end{flalign*}
   \end{definition}
+  \tnote{In real life, we simply take the entire list. Slice does not exist. "None" is not supported now. }
 \end{document}
