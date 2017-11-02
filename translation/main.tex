@@ -14,7 +14,8 @@
     \grule[variables]{\pvariable}{}
     \grule[suites]{\psuite}{\gtobrk \pstmt; \ldots \gtcbrk}
     \grule[statements]{\pstmt}{
-                \gtdef \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+                \gtdef \pvariable \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \gtclass \pvariable \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \gtreturn \pexpropt \gline
         \gor    \pexpr, \ldots \pexpr \gteq \pexpr \gline
         \gor    \pexpr \pbinop \gteq \pexpr \gline
@@ -120,6 +121,7 @@
         \gor    \mathbb{B} \gline
         \gor    \pvariable \gline
         \gor    \gtfun \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
+        \gor    \gtclass \gtopar \pexpr, \ldots \gtcpar \gtcolon \psuite \gline
         \gor    \pmagic
     }
     \grule[unary operators]{\punop}{
@@ -158,17 +160,26 @@ for slices.
 
 \subsection{Statements}
 
+\begin{mathpar}
+  \translationRule{Suite (statement list)}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+  }
+\end{mathpar}
+
 \newsavebox{\funcDefBox}
 \begin{lrbox}{\funcDefBox}
 \begin{python}
-$\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
+$\pvariable$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
   $\meaningof{\psuite'}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{Function Definition}{
-    \gtdef \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
+    \gtdef \pvariable \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
   }{
     \usebox{\funcDefBox}
   }{
@@ -178,10 +189,31 @@ $\tfreshvar$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
   }
 \end{mathpar}
 
+\newsavebox{\classDefBox}
+\begin{lrbox}{\classDefBox}
+\begin{python}
+$\psuite_{(e_0)}$
+$\psuite_{(e_1  )}$
+$\ldots$
+$\psuite_{(e_n)}$
+$\pvariable$ = $\gtclass \gtopar \pexpr_{(\pexpr_0)}, \ldots, \pexpr_{(\pexpr_n)} \gtcpar$:
+  $\meaningof{\psuite'}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Class Definition}{
+    \gtclass \pvariable \gtopar \pexpr_0, \ldots, \pexpr_n \gtcpar \gtcolon \psuite
+  }{
+    \usebox{\classDefBox}
+  }{
+  }
+\end{mathpar}
+
 \newsavebox{\returnBox}
 \begin{lrbox}{\returnBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 return $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -199,7 +231,7 @@ return $\pexpr_{(\pexpr)}$
 \newsavebox{\ereturnBox}
 \begin{lrbox}{\ereturnBox}
 \begin{python}
-return $\mathtt{None}$
+return $\mathtt{\star None}$
 \end{python}
 \end{lrbox}
 
@@ -216,7 +248,7 @@ return $\mathtt{None}$
 \newsavebox{\multipleAssignmentBox}
 \begin{lrbox}{\multipleAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\tfreshvar = \pexpr_{(\pexpr)}$
 $\meaningof{\pexpr_1 = \tfreshvar}$
 ...
@@ -238,7 +270,7 @@ $\meaningof{\pexpr_n = \tfreshvar}$
 \newsavebox{\variableAssignmentBox}
 \begin{lrbox}{\variableAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\pvariable = \pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -255,8 +287,8 @@ $\pvariable = \pexpr_{(\pexpr)}$
 \newsavebox{\attributeAssignmentBox}
 \begin{lrbox}{\attributeAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr_2)}}$
-$\meaningof{\psuite_{(\pexpr_1)}}$0
+$\psuite_{(\pexpr_2)}$
+$\psuite_{(\pexpr_1)}$
 $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
@@ -275,9 +307,9 @@ $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \newsavebox{\sliceAssignmentBox}
 \begin{lrbox}{\sliceAssignmentBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr_2)}}$
-$\meaningof{\psuite_{(\pexpr_1)}}$
-$\meaningof{\psuite_{(\pslice)}}$
+$\psuite_{(\pexpr_2)}$
+$\psuite_{(\pexpr_1)}$
+$\psuite_{(\pslice)}$
 $\pexpr_{(\pexpr_1)}$.__setitem__($\pexpr_{(\pslice)}$, $\pexpr_{(\pexpr_2)}$)
 \end{python}
 \end{lrbox}
@@ -316,8 +348,8 @@ try:
   except $\star$StopIteration:
     pass
 
-except StopIteration:
-  raise ValueError, "too few elements to unpack"
+except $\star$StopIteration:
+  raise $\star$ValueError, "too few elements to unpack"
 
 $\pexpr_1$ = $\tfreshvar_1$
 ...
@@ -437,11 +469,11 @@ except $\star$StopIteration:
 \newsavebox{\whileBox}
 \begin{lrbox}{\whileBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 while $\tfreshvar$:
   $\meaningof{\psuite}$
-  $\meaningof{\psuite_{(\pexpr)}}$
+  $\psuite_{(\pexpr)}$
   $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 \end{python}
 \end{lrbox}
@@ -458,7 +490,7 @@ while $\tfreshvar$:
 \newsavebox{\ifBox}
 \begin{lrbox}{\ifBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 if $\star$bool($\pexpr_{(\pexpr)}$):
   $\meaningof{\psuite_1}$
 else:
@@ -478,7 +510,7 @@ else:
 \newsavebox{\raiseBox}
 \begin{lrbox}{\raiseBox}
 \begin{python}
-$\meaningof{\psuite_{(\pexpr)}}$
+$\psuite_{(\pexpr)}$
 raise $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -567,7 +599,8 @@ $\left<\psuite || \psuite_{(\pexpr)}, \pexpr_{(\pexpr)}\right>$.
 \newsavebox{\andBox}
 \begin{lrbox}{\andBox}
 \begin{python}
-$\tfreshvar$ = $\pexpr_1$
+$\psuite_{(\pexpr_1)}$
+$\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 \end{python}
 \end{lrbox}
 
@@ -575,28 +608,23 @@ $\tfreshvar$ = $\pexpr_1$
   \translationRule{Boolean expression (And)}{
     \pexpr_1 \gtand \pexpr_2
   }{
-    \left<\usebox{\andBox}\hspace{20pt},
+    \left<\usebox{\andBox}\hspace{25pt},
     \meaningof{\pexpr_2 \gtif \tfreshvar \gtelse \tfreshvar}\right>
   }{
   }
 \end{mathpar}
 
-\newsavebox{\orBox}
-\begin{lrbox}{\orBox}
-\begin{python}
-$\tfreshvar$ = $\pexpr_1$
-\end{python}
-\end{lrbox}
-
 \begin{mathpar}
   \translationRule{Boolean expression (Or)}{
     \pexpr_1 \gtor \pexpr_2
   }{
-    \left<\usebox{\orBox}\hspace{18pt},
+    \left<\usebox{\andBox}\hspace{25pt},
     \meaningof{\tfreshvar \gtif \tfreshvar \gtelse \pexpr_2}\right>
   }{
   }
 \end{mathpar}
+
+TODO: Stuff like \_\_radd\_\_ if $\pexpr_1$ doesn't have an appropriate function, etc
 
 \newsavebox{\binopBox}
 \begin{lrbox}{\binopBox}
@@ -628,7 +656,7 @@ $\psuite_{(\pexpr)}$
   \translationRule{Unary Operation (not)}{
     \gtnot \pexpr
   }{
-    \left<\usebox{\notBox}\hspace{20pt}, \gtnot \star\gtbool(\pexpr_{(\pexpr)})\right>
+    \left<\usebox{\notBox}\hspace{20pt}, \gtnot (\star\gtbool(\pexpr_{(\pexpr)}))\right>
   }{
   }
 \end{mathpar}
@@ -695,6 +723,8 @@ $\meaningof{\tfreshvar_2 = \pexpr_2}$
 $\tfreshvar_3$ = $\tfreshvar_1.\mathtt{opFunc}(\tfreshvar_2)$
 \end{python}
 \end{lrbox}
+
+TODO: Look for comparison functions on both sides, maybe?
 
 \begin{mathpar}
   \translationRule{Comparison operator}{
@@ -764,7 +794,7 @@ $\psuite_{(\pexpr_n)}$
     \pexpr \gtopar \pexpr_1, \ldots \pexpr_n \gtcpar
   }{
     \left< \usebox{\callBox}\hspace{10pt},
-    \pexpr_{(\pexpr)}(\pexpr_{(\pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)})}) \right>
+    \pexpr_{(\pexpr)}(\pexpr_{(\pexpr_1)}, \ldots, \pexpr_{(\pexpr_n)}) \right>
   }{
   }
 \end{mathpar}
@@ -775,7 +805,25 @@ $\psuite_{(\pexpr_n)}$
   }{
     \left< \psuite_{(\pexpr)} , \pexpr_{(\pexpr)}.\pvariable \right>
   }{
-  \mbox{where } \pexpr \mbox{ is a number, string, boolean or identifier}
+  }
+\end{mathpar}
+
+\newsavebox{\listAccessBox}
+\begin{lrbox}{\listAccessBox}
+\begin{python}
+$\psuite_{(\pexpr)}$
+$\psuite_{(\pslice)}$
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Subscript}{
+    \pexpr \gtobrk \pslice \gtcbrk
+  }{
+    \left< \usebox{\listAccessBox}\hspace{20pt},
+    \pexpr_{(\pexpr)}.\mathtt{\_\_getitem\_\_} ( \pexpr_{(\pslice)} )
+    \right>
+  }{
   }
 \end{mathpar}
 
@@ -810,7 +858,7 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{None expression}{
     \gtNone
   }{
-    \left< [] , \mathtt{*None} \right>
+    \left< \gtobrk \gtcbrk , \mathtt{\star None} \right>
   }{
   }
 \end{mathpar}
@@ -819,8 +867,9 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{Literal expression}{
     \pexpr
   }{
-    \left< [] , \pexpr \right>
+    \left< \gtobrk \gtcbrk , \pexpr \right>
   }{
+    \mbox{where } \pexpr \mbox{ is a number, string, boolean or identifier}
   }
 \end{mathpar}
 
@@ -828,7 +877,7 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{Slice (index)}{
     \pslice
   }{
-    \left< [] , \meaningof{\pexpr} \right>
+    \left< \gtobrk \gtcbrk , \meaningof{\pexpr} \right>
   }{
     \mbox{where} \pslice \gteq \pexpr
   }
@@ -861,7 +910,7 @@ $\psuite_{(\pexpr_3)}$
 \begin{lrbox}{\exnBox}
 \begin{python}
 if(True):
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
@@ -882,7 +931,7 @@ else:
 \begin{python}
 $\psuite_{(\pexpr)}$
 if $\tfreshvar$.__class__ is $\pexpr_{(\pexpr)}$:
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
@@ -904,7 +953,7 @@ else:
 $\psuite_{(\pexpr)}$
 if $\pvariable$.__class__ is $\pexpr_{(\pexpr)}$:
   $\pvariable_1$ = $\pvariable$
-  $\psuite$
+  $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
 \end{python}
@@ -1002,6 +1051,7 @@ raise $\pvariable$
       \gor    \mathbb{B} \gline
       \gor    \pvariable \gline
       \gor    \gtfun \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
+      \gor    \gtclass \gtopar \pvariable, \ldots \gtcpar \gtcolon \psuite \gline
       \gor    \pmagic
   }
   \grule[unary operators]{\punop}{
@@ -1125,6 +1175,28 @@ Furthermore, we define $<\psuite, \pexpr>$ to mean $<\psuite || \psuite', \pexpr
 $\meaningof{\pexpr} = <\psuite', \pexpr'>$. This is ok because eventually the expression will become simple
 enough that $\meaningof{\pexpr} = <\gtobrk \gtcbrk, \pexpr>$
 
+\subsection{Blocks}
+
+\begin{mathpar}
+  \translationRule{Entire program}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \osFunc{preamble}()\ \listConcat \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+    \mbox{where } \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk \mbox{ is at the top level}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \translationRule{Subordinate blocks}{
+    \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
+  }{
+    \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+  }{
+    \mbox{where } \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk \mbox{ is not at the top level}
+  }
+\end{mathpar}
+
 \subsection{Statements}
 
 \newsavebox{\lamiaAsgnBox}
@@ -1163,11 +1235,11 @@ return $\osFunc{Lookup}$($\pvariable$)
 \begin{lrbox}{\lamiaWhileBox}
 \begin{python}
 let $\tfreshmem$ = alloc
-let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
 store $\tfreshmem$ $\tfreshval$
 while $\tfreshmem$ do {
   $\meaningof{\psuite}$
-  let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is True
+  let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
   store $\tfreshmem$ $\tfreshval$
 }
 \end{python}
@@ -1316,10 +1388,10 @@ $\gtlet$ $\tfreshval$ = $\osFunc{Lookup}$($\pvariable_1$) is $\osFunc{Lookup}$($
 \newsavebox{\lamiaCallBox}
 \begin{lrbox}{\lamiaCallBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\osFunc{Lookup}(\pvariable)$
-$\gtlet$ $\tfreshval_2$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
-$\gtlet$ $\tfreshval_3$ = $\osFunc{Get\_call}(\tfreshval_1)$
-$\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
+$\gtlet$ $\tfreshmem_1$ = $\osFunc{Lookup}(\pvariable)$
+$\gtlet$ $\tfreshval_1$ = [$\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$]
+$\gtlet$ $\tfreshval_2$ = $\osFunc{Get\_call}(\tfreshmem_1)$
+$\gtlet$ $\tfreshmem_2$ = $\tfreshval_2$($\tfreshval_1$)
 \end{python}
 \end{lrbox}
 
@@ -1329,7 +1401,7 @@ $\gtlet$ $\tfreshmem$ = $\tfreshval_3$($\tfreshval_2$)
   }{
     \left<
     \usebox{\lamiaCallBox}\hspace{120pt},
-    \tfreshmem
+    \tfreshmem_2
     \right>
   }{
   }
@@ -1493,7 +1565,7 @@ $\gtlet$ $\tfreshvar$ = $b$
 \newsavebox{\lamiaFuncBox}
 \begin{lrbox}{\lamiaFuncBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$, $\tfreshval_2 $($\pvariable_1, \ldots, \pvariable_n$)) }
+$\gtlet$ $\tfreshval_1$ = $\gtdef$($\tfreshval_2$) { $\osFunc{Convert\_func\_body}$($\psuite$, $\tfreshval_2$, ($\pvariable_1, \ldots, \pvariable_n$)) }
 $\gtlet$ $\tfreshmem$ = alloc
 $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 \end{python}
@@ -1504,7 +1576,7 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
     \gtfun (\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
   }{
     \left<
-    \usebox{\lamiaFuncBox}\hspace{180pt},
+    \usebox{\lamiaFuncBox}\hspace{190pt},
     \tfreshmem
     \right>
   }{
@@ -1520,7 +1592,7 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 $\gtlet$ $\tfreshval_1$ = $\osFunc{string\_of\_id}$($\pvariable$)
 $\gtlet$ $\tfreshval_2$ = $\gtget$ &scope
 $\gtlet$ $\tfreshval_3$ = $\tfreshval_2${$\tfreshval_1$ $\gtarrow$ $\omemvariable$}
-$\gtstore$ $\tfreshval_3$ $\star$scope
+$\gtstore$ $\tfreshval_3$ &scope
 \end{python}
 \end{lrbox}
 
@@ -1579,7 +1651,165 @@ $\left<\usebox{\LookupBox}\hspace{30px}, \tfreshmem\right>$
 
 \begin{definition}[string\_of\_id]\ \\
 $\osFunc{string\_of\_id}(\pvariable)$ = $\pvariable$
+\end{definition}
 
+\begin{definition}[Builtins]
+  \begin{flalign*}
+  \begin{array}[t]{ c | c }
+   \star\pvariable & \osFunc{Builtin\_memloc}(\pbinop)\\
+   \hline
+   \star \mathtt{True} & \&\mathtt{True} \\
+   \star \mathtt{False} & \&\mathtt{False} \\
+   \star \mathtt{slice} & \&\mathtt{slice} \\
+   \star \mathtt{bool} & \&\mathtt{bool} \\
+   \star \mathtt{AttributeError} & \&\mathtt{AttributeError} \\
+   \star \mathtt{ValueError} & \&\mathtt{ValueError} \\
+   \star \mathtt{TypeError} & \&\mathtt{TypeError} \\
+   \star \mathtt{StopIteraiton} & \&\mathtt{StopIteration} \\
+  \end{array}
+  \end{flalign*}
+\end{definition}
+
+\newsavebox{\ScopegetBox}
+\begin{lrbox}{\ScopegetBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = $\gtget$ &scope
+$\gtlet$ $\tfreshval_2$ = $\tfreshval_1$ haskey $\tfreshval$
+$\gtlet$ $\tfreshmem_1$ =
+  if $\tfreshval_2$ then {
+    $\gtlet$ $\tfreshmem_2$ = $\tfreshval_1${$\tfreshval$}
+    $\gtifresult$ $\tfreshmem_2$
+  } else {
+    $\gtlet$ $\tfreshmem_3$ = get_from_parent_scope($\tfreshval$)
+    $\gtifresult$ $\tfreshmem_3$
+  }
+return $\tfreshmem_1$
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Python variable retrieval]\ \\
+$\osFunc{get\_from\_scope}()$ = $\gtdef (\tfreshval) : \{ \psuite \}$, \\
+where $\psuite = $
+\usebox{\ScopegetBox}
+\end{definition}
+
+\newsavebox{\GetCallBox}
+\begin{lrbox}{\GetCallBox}
+\begin{python}
+$\gtlet$ $\tfreshmem$ = $\omemvariable$
+
+#Compute test condition for our loop
+$\gtlet$ $\tfreshval_1$ = get $\tfreshmem$
+$\gtlet$ $\tfreshval_2$ = get $\osFunc{get\_attr}$("$\star$value", $\tfreshval_1$)
+$\gtlet$ $\tfreshval_3$ = is_function? $\tfreshval_2$
+$\gtlet$ $\tfreshval_4$ = not $\tfreshval_3$
+$\gtlet$ $\tfreshmem_1$ = alloc
+$\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
+
+#Loop until error or callable
+while $\tfreshmem_1$:
+  $\gtlet$ $\tfreshval_5$ = "__call__"
+  $\gtlet$ $\tfreshval_6$ = $\tfreshval_1$ haskey $\tfreshval_5$
+  $\gtlet$ $\tfreshmem_2$ =
+    if $\tfreshval_6$ then {
+      $\gtlet$ $\tfreshmem_3$ = $\tfreshval_1${$\tfreshval_5$}
+      $\gtifresult$ $\tfreshmem_3$
+    } else {
+      #FIXME: Strictly speaking this string should contain the class of the object
+      $\gtlet \tfreshval_7$ = "Object is not callable"
+      $\gtlet \tfreshval_8$ = $\osFunc{wrap\_type\_error}(\tfreshval_7)$
+      raise $\tfreshval_8$
+    }
+  #At the end of the loop recompute the test
+  $\gtlet$ $\tfreshmem$ = $\tfreshmem_2$
+  $\gtlet$ $\tfreshval_1$ = get $\tfreshmem$
+  $\gtlet$ $\tfreshval_2$ = get $\osFunc{get\_attr}$("$\star$value", $\tfreshval_1$)
+  $\gtlet$ $\tfreshval_3$ = is_function? $\tfreshval_2$
+  $\gtlet$ $\tfreshval_4$ = not $\tfreshval_3$
+  $\gtstore$ $\tfreshval_4$ $\tfreshmem_1$
+
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Determine calling behavior]\ \\
+$\osFunc{get\_call}(\omemvariable)$ = $\left< \psuite, \tfreshval_2 \right>$ \\
+where \psuite =
+\usebox{\GetCallBox}
+\end{definition}
+
+\newsavebox{\GetAttrFuncBox}
+\begin{lrbox}{\GetAttrFuncBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = s
+$\gtlet$ $\tfreshval_2$ = $\ovalvariable$ haskey $\tfreshval_1$
+$\gtlet$ $\tfreshmem$ =
+  if $\tfreshval_2$ then {
+    $\gtlet$ $\tfreshmem_2$ = $\ovalvariable${$\tfreshval_1$}
+    $\gtifresult$ $\tfreshmem_2$
+  } else {
+    $\gtlet$ $\tfreshval_1$ = "Object has no attribute" ^ s
+    $\gtlet$ $\tfreshmem_3$ = $\osFunc{wrap\_attribute\_error}$($\tfreshval_1$)
+    raise $\tfreshmem_3$
+  }
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Attribute Retrieval]\ \\
+$\osFunc{get\_attr}(s, \ovalvariable)$ = $\left< \psuite, \tfreshmem \right>$ \\
+where s is a string literal, \^{} denotes compile-time string concatenation, and
+\\\psuite =
+\usebox{\GetAttrFuncBox}
+\end{definition}
+
+\begin{definition}[Lookup followed by attribute retrieval]\ \\
+$\osFunc{lookup\_and\_get\_attr}(s_1, s_2)$ =
+$\left< \gtlet \tfreshval_1 = \gtget \osFunc{Lookup}(s_1), \osFunc{get\_attr}(s_2, \tfreshval_1) \right>$ \\
+where $s_1,s_2$ are string literals
+\end{definition}
+
+\begin{definition}[Wrapping Objects]\ \\
+The functions of the form $\osFunc{wrap\_*}$ result in an object of type * with
+the given value. The details will change heavily when we add classes so we omit them.
+\end{definition}
+
+\newsavebox{\PreambleBox}
+\begin{lrbox}{\PreambleBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = {}
+$\gtlet$ &scope = $\gtalloc$
+$\gtstore$ $\tfreshval_1$ &scope
+
+$\gtlet$ get_from_parent_scope = def ($\tfreshval_2$) {
+  # Technically should contain the actual name
+  $\gtlet$ $\tfreshval_3$ = "Name is not defined"
+  $\gtlet$ $\tfreshmem_1$ = $\osFunc{wrap\_name\_error}$($\tfreshval_3$)
+  raise $\tfreshmem_1$
+}
+
+$\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+
+#We add each of the below variables to the python scope after they are defined
+
+$\gtlet$ $\star$True = #builtin true object
+$\gtlet$ $\star$False = #builtin false object
+$\gtlet$ $\star$None = #builtin none object
+
+$\gtlet$ $\star$AttributeError = #builtin AttrError type
+$\gtlet$ $\star$TypeError = #builtin TypeError type
+$\gtlet$ $\star$NameError = #builtin NameError type
+$\gtlet$ $\star$StopIteration = #builtin StopIteration type
+
+$\gtlet$ $\star$bool = #builtin bool function
+
+#Stop adding new variables to the python scope
+
+$\gtlet$ $\star$int_add = #builtin integer addition function
+
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Preamble]\ \\
+$\osFunc{Preamble}()$ = \usebox{\PreambleBox}
 \end{definition}
 
 \end{document}
