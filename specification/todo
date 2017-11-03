@@ -208,6 +208,9 @@ fix RAISE               DONE
 === 7.28 ===
 lint spec
 
+=== 11.2 ===
+simplify slicing
+list bundling
 
 
 
