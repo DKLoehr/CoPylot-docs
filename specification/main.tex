@@ -861,6 +861,7 @@
         \gor    \lInstr{Is}
         \gline
         \gor    \lInstr{Drop}
+        \gor    \lInstr{List}
     }
   \end{grammar}
 
@@ -1187,7 +1188,7 @@
         \item \rulename{List Assignment}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtobrk \omemvariable_1, \ldots, \omemvariable_n \gtcbrk, \gtime}$, and
            $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_n, \lInstr{!}, \lInstr{Capture}_{3n-1}, \lInstr{Jump}\;\gnode_1, \ldots, \omemvariable_1, \lInstr{!}, \lInstr{Capture}_{2}, \lInstr{Jump}\;\gnode_1,  \lInstr{List}_n] \listConcat \lstack')$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_n, \lInstr{Capture}_{2n}, \lInstr{Jump}\;\gnode_1, \ldots, \omemvariable_1, \lInstr{Capture}_{2}, \lInstr{Jump}\;\gnode_1,  \lInstr{List}_n] \listConcat \lstack')$.
 
         \item \rulename{Memory Allocation}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc, \gtime}$,
@@ -1374,7 +1375,7 @@
 
         \item \rulename{List Rule}
         If $\lstack = [\lInstr{List}_n, \omem_1, \ldots, \omem_n] \listConcat \lstack'$, and
-           $\ovalue = [\omem_1, \ldots, \omem_n]_{n+1}$, 
+           $\ovalue = [\omem_1, \ldots, \omem_n]_{n+1}$,
         then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\ovalue] \listConcat \lstack')$.
 
         \item \rulename{Index Rule}
