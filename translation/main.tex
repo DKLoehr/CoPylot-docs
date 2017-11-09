@@ -1584,6 +1584,28 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
   }
 \end{mathpar}
 
+% \newsavebox{\lamiaClassBox}
+% \begin{lrbox}{\lamiaClassBox}
+% \begin{python}
+% $\gtlet$ $\tfreshval_1$ = $\osFunc{Convert\_class\_body}$($\psuite$, ($\pvariable_1, \ldots, \pvariable_n$))
+% $\gtlet$ $\tfreshmem$ = alloc
+% $\gtstore$ $\tfreshmem$ $\tfreshval_1$
+% \end{python}
+% \end{lrbox}
+%
+% \begin{mathpar}
+%   \translationRule{Class Value}{
+%     \gtclass (\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
+%   }{
+%     \left<
+%     \usebox{\lamiaClassBox}\hspace{190pt},
+%     \tfreshmem
+%     \right>
+%   }{
+%     % No premises
+%   }
+% \end{mathpar}
+
 \subsection{Helper functions}
 
 \newsavebox{\PythonAssignBox}
@@ -1604,9 +1626,10 @@ $\osFunc{Python\_assign}(\pvariable,\omemvariable)$ =
 \newsavebox{\ConvertFuncBox}
 \begin{lrbox}{\ConvertFuncBox}
 \begin{python}
-$\gtlet$ get_from_parent_scope = get_from_scope
+$\gtlet$ get_from_parent_scope = get_from_inherit_scope
 $\gtlet$ &scope = alloc
 $\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+$\gtlet$ get_from_inherit_scope = get_from_scope
 $\gtlet$ $\tfreshval_{scope-0}$ = { }
 
 $\gtlet$ $\tfreshval_{1-1}$ = 0
@@ -1787,6 +1810,8 @@ $\gtlet$ get_from_parent_scope = def ($\tfreshval_2$) {
 }
 
 $\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+
+$\gtlet$ get_from_inherit_scope = get_from_scope
 
 #We add each of the below variables to the python scope after they are defined
 
