@@ -1584,27 +1584,37 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
   }
 \end{mathpar}
 
-% \newsavebox{\lamiaClassBox}
-% \begin{lrbox}{\lamiaClassBox}
-% \begin{python}
-% $\gtlet$ $\tfreshval_1$ = $\osFunc{Convert\_class\_body}$($\psuite$, ($\pvariable_1, \ldots, \pvariable_n$))
-% $\gtlet$ $\tfreshmem$ = alloc
-% $\gtstore$ $\tfreshmem$ $\tfreshval_1$
-% \end{python}
-% \end{lrbox}
-%
-% \begin{mathpar}
-%   \translationRule{Class Value}{
-%     \gtclass (\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
-%   }{
-%     \left<
-%     \usebox{\lamiaClassBox}\hspace{190pt},
-%     \tfreshmem
-%     \right>
-%   }{
-%     % No premises
-%   }
-% \end{mathpar}
+\newsavebox{\lamiaClassBox}
+\begin{lrbox}{\lamiaClassBox}
+\begin{python}
+$\gtlet$ $\tfreshval_1$ = True
+$\gtlet$ $\tfreshmem$ =
+  if $\tfreshval_1$ then {
+    $\gtlet$ get_from_parent_scope = get_from_inherit_scope
+    $\gtlet$ &scope = alloc
+    $\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
+    # Note: do NOT redefine get_from_inherit_scope!!!
+
+    $\osFunc{Create\_class}\left(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n)\right)$
+    $\gtifresult$ &scope
+  } else {
+    $\gtifresult$ $\star$None
+  }
+\end{python}
+\end{lrbox}
+
+\begin{mathpar}
+  \translationRule{Class Value}{
+    \gtclass \pvariable(\pvariable_1, \ldots, \pvariable_n) \gtcolon \psuite
+  }{
+    \left<
+    \usebox{\lamiaClassBox}\hspace{5pt},
+    \tfreshmem
+    \right>
+  }{
+    % No premises
+  }
+\end{mathpar}
 
 \subsection{Helper functions}
 
@@ -1657,6 +1667,19 @@ $\meaningof{\psuite}$
 \begin{definition}[Function body conversion]\ \\
 $\osFunc{Convert\_func\_body}(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n))$ =
 \usebox{\ConvertFuncBox}
+\end{definition}
+
+\newsavebox{\CreateClassBox}
+\begin{lrbox}{\CreateClassBox}
+\begin{python}
+#TODO: Standard class creation stuff
+$\meaningof{\psuite}$
+\end{python}
+\end{lrbox}
+
+\begin{definition}[Class creation]\ \\
+$\osFunc{Create\_class}(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n))$ =
+\usebox{\CreateClassBox}
 \end{definition}
 
 \newsavebox{\LookupBox}
