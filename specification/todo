@@ -209,8 +209,8 @@ fix RAISE               DONE
 lint spec
 
 === 11.2 ===
-simplify slicing
-list bundling
+simplify slicing        DONE
+list bundling           DONE
 
 
 

@@ -1188,7 +1188,7 @@
         \item \rulename{List Assignment}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtobrk \omemvariable_1, \ldots, \omemvariable_n \gtcbrk, \gtime}$, and
            $\lstack = [\ovalvariable] \listConcat \lstack'$,
-        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_n, \lInstr{Capture}_{2n}, \lInstr{Jump}\;\gnode_1, \ldots, \omemvariable_1, \lInstr{Capture}_{2}, \lInstr{Jump}\;\gnode_1,  \lInstr{List}_n] \listConcat \lstack')$.
+        then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gnode_1, [\omemvariable_n, \lInstr{Capture}_{3n-1}, \lInstr{Jump}\;\gnode_1, \ldots, \omemvariable_1, \lInstr{Capture}_{2}, \lInstr{Jump}\;\gnode_1,  \lInstr{List}_n] \listConcat \lstack')$.
 
         \item \rulename{Memory Allocation}
         If $\gnode_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc, \gtime}$,
