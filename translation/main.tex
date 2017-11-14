@@ -1587,19 +1587,31 @@ $\gtstore$ $\tfreshmem$ $\tfreshval_1$
 \newsavebox{\lamiaClassBox}
 \begin{lrbox}{\lamiaClassBox}
 \begin{python}
-$\gtlet$ $\tfreshval_1$ = True
-$\gtlet$ $\tfreshmem$ =
-  if $\tfreshval_1$ then {
+$\gtlet$ $\tfreshval_1$ = ($\osFunc{Lookup}(\pvariable_1)$, ..., $\osFunc{Lookup}(\pvariable_n)$)
+
+$\gtlet$ $\tfreshval_2$ = True
+$\gtlet$ $\tfreshmem_1$ =
+  if $\tfreshval_2$ then {
     $\gtlet$ get_from_parent_scope = get_from_inherit_scope
     $\gtlet$ &scope = alloc
     $\gtlet$ get_from_scope = $\osFunc{get\_from\_scope}$()
     # Note: do NOT redefine get_from_inherit_scope!!!
 
-    $\osFunc{Create\_class}\left(\psuite, \pvariable, (\pvariable_1, \ldots, \pvariable_n)\right)$
+    $\meaningof{\psuite}$
     $\gtifresult$ &scope
   } else {
     $\gtifresult$ $\star$None
   }
+$\gtlet$ $\tfreshmem_2$ = $\osFunc{wrap\_string}$($\osFunc{string\_of\_id}(\pvariable)$)
+$\gtlet$ $\tfreshmem_3$ = $\osFunc{wrap\_tuple}$($\tfreshval_1$)
+
+# TODO: Make sure this is correct Lamia call syntax
+$\gtlet$ $\tfreshval_3$ = [$\tfreshmem_2$, $\tfreshmem_3$, $\tfreshmem_1$]
+# TODO: Determine metaclass. For now it's just "type"
+$\gtlet$ $\tfreshval_4$ = get $\star$type
+$\gtlet$ $\tfreshmem_4$ = $\osFunc{Get\_attr}$("__call__", $\tfreshval_4$)
+$\gtlet$ $\tfreshval_5$ = get $\tfreshmem_4$
+$\gtlet$ $\tfreshmem_5$ = $\tfreshval_5$($\tfreshval_3$)
 \end{python}
 \end{lrbox}
 
@@ -1609,7 +1621,7 @@ $\gtlet$ $\tfreshmem$ =
   }{
     \left<
     \usebox{\lamiaClassBox}\hspace{5pt},
-    \tfreshmem
+    \tfreshmem_5
     \right>
   }{
     % No premises
