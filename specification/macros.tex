@@ -263,6 +263,13 @@
 \newcommandtwoopt{\gsreturn}[2][][]{\text{\textsmaller{{\color{node}\sc Return }}} \osLR{#1, \gtime#2}}
 \newcommandtwoopt{\gsraise}[2][][]{\text{\textsmaller{{\color{node}\sc Raise }}} \osLR{#1, \gtime#2}}
 \newcommandtwoopt{\gsifresult}[2][][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} \osLR{#1, \gtime#2}}
+
+% Special (analysis)
+\newcommand{\asadvance}[1][]{\text{\textsmaller{{\color{node}\sc Advance }}} \gsLR{#1}}
+\newcommand{\asreturn}[1][]{\text{\textsmaller{{\color{node}\sc Return }}} \gsLR{#1}}
+\newcommand{\asraise}[1][]{\text{\textsmaller{{\color{node}\sc Raise }}} \gsLR{#1}}
+\newcommand{\asifresult}[1][]{\text{\textsmaller{{\color{node}\sc Ifresult }}} \gsLR{#1}}
+
 % Relations
 \newcommand{\gsTransition}{\mathrel{\longrightarrow^1}}
 \newcommand{\gsBefore}{\rightarrowtriangle}

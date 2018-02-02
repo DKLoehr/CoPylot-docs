@@ -1,0 +1,127 @@
+\section{Graph-Based Semantics (Analysis)}
+
+\subsection{Graph Grammar}
+
+\begin{grammar}
+  \grule[graph]{\ggraph}{\gsSet{\gedge, \ldots}}
+  \grule[edges]{\gedge}{\gstate \gsBefore \gstate}
+  \grule[state nodes]{\gstate}{
+              \gsstart
+      \gor    \gsend
+      \gor    \gsLR{\ostmt}
+      \gor    \asadvance[\ostmt]
+      \gor    \asifresult[\ostmt]
+      \gor    \asreturn[\ostmt]
+      \gor    \asraise[\ostmt]
+  }
+  \grule[general statements]{\gstmt}{
+              \ostmt
+      \gor    \osplat
+  }
+  \grule[memory addresses]{\omem, \opscope}{\gsLR{\ostmt}}
+\end{grammar}
+
+\begin{definition}[Skippable statements]
+  $\ostmt = \olbl \gtcolon \odirective$ is skippable if and only if
+  \begin{flalign*}
+    \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
+  \end{flalign*}
+\end{definition}
+
+\begin{notation} [Statement relations]
+  \begin{flalign*}
+    \ostmt \osBefore \ostmt' & \iff \text{\ostmt \! is lexically before \ostmt'} \\
+    \ostmt \osUnder \ostmt' & \iff \text{\ostmt' \! is the lexical parent of \ostmt} \\
+    \ostmt \osStartof \ostmt' & \iff \text{\ostmt \! is the first statement of the block where \ostmt' lives} \\
+  \end{flalign*}
+\end{notation}
+
+\begin{notation} [Graph node relations]
+  \begin{flalign*}
+    \gstate \gsBeforeIn \gstate' & \iff \gstate \gsBefore \gstate' \in \ggraph \\
+  \end{flalign*}
+\end{notation}
+
+\subsection{Lookup Grammar}
+
+\begin{grammar}
+  \grule[lookup stack]{\lstack}{[\lstackelt, \ldots]}
+  \grule[lookup stack elements]{\lstackelt}{
+              \ovalvariable
+      \gor    \ovalue
+      \gor    \omemvariable
+      \gor    \omem
+      \gor    \linstr
+  }
+  \grule[lookup results]{\lresult}{
+              \ovalue
+      \gor    \omem
+  }
+  \grule[lookup result set]{\lresults}{\gsSet{\lresult, \ldots}}
+  \grule[lookup stack instructions]{\linstr}{
+              \lInstr{Capture}_ n
+      \gor    \lInstr{Jump} \; \gstate
+      \gor    \lInstr{Bind}
+      \gor    \lInstr{Project}
+      \gor    \lInstr{Index}
+      \gline
+      \gor    \lInstr{Slice}
+      \gor    \lInstr{Alias?}
+      \gor    \lInstr{!}
+      \gor    \lInstr{Unop}
+      \gor    \lInstr{Binop}
+      \gor    \lInstr{Answer}
+      \gor    \lInstr{Is}
+      \gline
+      \gor    \lInstr{Drop}
+      \gor    \lInstr{List}
+  }
+\end{grammar}
+
+\subsection{Graph Rules}
+
+\begin{mathpar}
+  \relationRule{Start}{
+    \ostmts = [\ostmt, \ldots]
+  }{
+    \gsAddEdge{\gsstart \gsBefore \gsLR{\ostmt}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Skip}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt \text{ is skippable}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
+  }
+\end{mathpar}
+
+\subsubsection{While}
+
+\begin{mathpar}
+  \relationRule{While-True Start}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \\
+    \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
+    \ostmts = [\ostmt', \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{While-False}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
+    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}])
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
+  }
+\end{mathpar}

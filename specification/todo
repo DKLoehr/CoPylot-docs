@@ -212,6 +212,27 @@ lint spec
 simplify slicing        DONE
 list bundling           DONE
 
+=== 11.10 ===
+debug list              DONE
+
+=== 11.17 ===
+list order              DONE
+list slice              DONE
+* list concat
+list lossy              DONE
+function search         DONE
+
+=== 12.7 ===
+conditional value (due to call site)
+"||"                    DONE
+list concat             DONE
+
+=== 2.1 ===
+split document          DONE
+add singleton type      DONE
+fix ops
+init section 3
+
 
 
 \item \rulename{Raise \;(bound)}
