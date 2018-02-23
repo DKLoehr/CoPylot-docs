@@ -230,8 +230,13 @@ list concat             DONE
 === 2.1 ===
 split document          DONE
 add singleton type      DONE
-fix ops
-init section 3
+fix ops                 DONE
+init section 3          DONE
+
+=== 2.8 ===
+delete zero             DONE
+fix equal
+rewrite tests
 
 
 
