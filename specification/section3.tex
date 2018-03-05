@@ -1,0 +1,752 @@
+\section{Graph-Based Semantics (Analysis)}
+
+\subsection{Graph Grammar}
+
+\begin{grammar}
+  \grule[graph]{\ggraph}{\gsSet{\gedge, \ldots}}
+  \grule[edges]{\gedge}{\gstate \gsBefore \gstate}
+  \grule[state nodes]{\gstate}{
+              \gsstart
+      \gor    \gsend
+      \gor    \gsLR{\ostmt}
+      \gor    \asadvance[\ostmt]
+      \gor    \asifresult[\ostmt]
+      \gor    \asreturn[\ostmt]
+      \gor    \asraise[\ostmt]
+  }
+  \grule[general statements]{\gstmt}{
+              \ostmt
+      \gor    \osplat
+  }
+  \grule[memory addresses]{\omem, \opscope}{\gsLR{\ostmt}}
+\end{grammar}
+
+\begin{definition}[Skippable statements]
+  $\ostmt = \olbl \gtcolon \odirective$ is skippable if and only if
+  \begin{flalign*}
+    \odirective \in & \gsSet{\gtlet \ovalvariable \gteq \oexpr, \gtlet \omemvariable \gteq \gtalloc, \gtlet \ovalvariable \gteq \ovalvariable, \gtlet \omemvariable \gteq \omemvariable, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtarrow \omemvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrc \ovalvariable \gtcbrc, \gtlet \omemvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcbrk, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \gtobrk \ovalvariable \gtcolon \ovalvariable \gtcbrk, \gtstore \omemvariable \; \ovalvariable, \gtlet \ovalvariable \gteq \gtget \omemvariable, \gtlet \ovalvariable \gteq \omemvariable \gtis \omemvariable, \gtlet \ovalvariable \gteq \ounop \ovalvariable, \\
+    & \gtlet \ovalvariable \gteq \ovalvariable \obinop \ovalvariable}
+  \end{flalign*}
+\end{definition}
+
+\begin{notation} [Statement relations]
+  \begin{flalign*}
+    \ostmt \osBefore \ostmt' & \iff \text{\ostmt \! is lexically before \ostmt'} \\
+    \ostmt \osUnder \ostmt' & \iff \text{\ostmt' \! is the lexical parent of \ostmt} \\
+    \ostmt \osStartof \ostmt' & \iff \text{\ostmt \! is the first statement of the block where \ostmt' lives} \\
+  \end{flalign*}
+\end{notation}
+
+\begin{notation} [Graph node relations]
+  \begin{flalign*}
+    \gstate \gsBeforeIn \gstate' & \iff \gstate \gsBefore \gstate' \in \ggraph \\
+  \end{flalign*}
+\end{notation}
+
+\subsection{Lookup Grammar}
+
+\begin{grammar}
+  \grule[lookup stack]{\lstack}{[\lstackelt, \ldots]}
+  \grule[lookup stack elements]{\lstackelt}{
+              \ovalvariable
+      \gor    \ovalue
+      \gor    \omemvariable
+      \gor    \omem
+      \gor    \linstr
+  }
+  \grule[lookup results]{\lresult}{
+              \ovalue
+      \gor    \omem
+  }
+  \grule[lookup result set]{\lresults}{\gsSet{\lresult, \ldots}}
+  \grule[lookup stack instructions]{\linstr}{
+              \lInstr{Capture}_ n
+      \gor    \lInstr{Jump} \; \gstate
+      \gor    \lInstr{Bind}
+      \gor    \lInstr{Project}
+      \gor    \lInstr{Index}
+      \gline
+      \gor    \lInstr{Slice}
+      \gor    \lInstr{Alias?}
+      \gor    \lInstr{!}
+      \gor    \lInstr{Unop}
+      \gor    \lInstr{Binop}
+      \gor    \lInstr{Answer}
+      \gor    \lInstr{Is}
+      \gline
+      \gor    \lInstr{Drop}
+      \gor    \lInstr{List}
+  }
+\end{grammar}
+
+\subsection{Graph Rules}
+
+\begin{mathpar}
+  \relationRule{Start}{
+    \ostmts = [\ostmt, \ldots]
+  }{
+    \gsAddEdge{\gsstart \gsBefore \gsLR{\ostmt}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Skip}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt \text{ is skippable}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
+  }
+\end{mathpar}
+
+\subsubsection{While}
+
+\begin{mathpar}
+  \relationRule{While-True Start}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \\
+    \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
+    \ostmts = [\ostmt', \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{While-False}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
+    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}])
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
+  }
+\end{mathpar}
+
+\subsubsection{If}
+
+\begin{mathpar}
+  \relationRule{If-True Start (\ovalvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\\\
+    \ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, [\ovalvariable']) \\
+    \ostmts_1 = [\ostmt_1, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{If-False Start (\ovalvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\\\
+    \ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\ovalvariable']) \\
+    \ostmts_2 = [\ostmt_2, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_2}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{If Result (\ovalvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtifresult \ovalvariable
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asifresult[\ostmt]}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{If-True Start (\omemvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\\\
+    \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, [\ovalvariable']) \\
+    \ostmts_1 = [\ostmt_1, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{If-False Start (\omemvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\\\
+    \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\ovalvariable']) \\
+    \ostmts_2 = [\ostmt_2, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_2}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{If Result (\omemvariable)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtifresult \omemvariable \\
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asifresult[\ostmt]}}
+  }
+\end{mathpar}
+
+\subsubsection{Function}
+
+\begin{mathpar}
+  \relationRule{Function Call}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_0 \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar \\
+    \gtfun \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \ostmts' \in \osFunc{Lookup}(\ggraph, \gstate_2, [\ovalvariable_0]) \\
+    \ostmts' = [\ostmt', \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\tnote{We don't need param list here. This is done in lookup.}
+
+\begin{mathpar}
+  \relationRule{Function Return}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtreturn \omemvariable
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asreturn[\ostmt]}}
+  }
+\end{mathpar}
+
+\subsubsection{Exception}
+
+\begin{mathpar}
+  \relationRule{Try}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\\\
+    \ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmts_1 = [\ostmt_1, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Raise Exception}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\ostmt}\\
+    \ostmt = \olbl \gtcolon \gtraise \omemvariable
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asraise[\ostmt]}}
+  }
+\end{mathpar}
+
+\subsubsection{Flow}
+
+\begin{mathpar}
+  \relationRule{Advance}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\gsadvance[\ostmt][']}\\
+    \ostmt \osBefore \ostmt'
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance End of While}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is a while statement}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance End of Try and Except}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    % \ostmt \osUnder \ostmt' \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is a try statement}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance EOF}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    \ostmt \osUnder \osplat
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\gsend}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Ifresult}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asifresult[\ostmt]}\\
+    % \ostmt \osUnder \ostmt' \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is an if statement}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Ifresult Through Blocks}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asifresult[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is a while or try statement}
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asifresult[\ostmt']}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Return}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asreturn[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is a funcdef} \\
+    \ostmt_1 \osStartof \ostmt \\
+    \gsLR{\ostmt_0} \gsBeforeIn \gsLR{\ostmt_1} \\
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt_0]}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Return Through Blocks}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asreturn[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is not a funcdef} \\
+    \ostmt_1 \osStartof \ostmt \\
+    \gsLR{\ostmt_0} \gsBeforeIn \gsLR{\ostmt_1} \\
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asreturn[\ostmt_0]}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Raise in Try Statment}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asraise[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt \in \ostmts_1 \\
+    \ostmts_2 = [\ostmt_2, \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_2}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Raise From Exception Block}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asraise[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt \in \ostmts_2 \\
+    \ostmt_1 \osStartof \ostmt \\
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asraise[\ostmt']}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Raise Through Blocks}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asraise[\ostmt]}\\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' \text{ is an if statement, while statement or funcdef} \\
+    \ostmt_1 \osStartof \ostmt \\
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asraise[\ostmt']}}
+  }
+\end{mathpar}
+
+\subsection{Helper Functions}
+
+\begin{definition}[Lookup]
+  Let \osFunc{Lookup}($\ggraph, \gstate_0, \lstack$) be the function returning the least set \lresults \;such that the following rules hold for $\gstate_1 \gsBefore \gstate_0$ :
+  \begin{enumerate}%[label=(\alph*)]
+    \item \textbf{Store}
+    \begin{enumerate}[label=(\alph*)]
+      \item \rulename{Singleton stack}
+      If $\lstack = [\ovalue]$,
+      then \formalRuleLine $\ovalue \in \lresults$.
+
+      \item \rulename{Expression Assignment}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \oexpr}$,
+         $\lstack = [\ovalvariable] \listConcat \lstack'$, and
+         $\ovalue = \osFunc{Valueof}(\oexpr)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{List Assignment}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtobrk \omemvariable_1, \ldots, \omemvariable_n \gtcbrk}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable_n, \lInstr{Capture}_{3n-1}, \lInstr{Jump}\;\gstate_1, \ldots, \omemvariable_1, \lInstr{Capture}_{2}, \lInstr{Jump}\;\gstate_1,  \lInstr{List}_n] \listConcat \lstack')$.
+
+      \item \rulename{Memory Allocation}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc}$,
+         $\lstack = [\omemvariable] \listConcat \lstack'$, and
+         $\omem = \osFunc{Alloc}(\gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \gtalloc})$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omem] \listConcat \lstack')$.
+    \end{enumerate}
+
+    \item \textbf{Heap search}
+    \begin{enumerate}[label=(\alph*)]
+      \item \rulename{Value Alias}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable_1 \gteq \ovalvariable_2}$, and
+         $\lstack = [\ovalvariable_1] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_2] \listConcat \lstack')$.
+
+      \item \rulename{Memory Alias}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable_1 \gteq \omemvariable_2}$, and
+         $\lstack = [\omemvariable_1] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable_2] \listConcat \lstack')$.
+
+      \item \rulename{Bind}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtarrow \omemvariable \gtcbrc}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_1, \lInstr{Capture}_8, \lInstr{Jump}\;\gstate_1, \ovalvariable_2, \lInstr{Capture}_6, \lInstr{Jump}\;\gstate_1, \omemvariable, \lInstr{Capture}_4, $ \\
+      $\lInstr{Jump}\;\gstate_1, \lInstr{Bind}] \listConcat \lstack')$.
+
+      \item \rulename{Retrieve}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_1 \gtobrc \ovalvariable_2 \gtcbrc}$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gstate_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gstate_1, \lInstr{Project}] \listConcat \lstack')$.
+
+      \item \rulename{List Indexing}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable_1 \gtobrk \ovalvariable_2 \gtcbrk}$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gstate_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gstate_1, \lInstr{Index}] \listConcat \lstack')$.
+
+      \item \rulename{List Slicing}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable' \gtobrk \ovalvariable_1 \gtcolon \ovalvariable_2 \gtcbrk}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable', \lInstr{Capture}_8, \lInstr{Jump}\;\gstate_1, \ovalvariable_1, \lInstr{Capture}_6, \lInstr{Jump}\;\gstate_1, \ovalvariable_2, \lInstr{Capture}_4, $ \\
+      $\lInstr{Jump}\;\gstate_1, \lInstr{Slice}] \listConcat \lstack')$.
+
+      \item \rulename{Store}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$, and
+         $\lstack = [\omem, \lInstr{!}] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable, \lInstr{Capture}_2, \lInstr{Jump} \; \gstate_0, \lInstr{Alias?}] \listConcat \lstack)$.
+
+      \item \rulename{Get}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \gtget \omemvariable}$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable, \lInstr{Capture}_1, \lInstr{Jump} \; \gstate_0, \lInstr{!}] \listConcat \lstack')$.
+
+      \item \rulename{Is}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \omemvariable_1 \gtis \omemvariable_2 }$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gstate_1, \omemvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gstate_1, \lInstr{Is}] \listConcat \lstack')$.
+    \end{enumerate}
+
+    \item \textbf{Operations}
+    \begin{enumerate}[label=(\alph*)]
+      \item \rulename{Unary Operation}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ounop \ovalvariable' }$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable', \lInstr{Capture}_2, \lInstr{Jump}\;\gstate_0, \lInstr{Unop}] \listConcat \lstack')$.
+
+      \item \rulename{Binary Operation}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \obinop \ovalvariable_2 }$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_1, \lInstr{Capture}_5, \lInstr{Jump}\;\gstate_1, \ovalvariable_2, \lInstr{Capture}_3, \lInstr{Jump}\;\gstate_0, \lInstr{Binop}] \listConcat \lstack')$.
+    \end{enumerate}
+
+    \item \textbf{Leave Block}
+    \begin{enumerate}[label=(\alph*)]
+
+      \item \rulename{Leave If/While/Try}
+      If $\gstate_1 = \gsLR{\ostmt, \gtime_1}$ where $\ostmt$ %= \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$,
+         is an if/while/try statement,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \tnote{In the cases where we lookup memloc, just follow the cfg loop.}
+
+      \item \rulename{Function Variable Search \;(argument)}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar}$,
+         $\gstate_0 = \gsLR{\ostmt}$, \\
+         $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtdef \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$, and
+         $\lstack = [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable_i] \listConcat \lstack')$.
+
+      \item \rulename{Function Variable Search \;(heap lookup)}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar,}$,
+         $\gstate_0 = \gsLR{\ostmt}$, \\
+         $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtdef \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$, and
+         $\lstack = [\omem] \listConcat \lstack'$
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Function Variable Search \;(free variable)}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar}$,
+         $\gstate_0 = \gsLR{\ostmt}$, \\
+         $\ostmt \osUnder \olbl \gtcolon \gtlet \ovalvariable' \gteq \gtdef \gtopar \ovalvariable'_1, \ldots, \ovalvariable'_n \gtcpar \gtarrow \otstmts'_1$,
+         $\lstack \neq [\ovalvariable'_i] \listConcat \lstack'$ where $1 \leq i \leq n$ and $\lstack \neq [\omem] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable, \lInstr{Capture}_1, \lInstr{Drop}] \listConcat \lstack)$.
+    \end{enumerate}
+
+    \item \textbf{Enter Block}
+    \begin{enumerate}[label=(\alph*)]
+
+      \item \rulename{Enter If block \ovalvariable}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+      \item \rulename{Enter If block \omemvariable}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+      \item \rulename{Enter function block}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+    \end{enumerate}
+
+    \item \textbf{Stack Instructions}
+    \begin{enumerate}[label=(\alph*)]
+      \item \rulename{Capture Rule}
+      If $\lstack = [\lresult, \lInstr{Capture}_n, \lstackelt_1, \ldots, \lstackelt_n] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\lstackelt_1, \ldots, \lstackelt_n, \lresult] \listConcat \lstack')$.
+
+      \item \rulename{Jump Rule}
+      If $\lstack = [\lInstr{Jump} \;\gstate] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate, \lstack')$.
+
+      \item \rulename{Drop Rule}
+      If $\lstack = [\lInstr{Drop}, \lstackelt] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack')$.
+
+      \item \rulename{Bind Rule}
+      If $\lstack = [\lInstr{Bind}, \ovalue_1, \ovalue_2, \omem] \listConcat \lstack'$,
+      and
+         $\ovalue_1 = \obinding, \ovalue_2 \in \mathbb{S}, \obinding' = \obinding[\ovalue_2 \mapsto \omem]$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\obinding'] \listConcat \lstack')$.
+
+      \item \rulename{Project Rule}
+      If $\lstack = [\lInstr{Project}, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         $\ovalue_1 = \obinding, \ovalue_2 \in \mathbb{S}, \omem = \ovalue_1[\ovalue_2]$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omem] \listConcat \lstack')$.
+
+      \item \rulename{List Rule}
+      If $\lstack = [\lInstr{List}_n, \omem_1, \ldots, \omem_n] \listConcat \lstack'$, and
+         $\ovalue = [\omem_1, \ldots, \omem_n]_{n+1}$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{Index Rule}
+      If $\lstack = [\lInstr{Index}, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+        $\ovalue_1 = [\omem_1, \ldots, \omem_n]_k,
+        L = $ \\
+        $
+        \begin{cases}
+          [\omem_i] \text{ or } [\;], \omem_i \in \ovalue_1, & \text{if } \ovalue_2 = \gtintplus \cr
+          [\;], & \text{if } \ovalue_2 = \gtintminus \cr
+          [\omem_1], & \text{if } \ovalue_2 = \gtintzero
+        \end{cases},
+        $
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, L \listConcat \lstack')$.
+
+      \item \rulename{Index Rule (imprecise)}
+      If $\lstack = [\lInstr{Index}, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         $\ovalue_1  = \osBag{\omem_1, \ldots, \omem_n},
+         L = $ \\
+         $
+         \begin{cases}
+           [\omem_i] \text{ or } [\;], \omem_i \in \ovalue_1, & \text{if } \ovalue_2 = \gtintplus \cr
+           [\;], & \text{if } \ovalue_2 = \gtintminus \cr
+           [\omem_i], \omem_i \in \ovalue_1, & \text{if } \ovalue_2 = \gtintzero
+         \end{cases},
+         $
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, L \listConcat \lstack')$.
+
+      \item \rulename{Slice Rule (precise)}
+      If $\lstack = [\lInstr{slice}, \ovalue, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         $\ovalue = [\omem_1, \ldots, \omem_n]_k,
+        %  p =
+        %  \begin{cases}
+        %    \ovalue_1, & \text{if } \ovalue_1 \in \mathbb{Z} \cr
+        %    0, & \text{if } \ovalue_1 = \osnone
+        %  \end{cases}, \\
+        %  q =
+        %  \begin{cases}
+        %    \ovalue_2 - 1, & \text{if } \ovalue_2 \in \mathbb{Z} \cr
+        %    n, & \text{if } \ovalue_2 = \osnone
+        %  \end{cases},
+        %  q \le p,
+        %  \ovalue' = [\omem_p, \ldots, \omem_q]_k,
+        %  k = q-p+1$,
+        \ovalue' = \osFunc{PreciseSlice}(\ovalue,\ovalue_1,\ovalue_2)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue'] \listConcat \lstack')$.
+
+      \item \rulename{Slice Rule (imprecise)}
+      If $\lstack = [\lInstr{slice}, \ovalue, \ovalue_1, \ovalue_2] \listConcat \lstack'$, and
+         $\ovalue = \osBag{\omem_1, \ldots, \omem_n},
+        %  \ovalue_1 \le \ovalue_2,
+        %  \omem_i, \ldots, \omem_j \in \ovalue,
+        %  \ovalue' = \osBag{\omem_i, \ldots, \omem_j}$,
+        \ovalue' = \osFunc{ImpreciseSlice}(\ovalue,\ovalue_1,\ovalue_2)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue'] \listConcat \lstack')$.
+
+      % \item \rulename{List k}
+      % If $\lstack = [\omem_p, \ldots, \omem_q, \lInstr{List}_k] \listConcat \lstack'$, and
+      % $\ovalue = [\omem_p, \ldots, \omem_q]_k$,
+      % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+      %
+      % \item \rulename{Bag}
+      % If $\lstack = [\omem_i, \ldots, \omem_j, \lInstr{Bag}] \listConcat \lstack'$, and
+      % $\ovalue = \osBag{\omem_i, \ldots, \omem_j}$,
+      % then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{Is Alias}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$, and
+         $\lstack = [\lInstr{Alias?}, \omem, \omem, \lInstr{!}] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable] \listConcat \lstack')$.
+
+      \item \rulename{Not Alias}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$,
+         $\lstack = [\lInstr{Alias?}, \omem, \omem', \lInstr{!}] \listConcat \lstack'$, and
+         $\omem \neq \omem'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omem', \lInstr{!}] \listConcat \lstack')$.
+
+      \item \rulename{Unop Rule \ovalue}
+      If $\lstack = [\lInstr{Unop}, \ovalue] \listConcat \lstack'$,
+         $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ounop \ovalvariable' }$, and
+         $\ovalue' = \osFunc{UnaryOperation}(\ounop, \ovalue)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue'] \listConcat \lstack')$.
+
+      \item \rulename{Binop Rule \ovalue}
+      If $\lstack = [\lInstr{Binop}, \ovalue_1, \ovalue_2] \listConcat \lstack'$,
+         $\gstate_1 = \gsLR{\olbl \gtcolon \gtlet \ovalvariable \gteq \ovalvariable_1 \obinop \ovalvariable_2}$, and
+         $\ovalue = \osFunc{BinaryOperation}(\obinop, \ovalue_1, \ovalue_2)$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+
+      \item \rulename{Trace Answer}
+      If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
+         $\gstate_1 = \gsLR{\gsreturn[\ostmt]} \;|\; \gsLR{\gsifresult[\ostmt]} \;|\;$ \\ $\gsLR{\gsraise[\ostmt]}$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Get Answer \ovalvariable}
+      If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
+         $\gstate_1 = \gsLR{\olbl \gtcolon \gtifresult \ovalvariable}$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable] \listConcat \lstack')$.
+
+      \item \rulename{Get Answer \omemvariable}
+      If $\lstack = [\lInstr{Answer}] \listConcat \lstack'$, and
+         $\gstate_1 = \gsLR{\olbl \gtcolon \gtreturn \omemvariable} \;|\; \gsLR{\olbl \gtcolon \gtraise \omemvariable} \;|\; $ \\
+         $\gsLR{\olbl \gtcolon \gtifresult \omemvariable}$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omemvariable] \listConcat \lstack')$.
+
+      \item \rulename{Start Tracing Raise}
+      If $\gstate_1 = \gsLR{\gsraise[\ostmt][']}$,
+         $\gstate_0 = \gsLR{\ostmt'}$, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\lInstr{Answer}] \listConcat \lstack')$.
+
+      \item \rulename{Start Tracing Raise (unbound)}
+      If $\gstate_1 = \gsLR{\gsraise[\ostmt][']}$,
+         $\gstate_0 = \gsLR{\ostmt'}$, and
+         $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \! is not of form \omemvariable,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Is Rule \omem}
+      If $\lstack = [\lInstr{Is}, \omem_1, \omem_2] \listConcat \lstack'$, and
+         \begin{flalign*}
+           \ovalue =
+           \begin{cases}
+             \ostrue, & \text{if } \omem_1 = \omem_2 \\
+             \osfalse, & \text{if } \omem_1 \neq \omem_2,
+           \end{cases}
+         \end{flalign*}
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalue] \listConcat \lstack')$.
+    \end{enumerate}
+
+    \item \textbf{Skip}
+    \begin{enumerate}
+      \item \rulename{Skip \ovalvariable \;assignments with \omemvariable}
+      If $\gstate_1$ is an \ovalvariable \! assignment clause, and
+         $\lstack = [\omemvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip \omemvariable \;assignments with \ovalvariable}
+      If $\gstate_1$ is an \omemvariable \! assignment clause, and
+         $\lstack = [\ovalvariable] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip \ovalvariable \;assignments with \ovalvariable'}
+      If $\gstate_1$ is an \ovalvariable \! assignment clause, and
+         $\lstack = [\ovalvariable'] \listConcat \lstack'$ where $\ovalvariable \neq \ovalvariable'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip \omemvariable \;assignments with \omemvariable'}
+      If $\gstate_1$ is an \omemvariable \! assignment clause, and
+         $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Dereference}
+      If $\gstate_1$ is not of form $\gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$, and
+         $\lstack = [\omem, \lInstr{!}] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip Advance}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]_1}$ where $\ostmt$ does not create a new block,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip Advance If \ovalvariable}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtlet \ovalvariable \gteq \gtif \ovalvariable' \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$,
+      and
+         $\lstack = [\ovalvariable'] \listConcat \lstack'$ where $\ovalvariable \neq \ovalvariable'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt}, \lstack)$.
+
+      \item \rulename{Skip Advance If \omemvariable}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc$, and
+         $\lstack = [\omemvariable'] \listConcat \lstack'$ where $\omemvariable \neq \omemvariable'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt}, \lstack)$.
+
+      \item \rulename{Skip while}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc$, and
+         $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip function}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \gtlet \omemvariable \gteq \ovalvariable \gtopar \ovalvariable_1, \ldots, \ovalvariable_n \gtcpar$,
+         $\lstack = [\lstackelt] \listConcat \lstack'$ where $\lstackelt \neq \omemvariable$, and
+         \lstackelt \;is not of form \omem,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      \item \rulename{Skip advance from while}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$,
+         $\gstate_0 = \gsLR{\olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc}$, and
+         $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, \lstack)$.
+
+      % \tnote{Add a lot more, and delete the Ifresult, etc. rules}
+
+      \item \rulename{Skip Try/except}
+      If $\gstate_1 = \gsLR{\asadvance [\ostmt]}$ where $\ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc$, and
+         $\lstack = [\lstackelt] \listConcat \lstack'$ where \lstackelt \;is not of form \omem,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gsLR{\ostmt}, \lstack)$.
+
+    \end{enumerate}
+  \end{enumerate}
+\end{definition}
