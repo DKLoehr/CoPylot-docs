@@ -623,6 +623,11 @@
          $\lstack = [\lInstr{Alias?}, \omem, \omem, \lInstr{!}] \listConcat \lstack'$,
       then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\ovalvariable] \listConcat \lstack')$.
 
+      \item \rulename{May Not Alias}
+      If $\gstate_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$, and
+         $\lstack = [\lInstr{Alias?}, \omem, \omem, \lInstr{!}] \listConcat \lstack'$,
+      then \formalRuleLine $\lresults \supseteq \osFunc{Lookup}(\ggraph, \gstate_1, [\omem, \lInstr{!}] \listConcat \lstack')$.
+
       \item \rulename{Not Alias}
       If $\gstate_1 = \gsLR{\olbl \gtcolon \gtstore \omemvariable \; \ovalvariable}$,
          $\lstack = [\lInstr{Alias?}, \omem, \omem', \lInstr{!}] \listConcat \lstack'$, and
