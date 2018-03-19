@@ -206,9 +206,9 @@
   \begin{mathpar}
   \relationRule{Index (imprecise)}{
     \ovalue_1 = \oheap[\ovalvariable_1] = \osBag{\omem_1, \ldots, \omem_n} \\
-    \ovalue_2 \in \ovalue_1 \\
-    \oheap' = \oheap[\omem \mapsto \ovalue_2] \\
-    \oheap'' = \oheap'[\omemvariable \mapsto \omem]
+    \omem \in \ovalue_1 \\
+    % \oheap' = \oheap[\omem \mapsto \ovalue_2] \\
+    \oheap' = \oheap'[\omemvariable \mapsto \omem]
   }{
     [\gtlet \omemvariable \gteq \ovalvariable_1 \gtobrk \ovalvariable_2 \gtcbrk \gtsemi] \listConcat \otstmts, \oheap \osTransition
     \otstmts, \oheap'

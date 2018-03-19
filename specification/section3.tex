@@ -250,7 +250,7 @@
 \begin{mathpar}
   \relationRule{Advance}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
-    \gstate_2 = \gsLR{\gsadvance[\ostmt][']}\\
+    \gstate_2 = \gsLR{\asadvance[\ostmt][']}\\
     \ostmt \osBefore \ostmt'
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
