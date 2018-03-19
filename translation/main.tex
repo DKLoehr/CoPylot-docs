@@ -624,13 +624,32 @@ $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
   }
 \end{mathpar}
 
-TODO: Stuff like \_\_radd\_\_ if $\pexpr_1$ doesn't have an appropriate function, etc
-
 \newsavebox{\binopBox}
 \begin{lrbox}{\binopBox}
 \begin{python}
 $\psuite_{(\pexpr_1)}$
 $\psuite_{(\pexpr_2)}$
+$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
+$\tfreshvar_2$ = $\pexpr_{(\pexpr_2)}$
+try:
+  $\tfreshvar_3$ = $\tfreshvar_1$.opFunc
+except $\star$AttributeError:
+  $\tfreshvar_0$ = $\star$NotImplemented
+else:
+  $\tfreshvar_0$ = $\tfreshvar_3$($\tfreshvar_2$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented and
+   type($\tfreshvar_1$) is not type($\tfreshvar_2$):
+  try:
+    $\tfreshvar_3$ = $\tfreshvar_2$.ropFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_3$($\tfreshvar_1$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  raise TypeError("Unsupported operands for binop")
+
 \end{python}
 \end{lrbox}
 
@@ -638,10 +657,11 @@ $\psuite_{(\pexpr_2)}$
   \translationRule{Binary Operation}{
     \pexpr_1 \pbinop \pexpr_2
   }{
-    \left<\usebox{\binopBox}\hspace{25pt}, \pexpr_{(\pexpr_1)}.\mathtt{opFunc}(\pexpr_{(\pexpr_2)}) \right>
+    \left<\usebox{\binopBox}\hspace{0pt}, \tfreshvar_0 \right>
   }{
   \mbox{where }
-  \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop)
+  \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
+  \mathtt{opFunc} = \osFunc{binop\_to\_rfunc}(\pbinop)
   }
 \end{mathpar}
 
@@ -989,15 +1009,17 @@ raise $\pvariable$
 \subsection{Helper function definitions}
 \begin{definition}[Binary Operators]
   \begin{flalign*}
-  \begin{array}[t]{ c | c c }
-   \pbinop & \osFunc{Binop\_to\_func}(\pbinop) & \osFunc{Binop\_to\_ifunc}(\pbinop) \\
+  \begin{array}[t]{ c | c c c }
+   \pbinop & \osFunc{Binop\_to\_func}(\pbinop) &
+             \osFunc{Binop\_to\_ifunc}(\pbinop) &
+             \osFunc{Binop\_to\_rfunc}(\pbinop) \\
    \hline
-   \gtplus & \_\_add\_\_ & \_\_iadd\_\_ \\
-   \gtsub & \_\_sub\_\_ & \_\_isub\_\_ \\
-   \gtmult & \_\_mul\_\_ & \_\_imul\_\_ \\
-   \gtdiv & \_\_div\_\_ & \_\_idiv\_\_ \\
-   \gtmod & \_\_mod\_\_ & \_\_imod\_\_ \\
-   \gtpow & \_\_pow\_\_ & \_\_ipow\_\_ \\
+   \gtplus & \_\_add\_\_ & \_\_iadd\_\_ & \_\_radd\_\_ \\
+   \gtsub & \_\_sub\_\_ & \_\_isub\_\_ & \_\_rsub\_\_ \\
+   \gtmult & \_\_mul\_\_ & \_\_imul\_\_ & \_\_rmul\_\_ \\
+   \gtdiv & \_\_div\_\_ & \_\_idiv\_\_ & \_\_rdiv\_\_ \\
+   \gtmod & \_\_mod\_\_ & \_\_imod\_\_ & \_\_rmod\_\_ \\
+   \gtpow & \_\_pow\_\_ & \_\_ipow\_\_ & \_\_rpow\_\_ \\
   \end{array}
   \end{flalign*}
 \end{definition}
