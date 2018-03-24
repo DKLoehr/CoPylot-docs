@@ -374,11 +374,36 @@ expression should be evaluated first.
 \newsavebox{\augmentedAssignmentBox}
 \begin{lrbox}{\augmentedAssignmentBox}
 \begin{python}
+$\psuite_{(\pexpr)}$
+$\tfreshvar$ = $\pexpr_{(\pexpr)}$
 try:
-  $\tfreshvar$ = $\pvariable$.iopFunc
+  $\tfreshvar_1$ = $\pvariable$.iopFunc
 except $\star$AttributeError:
-  $\tfreshvar$ = $\pvariable$.opFunc
-$\pvariable$ = $\tfreshvar$($\pexpr$)
+  $\tfreshvar_0$ = $\star$NotImplemented
+else:
+  $\tfreshvar_0$ = $\tfreshvar_1$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  try:
+    $\tfreshvar_1$ = $\pvariable$.opFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_1$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented and
+  type($\pvariable$) is not type($\tfreshvar$):
+  try:
+    $\tfreshvar_1$ = $\tfreshvar$.ropFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_1$($\pvariable$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  raise TypeError("Unsupported operands for binop")
+else:
+  $\pvariable$ = $\tfreshvar_0$
 \end{python}
 \end{lrbox}
 
@@ -390,7 +415,8 @@ $\pvariable$ = $\tfreshvar$($\pexpr$)
   }{
   \mbox{where }
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
-    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
+    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop) \\
+    \mathtt{ropFunc} = \osFunc{binop\_to\_rfunc}(\pbinop)
   }
 \end{mathpar}
 
