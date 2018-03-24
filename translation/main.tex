@@ -424,12 +424,37 @@ else:
 \begin{lrbox}{\augmentedAttributeAssignmentBox}
 \begin{python}
 $\psuite_{(\pexpr_1)}$
-$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
+$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$.$\pvariable$
+$\psuite_{(\pexpr_2)}$
+$\tfreshvar$ = $\pexpr_{(\pexpr_2)}$
 try:
-  $\tfreshvar_2$ = $\tfreshvar_1$.$\pvariable$.iopFunc
-except AttributeError:
-  $\tfreshvar_2$ = $\tfreshvar_1$.$\pvariable$.opFunc
-$\tfreshvar_1$.$\pvariable$ = $\tfreshvar_2$($\pexpr_2$)
+  $\tfreshvar_2$ = $\tfreshvar_1$.iopFunc
+except $\star$AttributeError:
+  $\tfreshvar_0$ = $\star$NotImplemented
+else:
+  $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  try:
+    $\tfreshvar_2$ = $\tfreshvar_1$.opFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented and
+  type($\tfreshvar_1$) is not type($\tfreshvar$):
+  try:
+    $\tfreshvar_2$ = $\tfreshvar$.ropFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar_1$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  raise TypeError("Unsupported operands for binop")
+else:
+    $\pexpr_{(\pexpr_1)}$.$\pvariable$ = $\tfreshvar_0$
 \end{python}
 \end{lrbox}
 
@@ -440,7 +465,8 @@ $\tfreshvar_1$.$\pvariable$ = $\tfreshvar_2$($\pexpr_2$)
     \left\llbracket\usebox{\augmentedAttributeAssignmentBox}\right\rrbracket
   }{
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
-    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
+    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop) \\
+    \mathtt{ropFunc} = \osFunc{binop\_to\_rfunc}(\pbinop)
   }
 \end{mathpar}
 
@@ -449,13 +475,37 @@ $\tfreshvar_1$.$\pvariable$ = $\tfreshvar_2$($\pexpr_2$)
 \begin{python}
 $\psuite_{(\pexpr_1)}$
 $\psuite_{(\pslice)}$
-$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
-$\tfreshvar_2$ = $\pexpr_{(\pslice)}$
+$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$[$\pexpr_{(\pslice)}$]
+$\psuite_{(\pexpr_2)}$
+$\tfreshvar$ = $\pexpr_{(\pexpr_2)}$
 try:
-  $\tfreshvar_3$ = $\tfreshvar_1$[$\tfreshvar_2$].iopFunc
-except AttributeError:
-  $\tfreshvar_3$ = $\tfreshvar_1$[$\tfreshvar_2$].opFunc
-$\tfreshvar_1$[$\tfreshvar_2$] = $\tfreshvar_3$($\pexpr_2$)
+  $\tfreshvar_2$ = $\tfreshvar_1$.iopFunc
+except $\star$AttributeError:
+  $\tfreshvar_0$ = $\star$NotImplemented
+else:
+  $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  try:
+    $\tfreshvar_2$ = $\tfreshvar_1$.opFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented and
+  type($\tfreshvar_1$) is not type($\tfreshvar$):
+  try:
+    $\tfreshvar_2$ = $\tfreshvar$.ropFunc
+  except $\star$AttributeError:
+    $\tfreshvar_0$ = $\star$NotImplemented
+  else:
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar_1$)
+
+if $\tfreshvar_0$ is $\star$NotImplemented:
+  raise TypeError("Unsupported operands for binop")
+else:
+    $\pexpr_{(\pexpr_1)}$[$\pexpr_{(\pslice)}$] = $\tfreshvar_0$
 \end{python}
 \end{lrbox}
 
@@ -466,7 +516,8 @@ $\tfreshvar_1$[$\tfreshvar_2$] = $\tfreshvar_3$($\pexpr_2$)
     \left\llbracket\usebox{\augmentedSliceAssignmentBox}\right\rrbracket
   }{
     \mathtt{opFunc} = \osFunc{binop\_to\_func}(\pbinop) \\
-    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop)
+    \mathtt{iopFunc} = \osFunc{binop\_to\_ifunc}(\pbinop) \\
+    \mathtt{ropFunc} = \osFunc{binop\_to\_rfunc}(\pbinop)
   }
 \end{mathpar}
 
