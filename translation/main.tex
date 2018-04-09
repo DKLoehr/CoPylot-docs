@@ -21,10 +21,10 @@
         \gor    \pexpr \pbinop \gteq \pexpr \gline
         %I really don't care about print statements so I'm ignoring them
         \gor    \gtfor \pexpr \gtin \pexpr \gtcolon \psuite \gline
-        \gor    \gtwhile \pexpr \gtcolon \psuite \gline
+        \gor    \gtwhile \pexpr \gtcolon \psuite \gtelse \gtcolon \psuite \gline
         \gor    \gtif \pexpr \gtcolon \psuite \gtelse \gtcolon \psuite \gline
         \gor    \gtraise \pexpropt, \pexpropt, \pexpropt \gline
-        \gor    \gttry \gtcolon \psuite \gtobrk \pexcepthandler; \ldots \gtcbrk \gline
+        \gor    \gttry \gtcolon \psuite \gtobrk \pexcepthandler; \ldots \gtcbrk \gtelse \gtcolon \psuite \gline
         \gor    \pexpr \gline
         \gor    \gtpass \gline
         \gor    \gtbreak \gline
@@ -92,7 +92,6 @@
   \end{grammar}
 
   \section{Python Simplified Grammar}
-  % This grammar is based on the AST defined in the python2_ast.ml file
 
   \begin{grammar}
     \grule[variables]{\pvariable}{}
@@ -100,10 +99,10 @@
     \grule[statements]{\pstmt}{
                 \gtreturn \pexpr \gline
         \gor    \pvariable \gteq \pexpr \gline
-        \gor    \gtwhile \pvariable \gtcolon \psuite \gline
+        \gor    \gtwhile \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
         \gor    \gtif \pexpr \gtcolon \psuite \gtelse \gtcolon \psuite \gline
         \gor    \gtraise \pexpr \gline
-        \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gline
+        \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
         \gor    \gtpass \gline
         \gor    \gtbreak \gline
         \gor    \gtcontinue \gline
@@ -164,7 +163,7 @@ for slices.
   \translationRule{Suite (statement list)}{
     \gtobrk \pstmt_1, \ldots, \pstmt_n \gtcbrk
   }{
-    \gtobrk \meaningof{\pstmt_1}, \ldots, \meaningof{\pstmt_n} \gtcbrk
+    \gtobrk \meaningof{\pstmt_1} \listConcat \ldots \listConcat \meaningof{\pstmt_n} \gtcbrk
   }{
   }
 \end{mathpar}
@@ -549,15 +548,17 @@ except $\star$StopIteration:
 $\psuite_{(\pexpr)}$
 $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 while $\tfreshvar$:
-  $\meaningof{\psuite}$
+  $\meaningof{\psuite_1}$
   $\psuite_{(\pexpr)}$
   $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
+else:
+  $\meaningof{\psuite_2}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{While loop}{
-    \gtwhile \pexpr \gtcolon \psuite
+    \gtwhile \pexpr \gtcolon \psuite_1 \gtelse \gtcolon \psuite_2
   }{
     \usebox{\whileBox}
   }{
@@ -605,15 +606,17 @@ raise $\pexpr_{(\pexpr)}$
 \begin{lrbox}{\tryBox}
 \begin{python}
 try:
-  $\meaningof{\psuite}$
+  $\meaningof{\psuite_1}$
 except $\tfreshvar$:
   $\meaningof{\gtobrk \pexcepthandler_1; \ldots; \pexcepthandler_n \gtcbrk}_{\tfreshvar}$
+else:
+  $\meaningof{\psuite_2}$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{Try/Except statement}{
-    \gttry \gtcolon \psuite \gtobrk \pexcepthandler_1; \ldots; \pexcepthandler_n \gtcbrk
+    \gttry \gtcolon \psuite_1 \gtobrk \pexcepthandler_1; \ldots; \pexcepthandler_n \gtcbrk \gtelse \gtcolon \psuite_2
   }{
     \usebox{\tryBox}
   }{
@@ -1130,10 +1133,10 @@ raise $\pvariable$
   \grule[statements]{\pstmt}{
               \gtreturn \pvariable \gline
       \gor    \pvariable \gteq \pexpr \gline
-      \gor    \gtwhile \pvariable \gtcolon \psuite \gline
+      \gor    \gtwhile \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
       \gor    \gtif \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
       \gor    \gtraise \pvariable \gline
-      \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gline
+      \gor    \gttry \gtcolon \psuite \gtexcept \pvariable \gtcolon \psuite \gtelse \gtcolon \psuite \gline
       \gor    \gtpass \gline
       \gor    \gtbreak \gline
       \gor    \gtcontinue \gline
@@ -1221,10 +1224,10 @@ It is entirely unremarkable in every way, so we omit it.
       \gor    \gtifresult \omemvariable \gline
       \gor    \gtreturn \omemvariable \gline
       \gor    \gtraise \omemvariable \gline
-      \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gline
+      \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
       \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
       \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
-      \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc
+      \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
   }
   \grule[unary operators]{\ounop}{
               \gtnot
@@ -1337,16 +1340,18 @@ let $\tfreshmem$ = alloc
 let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
 store $\tfreshmem$ $\tfreshval$
 while $\tfreshmem$ do {
-  $\meaningof{\psuite}$
+  $\meaningof{\psuite_1}$
   let $\tfreshval$ = $\osFunc{Lookup}$($\pvariable$) is $\star$True
   store $\tfreshmem$ $\tfreshval$
+} else {
+  $\meaningof{\psuite_2}$
 }
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{While loop}{
-    \gtwhile \pvariable \gtcolon \psuite
+    \gtwhile \pvariable \gtcolon \psuite_1 \gtelse \gtcolon \psuite_2
   }{
     \usebox{\lamiaWhileBox}
   }{
@@ -1403,13 +1408,15 @@ $\gttry$ {
 } $\gtexcept$ $\tfreshmem$ {
   $\osFunc{Python\_assign}$($\pvariable$, $\tfreshmem$)
   $\meaningof{\psuite_2}$
+} $\gtelse$ {
+  $\meaningof{\psuite_3}$
 }
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{Try/Except block}{
-    \gttry \gtcolon \psuite_1 \gtexcept \pvariable \gtcolon \psuite_2
+    \gttry \gtcolon \psuite_1 \gtexcept \pvariable \gtcolon \psuite_2 \gtelse \gtcolon \psuite_3
   }{
     \usebox{\lamiaTryBox}
   }{
