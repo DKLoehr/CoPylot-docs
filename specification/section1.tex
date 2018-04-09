@@ -43,10 +43,10 @@
       \gor    \gtifresult \omemvariable \gline
       \gor    \gtreturn \omemvariable \gline
       \gor    \gtraise \omemvariable \gline
-      \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gline
+      \gor    \gttry \gtobrc \ostmts \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
       \gor    \gtlet \ovalvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
       \gor    \gtlet \omemvariable \gteq \gtif \ovalvariable \gtthen \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc \gline
-      \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc
+      \gor    \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtelse \gtobrc \ostmts \gtcbrc
   }
   \grule[unary operators]{\ounop}{
               \gtnot
@@ -309,21 +309,23 @@
 
 \begin{mathpar}
   \relationRule{While False}{
-    \oheap[\omemvariable] = \omem \\
+  \otstmt = \gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtelse \gtobrc \otstmts' \gtcbrc \\
+  \oheap[\omemvariable] = \omem \\
     \oheap[\omem] = \osfalse
   }{
-    [\gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
-    \otstmts', \oheap
+    [\otstmt \gtsemi] \listConcat \otstmts'', \oheap \osTransition
+    \otstmts' \listConcat \otstmts'', \oheap
   }
 \end{mathpar}
 
 \begin{mathpar}
   \relationRule{While True}{
+    \otstmt = \gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtelse \gtobrc \otstmts' \gtcbrc \\
     \oheap[\omemvariable] = \omem \\
     \oheap[\omem] = \ostrue
   }{
-    [\gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap \osTransition
-    [\gtobrc \osBlock{while} \gtcbrc \gtsemi, \gtwhile \omemvariable \gtdo \gtobrc \otstmts \gtcbrc \gtsemi] \listConcat \otstmts', \oheap
+    [\otstmt \gtsemi] \listConcat \otstmts'', \oheap \osTransition
+    [\gtobrc \osBlock{while} \gtcbrc \gtsemi t \gtsemi] \listConcat \otstmts'', \oheap
   }
 \end{mathpar}
 
@@ -488,10 +490,11 @@
 
 \begin{mathpar}
   \relationRule{Try Block}{
+    \otstmt = \gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtelse \gtobrc \otstmts_3 \gtcbrc \\
     \otstmts_1, \oheap \osTransition \otstmts'_1, \oheap'
   }{
-    [\gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
-    [\gttry \gtobrc \otstmts'_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap'
+    [\otstmt \gtsemi] \listConcat \otstmts, \oheap \osTransition
+    [\gttry \gtobrc \otstmts'_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtelse \gtobrc \otstmts_3 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap'
   }
 \end{mathpar}
 
@@ -499,8 +502,8 @@
   \relationRule{Try Block Empty}{
     \\
   }{
-    [\gttry \gtobrc [\;] \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
-    \otstmts, \oheap
+    [\gttry \gtobrc [\;] \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtelse \gtobrc \otstmts_3 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+    \otstmts_3 \listConcat \otstmts, \oheap
   }
 \end{mathpar}
 
@@ -508,7 +511,7 @@
   \relationRule{Raise Caught}{
     \otstmts_1 = [\gtraise \omemvariable' \gtsemi] \listConcat \otstmts'_1
   }{
-    [\gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
+    [\gttry \gtobrc \otstmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \otstmts_2 \gtcbrc \gtelse \gtobrc \otstmts_3 \gtcbrc \gtsemi] \listConcat \otstmts, \oheap \osTransition
     [\gtlet \omemvariable \gteq \omemvariable' \gtsemi] \listConcat \otstmts_2 \listConcat \otstmts, \oheap
   }
 \end{mathpar}
