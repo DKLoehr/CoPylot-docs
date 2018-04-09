@@ -208,6 +208,35 @@ fix RAISE               DONE
 === 7.28 ===
 lint spec
 
+=== 11.2 ===
+simplify slicing        DONE
+list bundling           DONE
+
+=== 11.10 ===
+debug list              DONE
+
+=== 11.17 ===
+list order              DONE
+list slice              DONE
+* list concat
+list lossy              DONE
+function search         DONE
+
+=== 12.7 ===
+conditional value (due to call site)
+"||"                    DONE
+list concat             DONE
+
+=== 2.1 ===
+split document          DONE
+add singleton type      DONE
+fix ops                 DONE
+init section 3          DONE
+
+=== 2.8 ===
+delete zero             DONE
+fix equal
+rewrite tests
 
 
 
