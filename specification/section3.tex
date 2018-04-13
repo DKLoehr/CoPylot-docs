@@ -107,20 +107,33 @@
   \relationRule{While-True Start}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\ostmt}\\
-    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \\
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
     \ostrue \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
-    \ostmts = [\ostmt', \ldots]
+    \ostmts_1= [\ostmt', \ldots]
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
   }
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{While-False}{
+  \relationRule{While-False (else))}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\ostmt}\\
-    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts \gtcbrc \gtsemi \\
-    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}])
+    \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
+    \ostmts_2 = [\ostmt', \ldots]
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{While-False (no else)}{
+  \gstate_1 \gsBeforeIn \gstate_2 \\
+  \gstate_2 = \gsLR{\ostmt}\\
+  \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+  \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
+  \ostmts_2 = \gtobrc \gtcbrc
   }{
     \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
   }
@@ -258,14 +271,28 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Advance End of While}{
+  \relationRule{Advance End of While (loop)}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
     \ostmt \osBefore \osplat \\
     \ostmt \osUnder \ostmt' \\
-    \ostmt' \text{ is a while statement}
+    \ostmt' = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt \in S_1
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt'}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance End of While (else)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt \in S_2
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
   }
 \end{mathpar}
 
