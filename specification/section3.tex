@@ -402,7 +402,7 @@
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asraise[\ostmt]}\\
     \ostmt \osUnder \ostmt' \\
-    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
     \ostmt \in \ostmts_1 \\
     \ostmts_2 = [\ostmt_2, \ldots]
   }{
@@ -411,12 +411,12 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Raise From Exception Block}{
+  \relationRule{Raise From Exception/Else Block}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asraise[\ostmt]}\\
     \ostmt \osUnder \ostmt' \\
-    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
-    \ostmt \in \ostmts_2 \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
+    \ostmt \in \ostmts_2 \cup \ostmts_3 \\
     \ostmt_1 \osStartof \ostmt \\
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asraise[\ostmt']}}
