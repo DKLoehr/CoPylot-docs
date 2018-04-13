@@ -241,7 +241,7 @@
   \relationRule{Try}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\ostmt}\\\\
-    \ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \\
+    \ostmt = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
     \ostmts_1 = [\ostmt_1, \ldots]
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_1}}
@@ -297,13 +297,41 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Advance End of Try and Except}{
+  \relationRule{Advance End of Try (else)}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
     \ostmt \osBefore \osplat \\
-    % \ostmt \osUnder \ostmt' \\
     \ostmt \osUnder \ostmt' \\
-    \ostmt' \text{ is a try statement}
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
+    \ostmt \in \ostmts_1 \\
+    \ostmts_3 = \gtobrk \ostmt_1, \ldots \gtcbrk
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\ostmt_1}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance End of Try (no else)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
+    \ostmt \in \ostmts_1 \\
+    \ostmts_3 = \gtobrk \gtcbrk
+  }{
+    \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \relationRule{Advance End of Try (in else)}{
+    \gstate_1 \gsBeforeIn \gstate_2 \\
+    \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
+    \ostmt \osBefore \osplat \\
+    \ostmt \osUnder \ostmt' \\
+    \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
+    \ostmt \in \ostmts_3
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
   }
