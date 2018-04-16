@@ -523,19 +523,19 @@ else:
 \newsavebox{\forBox}
 \begin{lrbox}{\forBox}
 \begin{python}
-$\tfreshvar$ = $\pexpr_2$.__iter__().next
+$\tfreshvar$ = $\pexpr_2$.__iter__()
 try:
   while $\star$True:
-    $\pexpr_1$ = $\tfreshvar$()
-    $\psuite$
+    $\pexpr_1$ = $\tfreshvar$.__next__()
+    $\psuite_1$
 except $\star$StopIteration:
-  pass
+  $\psuite_2$
 \end{python}
 \end{lrbox}
 
 \begin{mathpar}
   \translationRule{For loop}{
-    \gtfor \pexpr_1 \gtin \pexpr_2 \gtcolon \psuite
+    \gtfor \pexpr_1 \gtin \pexpr_2 \gtcolon \psuite_1 \gtelse \gtcolon \psuite_2
   }{
     \left\llbracket\usebox{\forBox}\right\rrbracket
   }{
