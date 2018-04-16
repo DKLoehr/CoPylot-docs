@@ -133,7 +133,7 @@
   \gstate_2 = \gsLR{\ostmt}\\
   \ostmt = \olbl \gtcolon \gtwhile \omemvariable \gtdo \gtobrc \ostmts_1 \gtcbrc \gtelse \gtobrc \ostmts_2 \gtcbrc \\
   \osfalse \in \osFunc{Lookup}(\ggraph, \ostmt, [\omemvariable, \lInstr{!}]) \\
-  \ostmts_2 = \gtobrc \gtcbrc
+  \ostmts_2 = [\ ]
   }{
     \gsAddEdge{\gstate_2 \gsBefore \asadvance[\ostmt]}
   }
@@ -297,7 +297,7 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Advance End of Try (else)}{
+  \relationRule{Advance End of Try (to else)}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
     \ostmt \osBefore \osplat \\
@@ -325,13 +325,13 @@
 \end{mathpar}
 
 \begin{mathpar}
-  \relationRule{Advance End of Try (in else)}{
+  \relationRule{Advance End of Try (in handler/else)}{
     \gstate_1 \gsBeforeIn \gstate_2 \\
     \gstate_2 = \gsLR{\asadvance[\ostmt]}\\
     \ostmt \osBefore \osplat \\
     \ostmt \osUnder \ostmt' \\
     \ostmt' = \olbl \gtcolon \gttry \gtobrc \ostmts_1 \gtcbrc \gtexcept \omemvariable \gtobrc \ostmts_2 \gtcbrc \gtelse \gtobrc \ostmts_3 \gtcbrc \\
-    \ostmt \in \ostmts_3
+    \ostmt \in \ostmts_2 \cup \ostmts_3
   }{
     \gsAddEdge{\gstate_2 \gsBefore \gsLR{\asadvance[\ostmt']}}
   }
