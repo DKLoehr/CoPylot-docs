@@ -191,11 +191,11 @@ $\pvariable$ = $\gtfun \gtopar \pvariable_0, \ldots, \pvariable_n \gtcpar$:
 \newsavebox{\classDefBox}
 \begin{lrbox}{\classDefBox}
 \begin{python}
-$\psuite_{(e_0)}$
-$\psuite_{(e_1  )}$
+$\tsubsuite{e_0}$
+$\tsubsuite{e_1  }$
 $\ldots$
-$\psuite_{(e_n)}$
-$\pvariable$ = $\gtclass \gtopar \pexpr_{(\pexpr_0)}, \ldots, \pexpr_{(\pexpr_n)} \gtcpar$:
+$\tsubsuite{e_n}$
+$\pvariable$ = $\gtclass \gtopar \tsubvar{\pexpr_0}, \ldots, \tsubvar{\pexpr_n} \gtcpar$:
   $\meaningof{\psuite'}$
 \end{python}
 \end{lrbox}
@@ -212,8 +212,8 @@ $\pvariable$ = $\gtclass \gtopar \pexpr_{(\pexpr_0)}, \ldots, \pexpr_{(\pexpr_n)
 \newsavebox{\returnBox}
 \begin{lrbox}{\returnBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-return $\pexpr_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
+return $\tsubvar{\pexpr}$
 \end{python}
 \end{lrbox}
 
@@ -247,11 +247,10 @@ return $\mathtt{\star None}$
 \newsavebox{\multipleAssignmentBox}
 \begin{lrbox}{\multipleAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-$\tfreshvar = \pexpr_{(\pexpr)}$
-$\meaningof{\pexpr_1 = \tfreshvar}$
+$\tsubsuite{\pexpr}$
+$\meaningof{\pexpr_1 = \tsubvar{\pexpr}}$
 ...
-$\meaningof{\pexpr_n = \tfreshvar}$
+$\meaningof{\pexpr_n = \tsubvar{\pexpr}}$
 \end{python}
 \end{lrbox}
 
@@ -269,8 +268,8 @@ $\meaningof{\pexpr_n = \tfreshvar}$
 \newsavebox{\variableAssignmentBox}
 \begin{lrbox}{\variableAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-$\pvariable = \pexpr_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
+$\pvariable = \tsubvar{\pexpr}$
 \end{python}
 \end{lrbox}
 
@@ -286,9 +285,9 @@ $\pvariable = \pexpr_{(\pexpr)}$
 \newsavebox{\attributeAssignmentBox}
 \begin{lrbox}{\attributeAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr_2)}$
-$\psuite_{(\pexpr_1)}$
-$\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
+$\tsubsuite{\pexpr_2}$
+$\tsubsuite{\pexpr_1}$
+$\tsubvar{\pexpr_1}$.__setattr__($s$, $\tsubvar{\pexpr_2}$)
 \end{python}
 \end{lrbox}
 
@@ -306,10 +305,10 @@ $\pexpr_{(\pexpr_1)}$.__setattr__($s$, $\pexpr_{(\pexpr_2)}$)
 \newsavebox{\sliceAssignmentBox}
 \begin{lrbox}{\sliceAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr_2)}$
-$\psuite_{(\pexpr_1)}$
-$\psuite_{(\pslice)}$
-$\pexpr_{(\pexpr_1)}$.__setitem__($\pexpr_{(\pslice)}$, $\pexpr_{(\pexpr_2)}$)
+$\tsubsuite{\pexpr_2}$
+$\tsubsuite{\pexpr_1}$
+$\tsubsuite{\pslice}$
+$\tsubvar{\pexpr_1}$.__setitem__($\tsubvar{\pslice}$, $\tsubvar{\pexpr_2}$)
 \end{python}
 \end{lrbox}
 
@@ -373,14 +372,13 @@ expression should be evaluated first.
 \newsavebox{\augmentedAssignmentBox}
 \begin{lrbox}{\augmentedAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-$\tfreshvar$ = $\pexpr_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 try:
   $\tfreshvar_1$ = $\pvariable$.iopFunc
 except $\star$AttributeError:
   $\tfreshvar_0$ = $\star$NotImplemented
 else:
-  $\tfreshvar_0$ = $\tfreshvar_1$($\tfreshvar$)
+  $\tfreshvar_0$ = $\tfreshvar_1$($\tsubvar{\pexpr}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented:
   try:
@@ -388,12 +386,12 @@ if $\tfreshvar_0$ is $\star$NotImplemented:
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
-    $\tfreshvar_0$ = $\tfreshvar_1$($\tfreshvar$)
+    $\tfreshvar_0$ = $\tfreshvar_1$($\tsubvar{\pexpr}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented and
-  type($\pvariable$) is not type($\tfreshvar$):
+  type($\pvariable$) is not type($\tsubvar{\pexpr}$):
   try:
-    $\tfreshvar_1$ = $\tfreshvar$.ropFunc
+    $\tfreshvar_1$ = $\tsubvar{\pexpr}$.ropFunc
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
@@ -422,16 +420,15 @@ else:
 \newsavebox{\augmentedAttributeAssignmentBox}
 \begin{lrbox}{\augmentedAttributeAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
-$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$.$\pvariable$
-$\psuite_{(\pexpr_2)}$
-$\tfreshvar$ = $\pexpr_{(\pexpr_2)}$
+$\tsubsuite{\pexpr_1}$
+$\tfreshvar_1$ = $\tsubvar{\pexpr_1}$.$\pvariable$
+$\tsubsuite{\pexpr_2}$
 try:
   $\tfreshvar_2$ = $\tfreshvar_1$.iopFunc
 except $\star$AttributeError:
   $\tfreshvar_0$ = $\star$NotImplemented
 else:
-  $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+  $\tfreshvar_0$ = $\tfreshvar_2$($\tsubvar{\pexpr_2}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented:
   try:
@@ -439,12 +436,12 @@ if $\tfreshvar_0$ is $\star$NotImplemented:
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
-    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tsubvar{\pexpr_2}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented and
-  type($\tfreshvar_1$) is not type($\tfreshvar$):
+  type($\tfreshvar_1$) is not type($\tsubvar{\pexpr_2}$):
   try:
-    $\tfreshvar_2$ = $\tfreshvar$.ropFunc
+    $\tfreshvar_2$ = $\tsubvar{\pexpr_2}$.ropFunc
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
@@ -453,7 +450,7 @@ if $\tfreshvar_0$ is $\star$NotImplemented and
 if $\tfreshvar_0$ is $\star$NotImplemented:
   raise TypeError("Unsupported operands for binop")
 else:
-    $\pexpr_{(\pexpr_1)}$.$\pvariable$ = $\tfreshvar_0$
+    $\tsubvar{\pexpr_1}$.$\pvariable$ = $\tfreshvar_0$
 \end{python}
 \end{lrbox}
 
@@ -472,17 +469,17 @@ else:
 \newsavebox{\augmentedSliceAssignmentBox}
 \begin{lrbox}{\augmentedSliceAssignmentBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
-$\psuite_{(\pslice)}$
-$\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$[$\pexpr_{(\pslice)}$]
-$\psuite_{(\pexpr_2)}$
-$\tfreshvar$ = $\pexpr_{(\pexpr_2)}$
+$\tsubsuite{\pexpr_1}$
+$\tsubsuite{\pslice}$
+$\tfreshvar_1$ = $\tsubvar{\pexpr_1}$[$\tsubvar{\pslice}$]
+$\tsubsuite{\pexpr_2}$
+$\tfreshvar$ = $\tsubvar{\pexpr_2}$
 try:
   $\tfreshvar_2$ = $\tfreshvar_1$.iopFunc
 except $\star$AttributeError:
   $\tfreshvar_0$ = $\star$NotImplemented
 else:
-  $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+  $\tfreshvar_0$ = $\tfreshvar_2$($\tsubvar{\pexpr_2}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented:
   try:
@@ -490,12 +487,12 @@ if $\tfreshvar_0$ is $\star$NotImplemented:
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
-    $\tfreshvar_0$ = $\tfreshvar_2$($\tfreshvar$)
+    $\tfreshvar_0$ = $\tfreshvar_2$($\tsubvar{\pexpr_2}$)
 
 if $\tfreshvar_0$ is $\star$NotImplemented and
-  type($\tfreshvar_1$) is not type($\tfreshvar$):
+  type($\tfreshvar_1$) is not type($\tsubvar{\pexpr_2}$):
   try:
-    $\tfreshvar_2$ = $\tfreshvar$.ropFunc
+    $\tfreshvar_2$ = $\tsubvar{\pexpr_2}$.ropFunc
   except $\star$AttributeError:
     $\tfreshvar_0$ = $\star$NotImplemented
   else:
@@ -504,7 +501,7 @@ if $\tfreshvar_0$ is $\star$NotImplemented and
 if $\tfreshvar_0$ is $\star$NotImplemented:
   raise TypeError("Unsupported operands for binop")
 else:
-    $\pexpr_{(\pexpr_1)}$[$\pexpr_{(\pslice)}$] = $\tfreshvar_0$
+    $\tsubvar{\pexpr_1}$[$\tsubvar{\pslice}$] = $\tfreshvar_0$
 \end{python}
 \end{lrbox}
 
@@ -554,11 +551,11 @@ The same is true for the try/except generated by Tuple Assignment
 \newsavebox{\whileBox}
 \begin{lrbox}{\whileBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 while $\tfreshvar$:
   $\meaningof{\psuite_1}$
-  $\psuite_{(\pexpr)}$
+  $\tsubsuite{\pexpr}$
   $\tfreshvar$ = $\star$bool($\pexpr_{(\pexpr)}$)
 else:
   $\meaningof{\psuite_2}$
@@ -577,7 +574,7 @@ else:
 \newsavebox{\ifBox}
 \begin{lrbox}{\ifBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 if $\star$bool($\pexpr_{(\pexpr)}$):
   $\meaningof{\psuite_1}$
 else:
@@ -597,7 +594,7 @@ else:
 \newsavebox{\raiseBox}
 \begin{lrbox}{\raiseBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 raise $\pexpr_{(\pexpr)}$
 \end{python}
 \end{lrbox}
@@ -682,13 +679,15 @@ continue
 
 \subsection{Expressions}
 
+We expect every expression to evaluate to a pair
+$\meaningof{\pexpr} = \left<\tsubsuite{\pexpr}, \tsubvar{\pexpr}\right>$.
 We will use the convention that $\left<\psuite, \meaningof{\pexpr}\right>$ is to be interpreted as
-$\left<\psuite || \psuite_{(\pexpr)}, \pexpr_{(\pexpr)}\right>$.
+$\left<\psuite || \tsubsuite{\pexpr}, \pvariable_{(\pexpr)}\right>$.
 
 \newsavebox{\andBox}
 \begin{lrbox}{\andBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
+$\tsubsuite{\pexpr_1}$
 $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 \end{python}
 \end{lrbox}
@@ -716,8 +715,8 @@ $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 \newsavebox{\binopBox}
 \begin{lrbox}{\binopBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
-$\psuite_{(\pexpr_2)}$
+$\tsubsuite{\pexpr_1}$
+$\tsubsuite{\pexpr_2}$
 $\tfreshvar_1$ = $\pexpr_{(\pexpr_1)}$
 $\tfreshvar_2$ = $\pexpr_{(\pexpr_2)}$
 try:
@@ -757,7 +756,7 @@ if $\tfreshvar_0$ is $\star$NotImplemented:
 \newsavebox{\notBox}
 \begin{lrbox}{\notBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 \end{python}
 \end{lrbox}
 
@@ -773,7 +772,7 @@ $\psuite_{(\pexpr)}$
 \newsavebox{\uplusBox}
 \begin{lrbox}{\uplusBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 \end{python}
 \end{lrbox}
 
@@ -789,7 +788,7 @@ $\psuite_{(\pexpr)}$
 \newsavebox{\usubBox}
 \begin{lrbox}{\usubBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 \end{python}
 \end{lrbox}
 
@@ -805,12 +804,12 @@ $\psuite_{(\pexpr)}$
 \newsavebox{\ifExpBox}
 \begin{lrbox}{\ifExpBox}
 \begin{python}
-$\psuite_{(\pexpr_2)}$
+$\tsubsuite{\pexpr_2}$
 if $\star$bool($\pexpr_{(\pexpr_2)}$):
-  $\psuite_{(\pexpr_1)}$
+  $\tsubsuite{\pexpr_1}$
   $\tfreshvar$ = $\pexpr_{(\pexpr_1)}$
 else:
-  $\psuite_{(\pexpr_3)}$
+  $\tsubsuite{\pexpr_3}$
   $\tfreshvar$ = $\pexpr_{(\pexpr_3)}$
 \end{python}
 \end{lrbox}
@@ -891,10 +890,10 @@ $\tfreshvar_3$ = $\gtnot$($\tfreshvar_1 \gtis \tfreshvar_2$)
 \newsavebox{\callBox} % No, not the blue one
 \begin{lrbox}{\callBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-$\psuite_{(\pexpr_1)}$
+$\tsubsuite{\pexpr}$
+$\tsubsuite{\pexpr_1}$
 ...
-$\psuite_{(\pexpr_n)}$
+$\tsubsuite{\pexpr_n}$
 \end{python}
 \end{lrbox}
 
@@ -912,7 +911,7 @@ $\psuite_{(\pexpr_n)}$
   \translationRule{Attribute access}{
     \pexpr.\pvariable
   }{
-    \left< \psuite_{(\pexpr)} , \pexpr_{(\pexpr)}.\pvariable \right>
+    \left< \tsubsuite{\pexpr} , \pexpr_{(\pexpr)}.\pvariable \right>
   }{
   }
 \end{mathpar}
@@ -920,8 +919,8 @@ $\psuite_{(\pexpr_n)}$
 \newsavebox{\listAccessBox}
 \begin{lrbox}{\listAccessBox}
 \begin{python}
-$\psuite_{(\pexpr)}$
-$\psuite_{(\pslice)}$
+$\tsubsuite{\pexpr}$
+$\tsubsuite{\pslice}$
 \end{python}
 \end{lrbox}
 
@@ -939,9 +938,9 @@ $\psuite_{(\pslice)}$
 \newsavebox{\listBox}
 \begin{lrbox}{\listBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
+$\tsubsuite{\pexpr_1}$
 ...
-$\psuite_{(\pexpr_n)}$
+$\tsubsuite{\pexpr_n}$
 \end{python}
 \end{lrbox}
 
@@ -997,9 +996,9 @@ $\psuite_{(\pexpr_n)}$
 \newsavebox{\sliceBox}
 \begin{lrbox}{\sliceBox}
 \begin{python}
-$\psuite_{(\pexpr_1)}$
-$\psuite_{(\pexpr_2)}$
-$\psuite_{(\pexpr_3)}$
+$\tsubsuite{\pexpr_1}$
+$\tsubsuite{\pexpr_2}$
+$\tsubsuite{\pexpr_3}$
 \end{python}
 \end{lrbox}
 
@@ -1010,7 +1009,7 @@ $\psuite_{(\pexpr_3)}$
     \left< \usebox{\sliceBox}\hspace{20pt},
     \star\mathtt{slice}(\pexpr_{(\pexpr_1)}, \pexpr_{(\pexpr_2)}, \pexpr_{(\pexpr_3)}) \right>
   }{
-    \mbox{where } \psuite_{(\pexpr_i)} \mbox{ is empty and } \pexpr_{(\pexpr_i)}
+    \mbox{where } \tsubsuite{\pexpr_i} \mbox{ is empty and } \pexpr_{(\pexpr_i)}
     \mbox{ is } \mathtt{*None} \mbox{ if } \pexpr_i \mbox{ is omitted}
   }
 \end{mathpar}
@@ -1038,7 +1037,7 @@ else:
 \newsavebox{\exnBoxTwo}
 \begin{lrbox}{\exnBoxTwo}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 if $\tfreshvar$.__class__ is $\pexpr_{(\pexpr)}$:
   $\meaningof{\psuite}$
 else:
@@ -1059,7 +1058,7 @@ else:
 \newsavebox{\exnBoxThree}
 \begin{lrbox}{\exnBoxThree}
 \begin{python}
-$\psuite_{(\pexpr)}$
+$\tsubsuite{\pexpr}$
 if $\pvariable$.__class__ is $\pexpr_{(\pexpr)}$:
   $\pvariable_1$ = $\pvariable$
   $\meaningof{\psuite}$
