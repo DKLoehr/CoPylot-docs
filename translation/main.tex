@@ -756,7 +756,9 @@ if $\tfreshvar_0$ is $\star$NotImplemented:
 \begin{lrbox}{\notBox}
 \begin{python}
 $\tsubsuite{\pexpr}$
-$\tfreshvar = \gtnot (\star\gtbool(\tsubvar{\pexpr}))$
+$\tfreshvar_1 = \star$bool
+$\tfreshvar_2 = \tfreshvar_1(\tsubvar{\pexpr})$
+$\tfreshvar_3 = \gtnot (\tfreshvar_2)$
 \end{python}
 \end{lrbox}
 
@@ -764,7 +766,7 @@ $\tfreshvar = \gtnot (\star\gtbool(\tsubvar{\pexpr}))$
   \translationRule{Unary Operation (not)}{
     \gtnot \pexpr
   }{
-    \left<\usebox{\notBox}\hspace{100pt}, \tfreshvar \right>
+    \left<\usebox{\notBox}\hspace{35pt}, \tfreshvar_3 \right>
   }{
   }
 \end{mathpar}
@@ -805,7 +807,9 @@ $\tsubsuite{\pexpr}$
 \begin{lrbox}{\ifExpBox}
 \begin{python}
 $\tsubsuite{\pexpr_2}$
-if $\star$bool($\tsubvar{\pexpr_2}$):
+$\tfreshvar_1 = \star$bool
+$\tfreshvar_2$ = $\tfreshvar_1(\tsubvar{\pexpr_2}$)
+if $\tfreshvar_2$:
   $\tsubsuite{\pexpr_1}$
   $\tfreshvar$ = $\tsubvar{\pexpr_1}$
 else:
@@ -818,7 +822,7 @@ else:
   \translationRule{If expression}{
     \pexpr_1 \gtif \pexpr_2 \gtelse \pexpr_3
   }{
-    \left< \usebox{\ifExpBox}\hspace{30pt}, \tfreshvar \right>
+    \left< \usebox{\ifExpBox}\hspace{50pt}, \tfreshvar \right>
   }{
   }
 \end{mathpar}
@@ -931,7 +935,8 @@ $\tfreshvar = \tsubvar{\pexpr}.\pvariable$
 \begin{python}
 $\tsubsuite{\pexpr}$
 $\tsubsuite{\pslice}$
-$\tfreshvar = \tsubvar{\pexpr}.\mathtt{\_\_getitem\_\_} ( \tsubvar{\pslice} )$
+$\tfreshvar_1 = \tsubvar{\pexpr}.\mathtt{\_\_getitem\_\_}$
+$\tfreshvar_2 = \tfreshvar_1 ( \tsubvar{\pslice} )$
 \end{python}
 \end{lrbox}
 
@@ -939,8 +944,8 @@ $\tfreshvar = \tsubvar{\pexpr}.\mathtt{\_\_getitem\_\_} ( \tsubvar{\pslice} )$
   \translationRule{Subscript}{
     \pexpr \gtobrk \pslice \gtcbrk
   }{
-    \left< \usebox{\listAccessBox}\hspace{105pt},
-    \tfreshvar
+    \left< \usebox{\listAccessBox}\hspace{90pt},
+    \tfreshvar_2
     \right>
   }{
   }
@@ -985,9 +990,6 @@ $\tfreshvar = \gtopar \tsubvar{\pexpr_1}, \ldots, \tsubvar{\pexpr_n} \gtcpar$
   }{
   }
 \end{mathpar}
-
-TODO: Not sure if we need to bind None to a temp variable here, but I'm
-doing it to be consistent
 
 \begin{mathpar}
   \translationRule{None expression}{
@@ -1035,7 +1037,7 @@ doing it to be consistent
 $\tsubsuite{\pexpr_1}$
 $\tsubsuite{\pexpr_2}$
 $\tsubsuite{\pexpr_3}$
-$\tfreshvar = \star\mathtt{slice}(\tsubvar{\pexpr_1}, \tsubvar{\pexpr_2}, \tsubvar{\pexpr_3})$
+$\meaningof{\tfreshvar = \star\mathtt{slice}(\tsubvar{\pexpr_1}, \tsubvar{\pexpr_2}, \tsubvar{\pexpr_3})}$
 \end{python}
 \end{lrbox}
 
@@ -1043,7 +1045,7 @@ $\tfreshvar = \star\mathtt{slice}(\tsubvar{\pexpr_1}, \tsubvar{\pexpr_2}, \tsubv
   \translationRule{Slice (slice)}{
     \pexpr_1 \gtcolon \pexpr_2 \gtcolon \pexpr_3
   }{
-    \left< \usebox{\sliceBox}\hspace{120pt}, \tfreshvar \right>
+    \left< \usebox{\sliceBox}\hspace{130pt}, \tfreshvar \right>
   }{
     \mbox{where } \tsubsuite{\pexpr_i} \mbox{ is empty and } \tsubvar{\pexpr_i}
     \mbox{ is } \mathtt{*None} \mbox{ if } \pexpr_i \mbox{ is omitted}
@@ -1061,7 +1063,7 @@ else:
 \end{lrbox}
 
 \begin{mathpar}
-  \translationRule{Exception handler list}{
+  \translationRule{Exception handler list (0 arg)}{
     \gtobrk (\gtexcept \gtcolon \psuite); \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
   }{
     \usebox{\exnBox}
@@ -1074,7 +1076,8 @@ else:
 \begin{lrbox}{\exnBoxTwo}
 \begin{python}
 $\tsubsuite{\pexpr}$
-if $\tfreshvar$.__class__ is $\tsubvar{\pexpr}$:
+$\tfreshvar = \pvariable$.__class__
+if $\tfreshvar$ is $\tsubvar{\pexpr}$:
   $\meaningof{\psuite}$
 else:
   $\meaningof{\gtobrk \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk}_{\pvariable}$
@@ -1082,7 +1085,7 @@ else:
 \end{lrbox}
 
 \begin{mathpar}
-  \translationRule{Exception handler list}{
+  \translationRule{Exception handler list (1 arg)}{
     \gtobrk (\gtexcept \pexpr \gtcolon \psuite); \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
   }{
     \usebox{\exnBoxTwo}
@@ -1095,7 +1098,8 @@ else:
 \begin{lrbox}{\exnBoxThree}
 \begin{python}
 $\tsubsuite{\pexpr}$
-if $\pvariable$.__class__ is $\tsubvar{\pexpr}$:
+$\tfreshvar = \pvariable$.__class__
+if $\tfreshvar$ is $\tsubvar{\pexpr}$:
   $\pvariable_1$ = $\pvariable$
   $\meaningof{\psuite}$
 else:
@@ -1104,7 +1108,7 @@ else:
 \end{lrbox}
 
 \begin{mathpar}
-  \translationRule{Exception handler list}{
+  \translationRule{Exception handler list (2 arg)}{
     \gtobrk (\gtexcept \pexpr \gtas \pvariable_1 \gtcolon \psuite);
     \pexcepthandler_2; \ldots; \pexcepthandler_n \gtcbrk _{\pvariable}
   }{
